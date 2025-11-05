@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# PhotoSyncWork Integration Tests Runner
+# StudioSyncWork Integration Tests Runner
 # This script runs all integration tests for Supabase and Cloudinary
 
-echo "🚀 Starting PhotoSyncWork Integration Tests..."
+echo "🚀 Starting StudioSyncWork Integration Tests..."
 echo "=============================================="
 
 # Check if node_modules exists

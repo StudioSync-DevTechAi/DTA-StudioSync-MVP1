@@ -124,7 +124,7 @@ export function EstimateDetails({ estimate }: EstimateDetailsProps) {
     <div className={`border rounded-lg overflow-hidden ${templateId === "bold" ? "border-none" : ""}`}>
       <div className={`text-center space-y-3 ${styles.headerClass}`}>
         <h1 className={`text-2xl font-semibold ${styles.headingClass}`}>ESTIMATE</h1>
-        <p className="text-muted-foreground">PhotoSyncWork Photography Services</p>
+        <p className="text-muted-foreground">StudioSyncWork Photography Services</p>
         <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm ${statusClass}`}>
           Status: {estimate.status.charAt(0).toUpperCase() + estimate.status.slice(1)}
         </div>

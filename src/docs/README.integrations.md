@@ -1,6 +1,6 @@
-# PhotoSyncWork Integration Tests
+# StudioSyncWork Integration Tests
 
-This directory contains comprehensive unit tests for the PhotoSyncWork application's integration layers, specifically for **Supabase** and **Cloudinary** services.
+This directory contains comprehensive unit tests for the StudioSyncWork application's integration layers, specifically for **Supabase** and **Cloudinary** services.
 
 ## 🧪 Test Structure
 

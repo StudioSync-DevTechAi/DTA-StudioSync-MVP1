@@ -160,12 +160,12 @@ export default function Auth() {
           >
             <img 
               src="/photosyncwork-logo.svg" 
-              alt="PhotoSyncWork Logo" 
+              alt="StudioSyncWork Logo" 
               className="h-8 w-8 object-contain"
             />
           </div>
           <CardTitle className="text-2xl font-bold">
-            Welcome to PhotoSyncWork
+            Welcome to StudioSyncWork
           </CardTitle>
           <CardDescription>
             Sign in to manage your photography business

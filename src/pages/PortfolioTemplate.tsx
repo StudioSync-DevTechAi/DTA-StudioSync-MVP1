@@ -132,6 +132,23 @@ export default function PortfolioTemplate() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { portfolioData, setPortfolioData, handleSave } = usePortfolioData();
+
+  // Load theme CSS only for PortfolioTemplate page (part of portfolio module)
+  useEffect(() => {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = '/theme-styles.css';
+    link.id = 'portfolio-template-theme-styles';
+    document.head.appendChild(link);
+
+    return () => {
+      // Remove theme CSS when component unmounts
+      const themeLink = document.getElementById('portfolio-template-theme-styles');
+      if (themeLink) {
+        themeLink.remove();
+      }
+    };
+  }, []);
   
   const [template, setTemplate] = useState<TemplateConfig | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -204,8 +221,12 @@ export default function PortfolioTemplate() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-6xl mx-auto">
+    <div className="page-wrapper portfolio-theme-wrapper">
+      <div className="body-wrapper">
+        <div className="body-wrapper-inner" style={{ paddingTop: 0 }}>
+          <div className="container-fluid" style={{ paddingTop: 0 }}>
+            <div className="min-h-screen bg-gray-50">
+              <div className="max-w-6xl mx-auto px-6 pt-4 pb-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
@@ -607,6 +628,9 @@ export default function PortfolioTemplate() {
           </div>
         </div>
         )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

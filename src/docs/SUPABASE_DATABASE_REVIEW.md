@@ -1,8 +1,8 @@
-# PhotoSyncWork Supabase Database Schema Review
+# StudioSyncWork Supabase Database Schema Review
 
 ## 📊 Database Overview
 
-Your PhotoSyncWork application has a comprehensive Supabase database with **20+ tables** covering all aspects of photography business management. Here's a detailed breakdown:
+Your StudioSyncWork application has a comprehensive Supabase database with **20+ tables** covering all aspects of photography business management. Here's a detailed breakdown:
 
 ## 🗂️ Core Business Tables
 

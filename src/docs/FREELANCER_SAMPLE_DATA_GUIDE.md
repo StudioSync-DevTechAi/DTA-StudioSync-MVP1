@@ -1,7 +1,7 @@
 # Freelancer Sample Data Implementation Guide
 
 ## Overview
-This guide explains how to add realistic sample freelancer data to the PhotoSyncWork database to populate the marketplace with photographers and job postings.
+This guide explains how to add realistic sample freelancer data to the StudioSyncWork database to populate the marketplace with photographers and job postings.
 
 ## Database Changes Required
 
@@ -163,4 +163,4 @@ You need to apply these migration files in order:
 - Analyze user engagement with different profile types
 - Measure conversion rates from browsing to contact
 
-This sample data provides a solid foundation for testing and demonstrating the PhotoSyncWork freelancer marketplace! 🎉
+This sample data provides a solid foundation for testing and demonstrating the StudioSyncWork freelancer marketplace! 🎉

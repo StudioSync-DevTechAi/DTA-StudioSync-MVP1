@@ -15,7 +15,7 @@
 - **Problem**: No project linked to Supabase CLI
 - **Solution**: Successfully linked to remote project
 - **Command**: `supabase link --project-ref mogywlineksvyssnocwz`
-- **Result**: Connected to "PhotoSyncWork Proj" project
+- **Result**: Connected to "StudioSyncWork Proj" project
 
 ### **3. Database Version Mismatch** ✅
 - **Problem**: Local config had PostgreSQL 15, remote has PostgreSQL 17

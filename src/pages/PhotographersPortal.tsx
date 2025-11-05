@@ -230,11 +230,11 @@ export default function PhotographersPortal() {
             <div className="mx-auto mb-4 p-3 bg-primary/10 rounded-full w-fit">
               <img 
                 src="/photosyncwork-logo.svg" 
-                alt="PhotoSyncWork Logo" 
+                alt="StudioSyncWork Logo" 
                 className="h-8 w-8 object-contain"
               />
             </div>
-            <CardTitle className="text-2xl font-bold">PhotoSyncWork Photographers</CardTitle>
+            <CardTitle className="text-2xl font-bold">StudioSyncWork Photographers</CardTitle>
             <CardDescription>
               Professional photography & videography management platform
             </CardDescription>

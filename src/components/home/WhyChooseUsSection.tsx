@@ -7,7 +7,7 @@ export function WhyChooseUsSection() {
     <section className="py-20 px-4 bg-gradient-to-br from-dustyBlue-dark to-velvet">
       <div className="max-w-6xl mx-auto text-center">
         <h2 className="text-4xl font-bold mb-8 font-playfair text-dustyBlue-soft">
-          Why Choose PhotoSyncWork?
+          Why Choose StudioSyncWork?
         </h2>
         <p className="text-xl max-w-3xl mx-auto mb-16 text-dustyBlue-whisper">
           We understand the unique challenges of running a creative business. That's why we've built 

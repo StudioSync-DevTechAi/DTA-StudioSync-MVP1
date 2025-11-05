@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Camera, Edit, Eye, Share2, Loader2, Settings, Heart, Mountain, Palette, Move, GripVertical } from "lucide-react";
+import { Camera, Edit, Eye, Share2, Loader2, Settings, Heart, Mountain, Palette, Move, GripVertical, Image } from "lucide-react";
 import { PortfolioGallery } from "@/components/portfolio/PortfolioGallery";
 import { PortfolioEditor } from "@/components/portfolio/PortfolioEditor";
 import { PortfolioPreview } from "@/components/portfolio/PortfolioPreview";
@@ -11,10 +11,12 @@ import { usePortfolioData } from "@/hooks/portfolio/usePortfolioData";
 import { useAuth } from "@/contexts/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { WorkInProgress } from "@/components/ui/WorkInProgress";
+import { PortfolioSidebar } from "@/components/portfolio/PortfolioSidebar";
 
 export default function Portfolio() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const { 
     portfolioData, 
     setPortfolioData, 
@@ -28,6 +30,23 @@ export default function Portfolio() {
     handleRemoveGalleryItem,
     hasPortfolio
   } = usePortfolioData();
+
+  // Load theme CSS only for Portfolio page
+  useEffect(() => {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = '/theme-styles.css';
+    link.id = 'portfolio-theme-styles';
+    document.head.appendChild(link);
+
+    return () => {
+      // Remove theme CSS when component unmounts
+      const themeLink = document.getElementById('portfolio-theme-styles');
+      if (themeLink) {
+        themeLink.remove();
+      }
+    };
+  }, []);
 
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
@@ -169,8 +188,18 @@ export default function Portfolio() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-6xl mx-auto">
+    <div className="page-wrapper portfolio-theme-wrapper">
+      <PortfolioSidebar onToggle={setSidebarCollapsed} />
+      <div 
+        className="body-wrapper transition-all duration-300"
+        style={{
+          marginLeft: sidebarCollapsed ? 'calc(256px * 0.2)' : '256px'
+        }}
+      >
+        <div className="body-wrapper-inner" style={{ paddingTop: 0 }}>
+          <div className="container-fluid" style={{ paddingTop: 0 }}>
+            <div className="min-h-screen bg-gray-50">
+              <div className="max-w-6xl mx-auto px-6 pt-4 pb-6">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold">Portfolio Manager</h1>
@@ -401,6 +430,10 @@ export default function Portfolio() {
             </div>
           </div>
         )}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

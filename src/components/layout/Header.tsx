@@ -47,10 +47,10 @@ export function Header() {
           >
             <img 
               src="/photosyncwork-logo.svg" 
-              alt="PhotoSyncWork Logo" 
+              alt="StudioSyncWork Logo" 
               className="h-8 w-8 object-contain"
             />
-            <span>PhotoSyncWork</span>
+            <span>StudioSyncWork</span>
           </button>
           
           {/* Work in Progress Indicator */}

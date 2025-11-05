@@ -501,7 +501,7 @@ describe('Supabase Edge Functions Integration', () => {
       } as Response)
 
       const logoData = {
-        companyName: 'PhotoSyncWork',
+        companyName: 'StudioSyncWork',
         industry: 'photography',
         style: 'modern',
         colors: ['#1a365d', '#ffffff'],

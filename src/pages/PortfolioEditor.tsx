@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -47,6 +47,23 @@ export default function PortfolioEditor({}: PortfolioEditorProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { portfolioData, setPortfolioData, handleSave } = usePortfolioData();
+  
+  // Load theme CSS only for PortfolioEditor page (part of portfolio module)
+  useEffect(() => {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = '/theme-styles.css';
+    link.id = 'portfolio-editor-theme-styles';
+    document.head.appendChild(link);
+
+    return () => {
+      // Remove theme CSS when component unmounts
+      const themeLink = document.getElementById('portfolio-editor-theme-styles');
+      if (themeLink) {
+        themeLink.remove();
+      }
+    };
+  }, []);
   
   const [elements, setElements] = useState<PortfolioElement[]>([
     {
@@ -362,7 +379,11 @@ export default function PortfolioEditor({}: PortfolioEditorProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="page-wrapper portfolio-theme-wrapper">
+      <div className="body-wrapper">
+        <div className="body-wrapper-inner" style={{ paddingTop: 0 }}>
+          <div className="container-fluid" style={{ paddingTop: 0 }}>
+            <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b p-4">
         <div className="flex items-center justify-between">
@@ -603,6 +624,10 @@ export default function PortfolioEditor({}: PortfolioEditorProps) {
           </div>
         </div>
       )}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

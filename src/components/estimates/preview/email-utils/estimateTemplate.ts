@@ -131,7 +131,7 @@ export const generateEstimateDetailsHtml = (estimate: {
     <div style="border:1px solid #e2e8f0; border-radius:8px; padding:24px; margin-bottom:30px;">
       <div style="text-align:center; margin-bottom:20px;">
         <h2 style="font-size:24px; font-weight:600; margin-bottom:10px;">ESTIMATE</h2>
-        <p style="color:#666;">PhotoSyncWork Photography Services</p>
+        <p style="color:#666;">StudioSyncWork Photography Services</p>
         <div style="display:inline-block; background:#f1f5f9; color:#374151; padding:4px 12px; border-radius:9999px; font-size:14px; margin-top:10px;">
           Status: Pending
         </div>

@@ -3,7 +3,7 @@
 ## Step 1: Open Supabase Dashboard
 1. Go to: https://supabase.com/dashboard
 2. Sign in to your account
-3. Navigate to your "PhotoSyncWork Proj" project
+3. Navigate to your "StudioSyncWork Proj" project
 
 ## Step 2: Open SQL Editor
 1. Click on "SQL Editor" in the left sidebar

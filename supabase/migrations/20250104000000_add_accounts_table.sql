@@ -1,5 +1,5 @@
 /*
-  # Add Accounts Table to PhotoSyncWork
+  # Add Accounts Table to StudioSyncWork
   
   This migration creates a comprehensive accounts table for managing
   client accounts, payment terms, credit limits, and account status.

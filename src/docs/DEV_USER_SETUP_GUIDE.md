@@ -1,7 +1,7 @@
 # Dev User Freelancer Setup Guide
 
 ## Overview
-This guide explains how to create a dev user freelancer account for testing the PhotoSyncWork freelancer marketplace functionality.
+This guide explains how to create a dev user freelancer account for testing the StudioSyncWork freelancer marketplace functionality.
 
 ## Step 1: Create Auth User in Supabase
 
@@ -173,4 +173,4 @@ WHERE portfolio_id = (
 - [ ] Search and filtering work with dev user
 - [ ] Profile editing works (if implemented)
 
-This dev user setup provides a complete testing environment for the PhotoSyncWork freelancer marketplace! 🎉
+This dev user setup provides a complete testing environment for the StudioSyncWork freelancer marketplace! 🎉

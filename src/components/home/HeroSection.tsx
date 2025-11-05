@@ -26,7 +26,7 @@ export function HeroSection() {
       >
         <img 
           src="/photosyncwork-logo.svg" 
-          alt="PhotoSyncWork Logo" 
+          alt="StudioSyncWork Logo" 
           className="h-24 md:h-32 w-auto object-contain mx-auto drop-shadow-lg"
         />
       </div>

@@ -79,11 +79,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <div className="flex items-center space-x-3 px-2">
               <img 
                 src="/photosyncwork-logo.svg" 
-                alt="PhotoSyncWork Logo" 
+                alt="StudioSyncWork Logo" 
                 className="h-8 w-8 object-contain"
               />
               <div className="flex-1">
-                <h1 className="text-2xl font-semibold">PhotoSyncWork</h1>
+                <h1 className="text-2xl font-semibold">StudioSyncWork</h1>
                 <WorkInProgress size="sm" className="mt-1" />
               </div>
             </div>
@@ -194,10 +194,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <div className="flex items-center space-x-2">
               <img 
                 src="/photosyncwork-logo.svg" 
-                alt="PhotoSyncWork Logo" 
+                alt="StudioSyncWork Logo" 
                 className="h-6 w-6 object-contain"
               />
-              <h1 className="text-xl font-semibold">PhotoSyncWork</h1>
+              <h1 className="text-xl font-semibold">StudioSyncWork</h1>
             </div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-// Accounts table TypeScript interfaces for PhotoSyncWork
+// Accounts table TypeScript interfaces for StudioSyncWork
 
 export interface Account {
   id: string;

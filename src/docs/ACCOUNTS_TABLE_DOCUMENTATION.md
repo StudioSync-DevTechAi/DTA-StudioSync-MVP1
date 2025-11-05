@@ -1,8 +1,8 @@
-# Accounts Table - PhotoSyncWork
+# Accounts Table - StudioSyncWork
 
 ## Overview
 
-The `accounts` table is a comprehensive account management system for PhotoSyncWork that handles client accounts, vendor accounts, and internal accounts with full financial tracking capabilities.
+The `accounts` table is a comprehensive account management system for StudioSyncWork that handles client accounts, vendor accounts, and internal accounts with full financial tracking capabilities.
 
 ## Table Structure
 

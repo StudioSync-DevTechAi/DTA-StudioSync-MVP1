@@ -2,7 +2,7 @@
 
 ## 📊 Current Authentication Status
 
-Your PhotoSyncWork application **already has** a robust authentication system in place! Here's what you currently have:
+Your StudioSyncWork application **already has** a robust authentication system in place! Here's what you currently have:
 
 ### ✅ **Existing Tables (Already Implemented)**
 
