@@ -132,7 +132,7 @@ export default function PortfolioTemplate() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { portfolioData, setPortfolioData, handleSave } = usePortfolioData();
-
+  
   // Load theme CSS only for PortfolioTemplate page (part of portfolio module)
   useEffect(() => {
     const link = document.createElement('link');

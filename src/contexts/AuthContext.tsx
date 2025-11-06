@@ -148,6 +148,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Set loading state to prevent multiple sign-in attempts
       setLoading(true);
       
+      // Store current location for redirect after OAuth
+      const currentPath = window.location.pathname;
+      if (currentPath !== '/auth' && currentPath !== '/auth/callback') {
+        sessionStorage.setItem('auth_redirect', currentPath);
+      }
+      
       // Sign in with Google using Supabase
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',

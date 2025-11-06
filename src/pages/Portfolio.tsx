@@ -17,6 +17,18 @@ export default function Portfolio() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Handle window resize for responsive behavior
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   const { 
     portfolioData, 
     setPortfolioData, 
@@ -191,9 +203,11 @@ export default function Portfolio() {
     <div className="page-wrapper portfolio-theme-wrapper">
       <PortfolioSidebar onToggle={setSidebarCollapsed} />
       <div 
-        className="body-wrapper transition-all duration-300"
+        className="body-wrapper transition-all duration-300 lg:ml-64"
         style={{
-          marginLeft: sidebarCollapsed ? 'calc(256px * 0.2)' : '256px'
+          marginLeft: !isMobile 
+            ? (sidebarCollapsed ? 'calc(256px * 0.2)' : '256px')
+            : '0px'
         }}
       >
         <div className="body-wrapper-inner" style={{ paddingTop: 0 }}>

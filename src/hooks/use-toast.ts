@@ -56,17 +56,34 @@ interface State {
 
 const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
 
-const addToRemoveQueue = (toastId: string, duration?: number) => {
+const addToRemoveQueue = (toastId: string, duration?: number, skipDismiss = false) => {
   if (toastTimeouts.has(toastId)) {
     return
   }
 
   const timeout = setTimeout(() => {
     toastTimeouts.delete(toastId)
-    dispatch({
-      type: "REMOVE_TOAST",
-      toastId: toastId,
-    })
+    if (skipDismiss) {
+      // Directly remove if skipDismiss is true (called from auto-dismiss)
+      // First set open to false for animation by updating the toast
+      dispatch({
+        type: "UPDATE_TOAST",
+        toast: { id: toastId, open: false }
+      })
+      // Then remove after animation
+      setTimeout(() => {
+        dispatch({
+          type: "REMOVE_TOAST",
+          toastId: toastId,
+        })
+      }, 200)
+    } else {
+      // Normal dismiss flow (called from manual dismiss)
+      dispatch({
+        type: "DISMISS_TOAST",
+        toastId: toastId,
+      })
+    }
   }, duration || TOAST_REMOVE_DELAY)
 
   toastTimeouts.set(toastId, timeout)
@@ -75,6 +92,13 @@ const addToRemoveQueue = (toastId: string, duration?: number) => {
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case "ADD_TOAST":
+      // Auto-dismiss toast after duration if specified
+      if (action.toast.duration !== undefined && action.toast.duration > 0) {
+        addToRemoveQueue(action.toast.id, action.toast.duration, true)
+      } else {
+        // Use default duration if not specified
+        addToRemoveQueue(action.toast.id, TOAST_REMOVE_DELAY, true)
+      }
       return {
         ...state,
         toasts: [action.toast, ...state.toasts].slice(0, TOAST_LIMIT),

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { 
   LayoutDashboard, 
@@ -25,6 +25,23 @@ export function PortfolioSidebar({ onToggle }: PortfolioSidebarProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Handle window resize for responsive behavior
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
+      // Auto-collapse sidebar on mobile when resizing to mobile size
+      if (mobile && !isCollapsed) {
+        setIsCollapsed(true);
+      }
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, [isCollapsed]);
 
   const handleToggle = () => {
     const newState = !isCollapsed;
@@ -89,17 +106,25 @@ export function PortfolioSidebar({ onToggle }: PortfolioSidebarProps) {
       {/* Sidebar */}
       <aside 
         className={`left-sidebar fixed top-0 left-0 h-full bg-white z-50 transition-all duration-300 flex flex-col ${
-          isCollapsed ? "-translate-x-full lg:translate-x-0 portfolio-sidebar-collapsed" : "translate-x-0"
-        }`}
+          isCollapsed 
+            ? "-translate-x-full lg:translate-x-0 portfolio-sidebar-collapsed" 
+            : "translate-x-0"
+        } w-full sm:w-64 lg:w-64`}
         style={{
-          width: isCollapsed ? 'calc(256px * 0.2)' : '256px',
+          width: isCollapsed 
+            ? (isMobile ? '0px' : 'calc(256px * 0.2)')
+            : (isMobile ? '100%' : '256px'),
+          maxWidth: isMobile && !isCollapsed ? '320px' : 'none',
           overflow: 'hidden'
         }}
       >
         {/* Sidebar scroll container */}
         <div className="flex flex-col h-full">
           {/* Brand Logo */}
-          <div className="brand-logo d-flex align-items-center justify-content-center flex-shrink-0" style={{ padding: isCollapsed ? '16px 4px' : undefined, minHeight: isCollapsed ? '60px' : undefined }}>
+          <div className="brand-logo d-flex align-items-center justify-content-center flex-shrink-0" style={{ 
+            padding: isCollapsed ? '16px 4px' : (isMobile ? '16px' : undefined), 
+            minHeight: isCollapsed ? '60px' : undefined 
+          }}>
             {!isCollapsed && (
               <a href="/portfolio" className="text-nowrap logo-img d-flex align-items-center gap-2 w-100" onClick={(e) => { e.preventDefault(); navigate('/portfolio'); }}>
                 <div className="d-flex align-items-center">
@@ -204,9 +229,9 @@ export function PortfolioSidebar({ onToggle }: PortfolioSidebarProps) {
       </aside>
 
       {/* Sidebar toggle button for mobile */}
-      {isCollapsed && (
+      {isCollapsed && isMobile && (
         <button
-          className="fixed top-4 left-4 z-50 bg-dark text-white p-2 rounded-lg lg:hidden"
+          className="fixed top-4 left-4 z-50 bg-dark text-white p-2 rounded-lg shadow-lg hover:bg-gray-800 transition-colors"
           onClick={() => setIsCollapsed(false)}
           aria-label="Open sidebar"
         >

@@ -383,7 +383,7 @@ export default function PortfolioEditor({}: PortfolioEditorProps) {
       <div className="body-wrapper">
         <div className="body-wrapper-inner" style={{ paddingTop: 0 }}>
           <div className="container-fluid" style={{ paddingTop: 0 }}>
-            <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b p-4">
         <div className="flex items-center justify-between">

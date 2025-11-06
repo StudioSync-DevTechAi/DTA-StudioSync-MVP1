@@ -813,6 +813,8 @@ export const createProjectDetails = async (
     sub_event_name: string;
     custom_sub_event_name?: string;
     project_last_modified_by: string; // Person name
+    album_ids?: string[]; // Array of album IDs (FKs)
+    project_imageobjects_json?: Record<string, any>; // Complete JSON object with images, albums, and metadata
   }
 ): Promise<{ project_main_event_id: string; main_event_name: string }> => {
   try {
@@ -838,6 +840,42 @@ export const createProjectDetails = async (
 };
 
 /**
+ * Fetch a single project by ID from Project_Details_Table
+ */
+export const fetchProjectDetails = async (
+  projectMainEventId: string
+): Promise<{
+  project_main_event_id: string;
+  project_title: string;
+  project_thumbnail_image_link?: string;
+  main_event_name: string;
+  main_event_desc: string;
+  short_description: string;
+  sub_event_name: string;
+  custom_sub_event_name?: string;
+  album_ids?: string[];
+  project_imageobjects_json?: Record<string, any>;
+} | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('project_details_table')
+      .select('*')
+      .eq('project_main_event_id', projectMainEventId)
+      .single();
+
+    if (error) {
+      console.error("Error fetching project details:", error);
+      throw error;
+    }
+
+    return data as any;
+  } catch (error) {
+    console.error("Error fetching project details:", error);
+    throw error;
+  }
+};
+
+/**
  * Update Project in Project_Details_Table
  */
 export const updateProjectDetails = async (
@@ -851,6 +889,8 @@ export const updateProjectDetails = async (
     sub_event_name?: string;
     custom_sub_event_name?: string;
     project_last_modified_by: string;
+    album_ids?: string[];
+    project_imageobjects_json?: Record<string, any>;
   }
 ): Promise<{ project_main_event_id: string; main_event_name: string }> => {
   try {
@@ -881,6 +921,7 @@ export const updateProjectDetails = async (
 export const saveAlbumStorage = async (
   projectMainEventId: string,
   albumData: {
+    album_name?: string; // Display name for the album
     album_photos_kv_json: {
       album_thumbnail_url?: string;
       thumbnail_image_uuid?: string;
@@ -899,6 +940,7 @@ export const saveAlbumStorage = async (
       const { data, error } = await supabase
         .from('albums_storage_table')
         .update({
+          album_name: albumData.album_name,
           album_photos_kv_json: albumData.album_photos_kv_json,
           album_last_modified_by: albumData.album_last_modified_by,
         })
@@ -918,6 +960,7 @@ export const saveAlbumStorage = async (
         .from('albums_storage_table')
         .insert([{
           project_main_event_id: projectMainEventId,
+          album_name: albumData.album_name,
           album_photos_kv_json: albumData.album_photos_kv_json,
           album_last_modified_by: albumData.album_last_modified_by,
         }])
@@ -973,6 +1016,310 @@ export const fetchAlbumsStorage = async (
     return (data || []) as any[];
   } catch (error) {
     console.error("Error fetching albums storage:", error);
+    throw error;
+  }
+};
+
+/**
+ * Album Info for Linking
+ * Used when displaying albums to link
+ */
+export interface AlbumLinkInfo {
+  album_id: string;
+  album_name: string; // Extracted from album_photos_kv_json or stored separately
+  project_main_event_id: string;
+  project_main_event_name: string; // From project_details_table
+  sub_event_name: string; // From album_photos_kv_json or project
+  album_thumbnail_url?: string;
+}
+
+/**
+ * Fetch all albums available for linking
+ * Returns albums with their project information
+ */
+export const fetchAlbumsForLinking = async (userId: string): Promise<AlbumLinkInfo[]> => {
+  try {
+    // Fetch all albums with their project details
+    const { data: albumsData, error: albumsError } = await supabase
+      .from('albums_storage_table')
+      .select(`
+        album_id,
+        album_name,
+        project_main_event_id,
+        album_photos_kv_json,
+        created_at
+      `)
+      .order('created_at', { ascending: false });
+
+    if (albumsError) {
+      console.error("Error fetching albums:", albumsError);
+      throw albumsError;
+    }
+
+    if (!albumsData || albumsData.length === 0) {
+      return [];
+    }
+
+    // Get unique project IDs
+    const projectIds = [...new Set(albumsData.map(a => a.project_main_event_id))];
+
+    // Fetch project details for these projects
+    const { data: projectsData, error: projectsError } = await supabase
+      .from('project_details_table')
+      .select('project_main_event_id, main_event_name, sub_event_name')
+      .in('project_main_event_id', projectIds)
+      .eq('user_id', userId); // Only user's own projects
+
+    if (projectsError) {
+      console.error("Error fetching projects:", projectsError);
+      throw projectsError;
+    }
+
+    // Create a map of project_id -> project info
+    const projectMap = new Map(
+      (projectsData || []).map(p => [
+        p.project_main_event_id,
+        {
+          main_event_name: p.main_event_name,
+          sub_event_name: p.sub_event_name,
+        }
+      ])
+    );
+
+    // Combine album and project data
+    const albumsForLinking: AlbumLinkInfo[] = (albumsData || [])
+      .filter(album => projectMap.has(album.project_main_event_id)) // Only include user's projects
+      .map(album => {
+        const projectInfo = projectMap.get(album.project_main_event_id)!;
+        const albumJson = album.album_photos_kv_json as any;
+
+        // Extract album name from album_name column or JSON fallback
+        const albumName = album.album_name || albumJson.album_name || `Album ${album.album_id.substring(0, 8)}`;
+
+        return {
+          album_id: album.album_id,
+          album_name: albumName,
+          project_main_event_id: album.project_main_event_id,
+          project_main_event_name: projectInfo.main_event_name,
+          sub_event_name: albumJson.sub_event_name || projectInfo.sub_event_name || '',
+          album_thumbnail_url: albumJson.album_thumbnail_url,
+        };
+      });
+
+    return albumsForLinking;
+  } catch (error) {
+    console.error("Error fetching albums for linking:", error);
+    throw error;
+  }
+};
+
+/**
+ * Link an album to a project
+ * Adds album_id to project's album_ids array
+ */
+export const linkAlbumToProject = async (
+  projectMainEventId: string,
+  albumId: string
+): Promise<void> => {
+  try {
+    const { error } = await supabase.rpc('add_album_to_project', {
+      p_project_main_event_id: projectMainEventId,
+      p_album_id: albumId,
+    });
+
+    if (error) {
+      console.error("Error linking album to project:", error);
+      throw error;
+    }
+  } catch (error) {
+    console.error("Error linking album to project:", error);
+    throw error;
+  }
+};
+
+/**
+ * Unlink an album from a project
+ * Removes album_id from project's album_ids array
+ */
+export const unlinkAlbumFromProject = async (
+  projectMainEventId: string,
+  albumId: string
+): Promise<void> => {
+  try {
+    const { error } = await supabase.rpc('remove_album_from_project', {
+      p_project_main_event_id: projectMainEventId,
+      p_album_id: albumId,
+    });
+
+    if (error) {
+      console.error("Error unlinking album from project:", error);
+      throw error;
+    }
+  } catch (error) {
+    console.error("Error unlinking album from project:", error);
+    throw error;
+  }
+};
+
+/**
+ * Delete an album from Albums_Storage_Table
+ * Also returns the album data including image UUIDs for cleanup
+ */
+export const deleteAlbumStorage = async (
+  albumId: string
+): Promise<{
+  album_id: string;
+  album_photos_kv_json: {
+    thumbnail_image_uuid?: string;
+    images: Array<{
+      image_uuid: string;
+      image_access_url: string;
+    }>;
+  };
+}> => {
+  try {
+    // First fetch the album to get image UUIDs
+    const { data: albumData, error: fetchError } = await supabase
+      .from('albums_storage_table')
+      .select('album_id, album_photos_kv_json')
+      .eq('album_id', albumId)
+      .single();
+
+    if (fetchError) {
+      console.error("Error fetching album for deletion:", fetchError);
+      throw fetchError;
+    }
+
+    if (!albumData) {
+      throw new Error('Album not found');
+    }
+
+    // Delete the album from database
+    const { error: deleteError } = await supabase
+      .from('albums_storage_table')
+      .delete()
+      .eq('album_id', albumId);
+
+    if (deleteError) {
+      console.error("Error deleting album:", deleteError);
+      throw deleteError;
+    }
+
+    return {
+      album_id: albumData.album_id,
+      album_photos_kv_json: albumData.album_photos_kv_json as any,
+    };
+  } catch (error) {
+    console.error("Error deleting album storage:", error);
+    throw error;
+  }
+};
+
+/**
+ * Fetch linked albums for a project
+ */
+export const fetchLinkedAlbums = async (
+  projectMainEventId: string
+): Promise<AlbumLinkInfo[]> => {
+  try {
+    // Get project with album_ids
+    const { data: project, error: projectError } = await supabase
+      .from('project_details_table')
+      .select('album_ids')
+      .eq('project_main_event_id', projectMainEventId)
+      .single();
+
+    if (projectError) {
+      console.error("Error fetching project:", projectError);
+      throw projectError;
+    }
+
+    if (!project.album_ids || project.album_ids.length === 0) {
+      return [];
+    }
+
+    // Fetch album details for linked album IDs
+    const { data: albumsData, error: albumsError } = await supabase
+      .from('albums_storage_table')
+      .select(`
+        album_id,
+        album_name,
+        project_main_event_id,
+        album_photos_kv_json
+      `)
+      .in('album_id', project.album_ids);
+
+    if (albumsError) {
+      console.error("Error fetching linked albums:", albumsError);
+      throw albumsError;
+    }
+
+    // Get project info
+    const { data: projectInfo, error: projectInfoError } = await supabase
+      .from('project_details_table')
+      .select('project_main_event_id, main_event_name, sub_event_name')
+      .eq('project_main_event_id', projectMainEventId)
+      .single();
+
+    if (projectInfoError) {
+      console.error("Error fetching project info:", projectInfoError);
+      throw projectInfoError;
+    }
+
+    // Map albums to AlbumLinkInfo
+    const linkedAlbums: AlbumLinkInfo[] = (albumsData || []).map(album => {
+      const albumJson = album.album_photos_kv_json as any;
+      const albumName = albumJson.album_name || `Album ${album.album_id.substring(0, 8)}`;
+
+      return {
+        album_id: album.album_id,
+        album_name: albumName,
+        project_main_event_id: album.project_main_event_id,
+        project_main_event_name: projectInfo.main_event_name,
+        sub_event_name: albumJson.sub_event_name || projectInfo.sub_event_name || '',
+        album_thumbnail_url: albumJson.album_thumbnail_url,
+      };
+    });
+
+    return linkedAlbums;
+  } catch (error) {
+    console.error("Error fetching linked albums:", error);
+    throw error;
+  }
+};
+
+/**
+ * Fetch a single album by ID to get its images
+ */
+export const fetchAlbumById = async (
+  albumId: string
+): Promise<{
+  album_id: string;
+  album_name: string;
+  album_photos_kv_json: {
+    album_thumbnail_url?: string;
+    thumbnail_image_uuid?: string;
+    images: Array<{
+      image_uuid: string;
+      image_access_url: string;
+    }>;
+  };
+} | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('albums_storage_table')
+      .select('album_id, album_name, album_photos_kv_json')
+      .eq('album_id', albumId)
+      .single();
+
+    if (error) {
+      console.error("Error fetching album:", error);
+      throw error;
+    }
+
+    return data as any;
+  } catch (error) {
+    console.error("Error fetching album by ID:", error);
     throw error;
   }
 };

@@ -142,11 +142,12 @@ export async function uploadImageDirect(
   }
 
   // Generate storage path
+  // Note: Don't include bucket name in path since we're already uploading to 'images' bucket
   const timestamp = Date.now();
   const randomString = Math.random().toString(36).substring(2, 15);
   const fileExtension = file.name.split('.').pop() || 'jpg';
   const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-  const storagePath = `images/${user.id}/${timestamp}-${randomString}-${sanitizedFileName}`;
+  const storagePath = `${user.id}/${timestamp}-${randomString}-${sanitizedFileName}`;
 
   if (onProgress) {
     onProgress(30);

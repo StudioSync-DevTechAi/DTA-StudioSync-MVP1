@@ -32,6 +32,7 @@ DROP POLICY IF EXISTS "Users can delete their own images" ON storage.objects;
 DROP POLICY IF EXISTS "Public can view images" ON storage.objects;
 
 -- Policy: Users can upload their own images
+-- Path structure: {user_id}/{filename}
 CREATE POLICY "Users can upload their own images"
 ON storage.objects FOR INSERT
 WITH CHECK (

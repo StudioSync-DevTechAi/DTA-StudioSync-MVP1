@@ -15,6 +15,7 @@ import { LoadingSpinner } from "./components/ui/loading-spinner";
 // Lazy load all page components
 const Home = React.lazy(() => import("./pages/Home"));
 const Auth = React.lazy(() => import("./pages/Auth"));
+const AuthCallback = React.lazy(() => import("./pages/AuthCallback"));
 const Portfolio = React.lazy(() => import("./pages/Portfolio"));
 const PortfolioTemplate = React.lazy(() => import("./pages/PortfolioTemplate"));
 const PortfolioEditor = React.lazy(() => import("./pages/PortfolioEditor"));
@@ -44,6 +45,7 @@ function App() {
           {/* Public routes - these should be accessible without authentication */}
           <Route path="/" element={<Home />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/login" element={<Navigate to="/auth" replace />} />
           <Route path="/hire" element={<Hire />} />
           <Route path="/photographers" element={<PhotographersPortal />} />
