@@ -92,4 +92,3 @@ export interface ProjectImageObjectsData {
   stateStatuses: ProjectStateStatuses;
 }
 
-

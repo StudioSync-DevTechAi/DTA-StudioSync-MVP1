@@ -109,4 +109,3 @@ node scripts/check-supabase-connection.mjs
 
 The PhotoBank image upload feature should now work correctly. The storage bucket exists, all tables are created, and the code has been fixed to prevent path duplication issues.
 
-

@@ -16,4 +16,3 @@ UPDATE public.albums_storage_table
 SET album_name = 'Album ' || SUBSTRING(album_id::text, 1, 8)
 WHERE album_name IS NULL;
 
-

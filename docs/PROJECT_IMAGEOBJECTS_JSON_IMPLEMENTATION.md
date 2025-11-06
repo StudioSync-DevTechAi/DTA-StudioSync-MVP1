@@ -127,4 +127,3 @@ This will:
 2. Create a GIN index for efficient queries
 3. Add validation function (optional)
 
-

@@ -119,4 +119,3 @@ export function validateProjectImageObjectsJSON(json: any): boolean {
   return true;
 }
 
-

@@ -141,4 +141,3 @@ The storage path structure is:
 2. Verify you're authenticated (check Supabase auth session)
 3. Check that RLS is enabled on storage.objects
 
-

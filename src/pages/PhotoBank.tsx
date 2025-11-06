@@ -111,43 +111,6 @@ export default function PhotoBank() {
   const [subEventsList, setSubEventsList] = useState<SubEvent[]>([]);
   const [isLoadingSubEvents, setIsLoadingSubEvents] = useState(true);
   
-  // Fetch user profile for greeting
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      if (!user) return;
-      
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('full_name, email')
-          .eq('id', user.id)
-          .single();
-        
-        if (error) {
-          // Fallback to user metadata if profile doesn't exist
-          setUserProfile({
-            full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
-            email: user.email || null
-          });
-        } else {
-          setUserProfile({
-            full_name: data.full_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
-            email: data.email || user.email || null
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching user profile:', error);
-        // Fallback to user metadata
-        setUserProfile({
-          full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
-          email: user.email || null
-        });
-      }
-    };
-    
-    fetchUserProfile();
-  }, [user]);
-
   // Load theme CSS only for PhotoBank page (part of portfolio module)
   useEffect(() => {
     const link = document.createElement('link');

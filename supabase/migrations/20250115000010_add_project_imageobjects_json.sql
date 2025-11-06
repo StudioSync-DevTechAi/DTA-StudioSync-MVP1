@@ -37,4 +37,3 @@ $$;
 -- ADD CONSTRAINT check_valid_imageobjects_json 
 -- CHECK (validate_project_imageobjects_json(project_imageobjects_json));
 
-

@@ -60,4 +60,3 @@ GRANT EXECUTE ON FUNCTION public.add_album_to_project(UUID, UUID) TO anon;
 GRANT EXECUTE ON FUNCTION public.remove_album_from_project(UUID, UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.remove_album_from_project(UUID, UUID) TO anon;
 
-

@@ -70,4 +70,3 @@ The storage path structure is:
 
 **Note:** The path does NOT include the bucket name since we're already uploading to the "images" bucket.
 
-

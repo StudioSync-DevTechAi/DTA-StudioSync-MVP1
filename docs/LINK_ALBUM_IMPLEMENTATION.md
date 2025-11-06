@@ -96,4 +96,3 @@ Execute these migrations in order:
 - The `album_name` column is optional but recommended for better UX
 - If `album_name` is not provided, a default name is generated from the album_id
 
-
