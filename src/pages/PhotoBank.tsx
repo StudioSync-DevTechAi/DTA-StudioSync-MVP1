@@ -8,15 +8,20 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
-import { Upload, X, Plus, ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
+import { Upload, X, Plus, ArrowLeft, ChevronDown, ChevronUp, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { PortfolioSidebar } from "@/components/portfolio/PortfolioSidebar";
+import { uploadImageDirect, uploadImageViaEdgeFunction, ImageUploadResponse } from "@/services/imageUpload/imageUploadService";
+import { createProjectDetails, saveAlbumStorage } from "@/hooks/photobank/api/photobankApi";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 interface UploadedImage {
   id: string;
   file: File;
   preview: string;
   url?: string;
+  imageUuid?: string; // UUID from image_obj_storage_table
 }
 
 interface Album {
@@ -36,7 +41,11 @@ interface Album {
 export default function PhotoBank() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  
+  // Project state - stores the project_main_event_id after project creation
+  const [projectMainEventId, setProjectMainEventId] = useState<string | null>(null);
   
   // Load theme CSS only for PhotoBank page (part of portfolio module)
   useEffect(() => {
@@ -88,6 +97,13 @@ export default function PhotoBank() {
   const [isUploadComplete, setIsUploadComplete] = useState(false);
   const albumImagesInputRef = useRef<HTMLInputElement>(null);
   const albumThumbnailInputRef = useRef<HTMLInputElement>(null);
+
+  // Upload progress tracking
+  const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
+  const [uploadStatus, setUploadStatus] = useState<Record<string, 'pending' | 'uploading' | 'success' | 'error'>>({});
+  const [thumbnailUploadProgress, setThumbnailUploadProgress] = useState(0);
+  const [thumbnailUploadStatus, setThumbnailUploadStatus] = useState<'pending' | 'uploading' | 'success' | 'error'>('pending');
+  const [thumbnailUuid, setThumbnailUuid] = useState<string | null>(null);
 
   // Check if there's an unsaved new project album
   const hasUnsavedNewProjectAlbum = albums.some(album => album.isNewProjectAlbum === true);
@@ -229,6 +245,11 @@ export default function PhotoBank() {
     setAlbumThumbnailFile(null);
     setAlbumThumbnailPreview(null);
     setIsUploadComplete(false);
+    setUploadProgress({});
+    setUploadStatus({});
+    setThumbnailUploadProgress(0);
+    setThumbnailUploadStatus('pending');
+    setThumbnailUuid(null);
     if (albumImagesInputRef.current) {
       albumImagesInputRef.current.value = '';
     }
@@ -342,8 +363,7 @@ export default function PhotoBank() {
     setIsUploadComplete(false);
   };
 
-  const handleAlbumUpload = () => {
-    // TODO: Implement actual upload logic
+  const handleAlbumUpload = async () => {
     if (albumImages.length === 0 && !albumThumbnailFile) {
       toast({
         title: "No files selected",
@@ -353,15 +373,111 @@ export default function PhotoBank() {
       return;
     }
 
-    // Simulate upload process
-    setIsUploadComplete(true);
-    toast({
-      title: "Upload successful",
-      description: `Uploaded ${albumImages.length} image${albumImages.length !== 1 ? 's' : ''}${albumThumbnailFile ? ' and thumbnail' : ''}`
-    });
+    try {
+      // Reset upload states
+      setIsUploadComplete(false);
+      setUploadProgress({});
+      setUploadStatus({});
+      setThumbnailUploadProgress(0);
+      setThumbnailUploadStatus('pending');
+      setThumbnailUuid(null);
+
+      // Upload thumbnail if present
+      if (albumThumbnailFile) {
+        setThumbnailUploadStatus('uploading');
+        try {
+          const thumbnailResult: ImageUploadResponse = await uploadImageDirect({
+            file: albumThumbnailFile,
+            onProgress: (progress) => {
+              setThumbnailUploadProgress(progress);
+            }
+          });
+          setThumbnailUuid(thumbnailResult.Image_UUID);
+          // Update thumbnail preview with the uploaded URL
+          setAlbumThumbnailPreview(thumbnailResult.Image_AccessURL);
+          setThumbnailUploadStatus('success');
+        } catch (error: any) {
+          console.error('Thumbnail upload error:', error);
+          setThumbnailUploadStatus('error');
+          toast({
+            title: "Thumbnail upload failed",
+            description: error.message || "Failed to upload thumbnail",
+            variant: "destructive"
+          });
+        }
+      }
+
+      // Upload images concurrently
+      if (albumImages.length > 0) {
+        const imageUploadPromises = albumImages.map(async (image) => {
+          setUploadStatus(prev => ({ ...prev, [image.id]: 'uploading' }));
+          try {
+            const result: ImageUploadResponse = await uploadImageDirect({
+              file: image.file,
+              onProgress: (progress) => {
+                setUploadProgress(prev => ({ ...prev, [image.id]: progress }));
+              }
+            });
+            setUploadStatus(prev => ({ ...prev, [image.id]: 'success' }));
+            return {
+              ...image,
+              imageUuid: result.Image_UUID,
+              url: result.Image_AccessURL
+            };
+          } catch (error: any) {
+            console.error(`Image upload error for ${image.id}:`, error);
+            setUploadStatus(prev => ({ ...prev, [image.id]: 'error' }));
+            throw { imageId: image.id, error };
+          }
+        });
+
+        const uploadedResults = await Promise.allSettled(imageUploadPromises);
+        
+        // Check for failures
+        const failures = uploadedResults.filter(result => result.status === 'rejected');
+        const successfulUploads = uploadedResults
+          .filter((result): result is PromiseFulfilledResult<UploadedImage> => result.status === 'fulfilled')
+          .map(result => result.value);
+
+        // Update albumImages with UUIDs and URLs
+        setAlbumImages(successfulUploads);
+
+        if (failures.length > 0) {
+          toast({
+            title: "Some uploads failed",
+            description: `${failures.length} image(s) failed to upload. ${successfulUploads.length} uploaded successfully.`,
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Upload successful",
+            description: `Uploaded ${successfulUploads.length} image(s)${albumThumbnailFile ? ' and thumbnail' : ''}`
+          });
+        }
+
+        // Mark as complete if at least one upload succeeded
+        if (successfulUploads.length > 0 || thumbnailUuid) {
+          setIsUploadComplete(true);
+        }
+      } else if (thumbnailUuid) {
+        // Only thumbnail uploaded
+        setIsUploadComplete(true);
+        toast({
+          title: "Upload successful",
+          description: "Thumbnail uploaded successfully"
+        });
+      }
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      toast({
+        title: "Upload failed",
+        description: error.message || "Failed to upload images",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleAlbumSubmit = () => {
+  const handleAlbumSubmit = async () => {
     if (!isUploadComplete) {
       toast({
         title: "Upload required",
@@ -371,13 +487,64 @@ export default function PhotoBank() {
       return;
     }
 
-    // TODO: Implement actual submit logic
-    toast({
-      title: "Album created",
-      description: "The album has been created successfully"
-    });
-    
-    handleCloseCreateAlbumModal();
+    if (!projectMainEventId) {
+      toast({
+        title: "Project required",
+        description: "Please create or save the project first before creating an album",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to create an album",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      // Get user info for album_last_modified_by
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      const userName = currentUser?.user_metadata?.full_name || currentUser?.email || 'Unknown';
+
+      // Prepare album_photos_kv_json
+      const albumPhotosJson = {
+        album_thumbnail_url: thumbnailUuid ? albumThumbnailPreview || undefined : undefined,
+        thumbnail_image_uuid: thumbnailUuid || undefined,
+        images: albumImages
+          .filter(img => img.imageUuid) // Only uploaded images
+          .map(img => ({
+            image_uuid: img.imageUuid!,
+            image_access_url: img.url!
+          }))
+      };
+
+      // Save album to Albums_Storage_Table
+      const albumResult = await saveAlbumStorage(
+        projectMainEventId,
+        {
+          album_photos_kv_json: albumPhotosJson,
+          album_last_modified_by: userName,
+        }
+      );
+
+      toast({
+        title: "Album created",
+        description: `Album created successfully. Album ID: ${albumResult.album_id}`
+      });
+
+      handleCloseCreateAlbumModal();
+    } catch (error: any) {
+      console.error('Album submit error:', error);
+      toast({
+        title: "Album submission failed",
+        description: error.message || "Failed to create album",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleAddNewProjectAlbum = () => {
@@ -445,19 +612,77 @@ export default function PhotoBank() {
     handleRemoveAlbum(albumId);
   };
 
-  const handleAlbumSave = (albumId: string) => {
+  const handleAlbumSave = async (albumId: string) => {
     const album = albums.find(a => a.id === albumId);
-    if (album) {
-      console.log('Saving album:', album);
+    if (!album) {
+      return;
+    }
+
+    if (!projectMainEventId) {
+      toast({
+        title: "Project required",
+        description: "Please create or save the project first before saving an album",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to save an album",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      // Get user info for album_last_modified_by
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      const userName = currentUser?.user_metadata?.full_name || currentUser?.email || 'Unknown';
+
+      // Prepare album_photos_kv_json from album data
+      // Note: This assumes album images have been uploaded and have UUIDs
+      // For now, we'll save what we have in the album state
+      const albumPhotosJson = {
+        album_thumbnail_url: undefined, // Will be set when thumbnail is uploaded
+        thumbnail_image_uuid: undefined,
+        images: album.images
+          .filter(img => img.imageUuid) // Only images with UUIDs
+          .map(img => ({
+            image_uuid: img.imageUuid!,
+            image_access_url: img.url || ''
+          }))
+      };
+
+      // Save album to Albums_Storage_Table
+      // Note: We need to track album_id from database, for now we'll create new
+      // In a full implementation, you'd want to store the database album_id in the Album interface
+      await saveAlbumStorage(
+        projectMainEventId,
+        {
+          album_photos_kv_json: albumPhotosJson,
+          album_last_modified_by: userName,
+        }
+        // albumId would go here if we had it stored
+      );
+
       // Mark as saved (remove isNewProjectAlbum flag)
       setAlbums(prev => prev.map(a => 
         a.id === albumId ? { ...a, isNewProjectAlbum: false } : a
       ));
+
       toast({
         title: "Album saved",
         description: "The album has been saved successfully"
       });
-      // TODO: Implement actual album save logic (update in Supabase)
+    } catch (error: any) {
+      console.error('Album save error:', error);
+      toast({
+        title: "Album save failed",
+        description: error.message || "Failed to save album",
+        variant: "destructive"
+      });
     }
   };
 
@@ -597,24 +822,125 @@ export default function PhotoBank() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // TODO: Implement actual form submission logic
-    toast({
-      title: "Project created",
-      description: "Your project has been saved successfully"
-    });
-    
-    // Navigate back or show success message
-    console.log({
-      projectTitle,
-      mainEventDescription,
-      mainEventName,
-      shortDescription,
-      subEventName,
-      thumbnailFile,
-      images,
-      albums
-    });
+
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to create a project",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      // Upload thumbnail if present
+      let thumbnailUuid: string | null = null;
+      let thumbnailUrl: string | null = null;
+      if (thumbnailFile) {
+        try {
+          const thumbnailResult: ImageUploadResponse = await uploadImageDirect({
+            file: thumbnailFile
+          });
+          thumbnailUuid = thumbnailResult.Image_UUID;
+          thumbnailUrl = thumbnailResult.Image_AccessURL;
+        } catch (error: any) {
+          console.error('Thumbnail upload error:', error);
+          toast({
+            title: "Thumbnail upload failed",
+            description: error.message || "Failed to upload thumbnail",
+            variant: "destructive"
+          });
+          return;
+        }
+      }
+
+      // Upload images concurrently (for main project)
+      let imageUuids: string[] = [];
+      let imageUrls: string[] = [];
+      if (images.length > 0) {
+        const imageUploadPromises = images.map(async (image) => {
+          try {
+            const result: ImageUploadResponse = await uploadImageDirect({
+              file: image.file
+            });
+            return {
+              image_uuid: result.Image_UUID,
+              image_access_url: result.Image_AccessURL
+            };
+          } catch (error: any) {
+            console.error(`Image upload error for ${image.id}:`, error);
+            throw error;
+          }
+        });
+
+        const uploadedResults = await Promise.allSettled(imageUploadPromises);
+        const failures = uploadedResults.filter(result => result.status === 'rejected');
+        
+        const successful = uploadedResults
+          .filter((result): result is PromiseFulfilledResult<{image_uuid: string; image_access_url: string}> => result.status === 'fulfilled')
+          .map(result => result.value);
+
+        imageUuids = successful.map(img => img.image_uuid);
+        imageUrls = successful.map(img => img.image_access_url);
+
+        if (failures.length > 0) {
+          toast({
+            title: "Some uploads failed",
+            description: `${failures.length} image(s) failed to upload. ${successful.length} uploaded successfully.`,
+            variant: "destructive"
+          });
+          if (successful.length === 0) {
+            return; // Don't proceed if all uploads failed
+          }
+        }
+      }
+
+      // Get user info for project_last_modified_by
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      const userName = currentUser?.user_metadata?.full_name || currentUser?.email || 'Unknown';
+
+      // Create project in Project_Details_Table
+      const projectResult = await createProjectDetails(user.id, {
+        project_title: projectTitle,
+        project_thumbnail_image_link: thumbnailUrl || undefined,
+        main_event_name: mainEventName,
+        main_event_desc: mainEventDescription,
+        short_description: shortDescription,
+        sub_event_name: isOtherSubEvent ? customSubEventName : subEventName,
+        custom_sub_event_name: isOtherSubEvent ? customSubEventName : undefined,
+        project_last_modified_by: userName,
+      });
+
+      // Store project_main_event_id for album creation
+      setProjectMainEventId(projectResult.project_main_event_id);
+
+      toast({
+        title: "Project created",
+        description: `Project "${projectResult.main_event_name}" created successfully. Project ID: ${projectResult.project_main_event_id}`
+      });
+
+      console.log({
+        project_main_event_id: projectResult.project_main_event_id,
+        main_event_name: projectResult.main_event_name,
+        projectTitle,
+        mainEventDescription,
+        mainEventName,
+        shortDescription,
+        subEventName,
+        thumbnailUuid,
+        thumbnailUrl,
+        imageUuids,
+        imageUrls,
+        albums
+      });
+    } catch (error: any) {
+      console.error('Submit error:', error);
+      toast({
+        title: "Submission failed",
+        description: error.message || "Failed to create project",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -1261,6 +1587,30 @@ export default function PhotoBank() {
                       alt="Thumbnail preview"
                       className="max-h-full max-w-full rounded-lg object-contain"
                     />
+                    {/* Thumbnail progress bar overlay */}
+                    {thumbnailUploadStatus === 'uploading' && (
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-xs p-2">
+                        <div className="w-full bg-gray-600 rounded-full h-1 mb-1">
+                          <div 
+                            className="bg-blue-400 h-1 rounded-full transition-all" 
+                            style={{ width: `${thumbnailUploadProgress}%` }}
+                          />
+                        </div>
+                        <div className="text-center">{Math.round(thumbnailUploadProgress)}%</div>
+                      </div>
+                    )}
+                    {/* Success indicator */}
+                    {thumbnailUploadStatus === 'success' && (
+                      <div className="absolute top-2 left-2 bg-green-500 rounded-full p-1 z-10">
+                        <Check className="h-3 w-3 text-white" />
+                      </div>
+                    )}
+                    {/* Error indicator */}
+                    {thumbnailUploadStatus === 'error' && (
+                      <div className="absolute top-2 left-2 bg-red-500 rounded-full p-1 z-10">
+                        <X className="h-3 w-3 text-white" />
+                      </div>
+                    )}
                     <Button
                       type="button"
                       variant="ghost"
@@ -1269,7 +1619,7 @@ export default function PhotoBank() {
                         e.stopPropagation();
                         removeAlbumThumbnail();
                       }}
-                      className="absolute top-2 right-2 bg-white/80 hover:bg-white"
+                      className="absolute top-2 right-2 bg-white/80 hover:bg-white z-10"
                     >
                       <X className="h-4 w-4" />
                     </Button>
@@ -1322,12 +1672,36 @@ export default function PhotoBank() {
                       alt={`Preview ${image.id}`}
                       className="w-full h-full object-cover"
                     />
+                    {/* Progress bar overlay */}
+                    {uploadStatus[image.id] === 'uploading' && (
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-xs p-1">
+                        <div className="w-full bg-gray-600 rounded-full h-1 mb-1">
+                          <div 
+                            className="bg-blue-400 h-1 rounded-full transition-all" 
+                            style={{ width: `${uploadProgress[image.id] || 0}%` }}
+                          />
+                        </div>
+                        <div className="text-center">{Math.round(uploadProgress[image.id] || 0)}%</div>
+                      </div>
+                    )}
+                    {/* Success indicator */}
+                    {uploadStatus[image.id] === 'success' && (
+                      <div className="absolute top-1 left-1 bg-green-500 rounded-full p-1 z-10">
+                        <Check className="h-3 w-3 text-white" />
+                      </div>
+                    )}
+                    {/* Error indicator */}
+                    {uploadStatus[image.id] === 'error' && (
+                      <div className="absolute top-1 left-1 bg-red-500 rounded-full p-1 z-10">
+                        <X className="h-3 w-3 text-white" />
+                      </div>
+                    )}
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
                       onClick={() => removeAlbumImage(image.id)}
-                      className="absolute top-1 right-1 bg-white/80 hover:bg-white opacity-0 group-hover:opacity-100 transition-opacity p-1 h-auto"
+                      className="absolute top-1 right-1 bg-white/80 hover:bg-white opacity-0 group-hover:opacity-100 transition-opacity p-1 h-auto z-10"
                     >
                       <X className="h-4 w-4" />
                     </Button>
