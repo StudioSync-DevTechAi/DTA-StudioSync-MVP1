@@ -12,7 +12,7 @@ import { Upload, X, Plus, ArrowLeft, ChevronDown, ChevronUp, Check } from "lucid
 import { useToast } from "@/hooks/use-toast";
 import { PortfolioSidebar } from "@/components/portfolio/PortfolioSidebar";
 import { uploadImageDirect, uploadImageViaEdgeFunction, ImageUploadResponse } from "@/services/imageUpload/imageUploadService";
-import { createProjectDetails, saveAlbumStorage } from "@/hooks/photobank/api/photobankApi";
+import { createProjectDetails, saveAlbumStorage, fetchSubEventsList, SubEvent } from "@/hooks/photobank/api/photobankApi";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -47,6 +47,10 @@ export default function PhotoBank() {
   // Project state - stores the project_main_event_id after project creation
   const [projectMainEventId, setProjectMainEventId] = useState<string | null>(null);
   
+  // Sub-events list state - loaded from database
+  const [subEventsList, setSubEventsList] = useState<SubEvent[]>([]);
+  const [isLoadingSubEvents, setIsLoadingSubEvents] = useState(true);
+  
   // Load theme CSS only for PhotoBank page (part of portfolio module)
   useEffect(() => {
     const link = document.createElement('link');
@@ -63,6 +67,36 @@ export default function PhotoBank() {
       }
     };
   }, []);
+
+  // Load sub-events list on component mount
+  useEffect(() => {
+    const loadSubEvents = async () => {
+      try {
+        setIsLoadingSubEvents(true);
+        const events = await fetchSubEventsList();
+        setSubEventsList(events);
+      } catch (error: any) {
+        console.error('Error loading sub-events:', error);
+        toast({
+          title: "Warning",
+          description: "Failed to load sub-events list. Using default values.",
+          variant: "default"
+        });
+        // Fallback to default values if database fetch fails
+        setSubEventsList([
+          { sub_event_id: '1', sub_event_name: 'Engagement', display_order: 1 },
+          { sub_event_id: '2', sub_event_name: 'Bridal Shower', display_order: 2 },
+          { sub_event_id: '3', sub_event_name: 'Reception', display_order: 3 },
+          { sub_event_id: '4', sub_event_name: 'Mehendi and Sangeet', display_order: 4 },
+        ]);
+      } finally {
+        setIsLoadingSubEvents(false);
+      }
+    };
+
+    loadSubEvents();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
   
   // Form state
   const [projectTitle, setProjectTitle] = useState("Click and Edit Project Title");
@@ -1119,10 +1153,11 @@ export default function PhotoBank() {
                             <SelectValue placeholder="Select sub event name..." />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="Engagement">Engagement</SelectItem>
-                            <SelectItem value="Bridal shower">Bridal shower</SelectItem>
-                            <SelectItem value="Reception">Reception</SelectItem>
-                            <SelectItem value="Mehendi and Sangeet">Mehendi and Sangeet</SelectItem>
+                            {subEventsList.map((event) => (
+                              <SelectItem key={event.sub_event_id} value={event.sub_event_name}>
+                                {event.sub_event_name}
+                              </SelectItem>
+                            ))}
                             <SelectItem value="Other">Other Sub-Event</SelectItem>
                           </SelectContent>
                         </Select>
@@ -1381,10 +1416,11 @@ export default function PhotoBank() {
                                     <SelectValue placeholder="Select sub event name..." />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    <SelectItem value="Engagement">Engagement</SelectItem>
-                                    <SelectItem value="Bridal shower">Bridal shower</SelectItem>
-                                    <SelectItem value="Reception">Reception</SelectItem>
-                                    <SelectItem value="Mehendi and Sangeet">Mehendi and Sangeet</SelectItem>
+                                    {subEventsList.map((event) => (
+                                      <SelectItem key={event.sub_event_id} value={event.sub_event_name}>
+                                        {event.sub_event_name}
+                                      </SelectItem>
+                                    ))}
                                     <SelectItem value="Other">Other Sub-Event</SelectItem>
                                   </SelectContent>
                                 </Select>

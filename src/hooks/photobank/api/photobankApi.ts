@@ -977,3 +977,61 @@ export const fetchAlbumsStorage = async (
   }
 };
 
+/**
+ * Sub-Event List Types
+ */
+export interface SubEvent {
+  sub_event_id: string;
+  sub_event_name: string;
+  display_order: number;
+}
+
+/**
+ * Fetch active sub-events from SubEvents_List_Table
+ * Returns list of sub-events ordered by display_order
+ * Falls back through multiple methods: table -> view -> function -> defaults
+ */
+export const fetchSubEventsList = async (): Promise<SubEvent[]> => {
+  try {
+    // Method 1: Try direct table access first
+    const { data: tableData, error: tableError } = await supabase
+      .from('sub_events_list_table')
+      .select('sub_event_id, sub_event_name, display_order')
+      .eq('is_active', true)
+      .order('display_order', { ascending: true })
+      .order('sub_event_name', { ascending: true });
+
+    if (!tableError && tableData) {
+      return tableData as SubEvent[];
+    }
+
+    // Method 2: Try using the view (if table access fails)
+    console.warn("Table access failed, trying view:", tableError?.message);
+    const { data: viewData, error: viewError } = await supabase
+      .from('sub_events_list_view')
+      .select('sub_event_id, sub_event_name, display_order')
+      .order('display_order', { ascending: true })
+      .order('sub_event_name', { ascending: true });
+
+    if (!viewError && viewData) {
+      return viewData as SubEvent[];
+    }
+
+    // Method 3: Try using the database function
+    console.warn("View access failed, trying function:", viewError?.message);
+    const { data: functionData, error: functionError } = await supabase
+      .rpc('get_active_sub_events');
+
+    if (!functionError && functionData) {
+      return functionData as SubEvent[];
+    }
+
+    // If all methods fail, throw the last error
+    console.error("All access methods failed. Last error:", functionError || viewError || tableError);
+    throw functionError || viewError || tableError;
+  } catch (error) {
+    console.error("Error fetching sub-events list:", error);
+    throw error;
+  }
+};
+
