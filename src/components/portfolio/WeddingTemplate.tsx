@@ -543,7 +543,7 @@ export function WeddingTemplate({
           {/* Image Selector */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Add Images from S3</h3>
+              <h3 className="text-lg font-semibold">Add Images from Remote Image Storage</h3>
               <Button
                 variant="outline"
                 onClick={() => setShowImageSelector(!showImageSelector)}

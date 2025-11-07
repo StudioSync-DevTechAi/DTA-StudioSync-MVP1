@@ -815,6 +815,7 @@ export const createProjectDetails = async (
     project_last_modified_by: string; // Person name
     album_ids?: string[]; // Array of album IDs (FKs)
     project_imageobjects_json?: Record<string, any>; // Complete JSON object with images, albums, and metadata
+    project_useremail?: string; // User email address
   }
 ): Promise<{ project_main_event_id: string; main_event_name: string }> => {
   try {
@@ -871,6 +872,47 @@ export const fetchProjectDetails = async (
     return data as any;
   } catch (error) {
     console.error("Error fetching project details:", error);
+    throw error;
+  }
+};
+
+/**
+ * Fetch all projects for a user from Project_Details_Table
+ * Filters by user email if provided, otherwise falls back to user_id
+ */
+export const fetchAllProjectsForUser = async (
+  userId: string,
+  userEmail?: string
+): Promise<Array<{
+  project_main_event_id: string;
+  project_title: string;
+  project_thumbnail_image_link?: string;
+  main_event_name: string;
+  created_at?: string;
+}>> => {
+  // Always use user_id filter for now until migration is applied
+  // Once project_useremail column exists, we can switch to email filtering
+  try {
+    const { data, error } = await supabase
+      .from('project_details_table')
+      .select('project_main_event_id, project_title, project_thumbnail_image_link, main_event_name, created_at')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error("Error fetching all projects for user:", error);
+      throw error;
+    }
+
+    return (data || []) as Array<{
+      project_main_event_id: string;
+      project_title: string;
+      project_thumbnail_image_link?: string;
+      main_event_name: string;
+      created_at?: string;
+    }>;
+  } catch (error) {
+    console.error("Error fetching all projects for user:", error);
     throw error;
   }
 };

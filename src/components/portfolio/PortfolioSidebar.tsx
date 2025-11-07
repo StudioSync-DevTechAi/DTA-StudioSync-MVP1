@@ -121,18 +121,18 @@ export function PortfolioSidebar({ onToggle }: PortfolioSidebarProps) {
         {/* Sidebar scroll container */}
         <div className="flex flex-col h-full">
           {/* Brand Logo */}
-          <div className="brand-logo d-flex align-items-center justify-content-center flex-shrink-0" style={{ 
+          <div className="brand-logo d-flex align-items-center justify-content-center flex-shrink-0 relative" style={{ 
             padding: isCollapsed ? '16px 4px' : (isMobile ? '16px' : undefined), 
             minHeight: isCollapsed ? '60px' : undefined 
           }}>
             {!isCollapsed && (
-              <a href="/portfolio" className="text-nowrap logo-img d-flex align-items-center gap-2 w-100" onClick={(e) => { e.preventDefault(); navigate('/portfolio'); }}>
+              <a href="/portfolio" className="text-nowrap logo-img d-flex align-items-center gap-2 w-100" onClick={(e) => { e.preventDefault(); navigate('/portfolio'); }} style={{ paddingLeft: '4px', justifyContent: 'flex-start' }}>
                 <div className="d-flex align-items-center">
                   <div className="bg-primary rounded d-flex align-items-center justify-content-center" style={{ width: '32px', height: '32px' }}>
                     <span className="text-white fw-bold">S</span>
                   </div>
                 </div>
-                <span className="fw-bold text-dark">StudioSyncWork</span>
+                <span className="fw-bold text-dark" style={{ marginLeft: '-8px' }}>StudioSyncWork</span>
               </a>
             )}
             {isCollapsed && (
@@ -142,10 +142,16 @@ export function PortfolioSidebar({ onToggle }: PortfolioSidebarProps) {
                 </div>
               </div>
             )}
-            {/* Mobile Close Button */}
-            <div className="close-btn d-xl-none d-block sidebartoggler cursor-pointer" onClick={() => setIsCollapsed(true)}>
-              <X className="h-6 w-6" />
-            </div>
+            {/* Mobile Close Button - Always visible on mobile when sidebar is open */}
+            {isMobile && !isCollapsed && (
+              <button
+                className="absolute top-4 right-4 z-50 bg-white text-gray-700 p-2 rounded-lg shadow-md hover:bg-gray-100 transition-colors border border-gray-200"
+                onClick={() => setIsCollapsed(true)}
+                aria-label="Close sidebar"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            )}
           </div>
 
           {/* Sidebar Navigation */}
@@ -192,12 +198,16 @@ export function PortfolioSidebar({ onToggle }: PortfolioSidebarProps) {
               </div>
 
               {/* Bottom Toggle Button - Collapsible Icon at lower section */}
-              <li className="mt-auto flex-shrink-0 d-none d-xl-block">
-                {!isCollapsed && (
-                  <span className="sidebar-divider lg"></span>
-                )}
-              </li>
-              <li className="sidebar-item flex-shrink-0 d-none d-xl-block">
+              {/* Show divider on desktop when not collapsed */}
+              {!isMobile && (
+                <li className="mt-auto flex-shrink-0">
+                  {!isCollapsed && (
+                    <span className="sidebar-divider lg"></span>
+                  )}
+                </li>
+              )}
+              {/* Collapse toggle button - visible on all screen sizes */}
+              <li className="sidebar-item flex-shrink-0">
                 <a
                   className="sidebar-link"
                   href="#"
@@ -207,7 +217,7 @@ export function PortfolioSidebar({ onToggle }: PortfolioSidebarProps) {
                   }}
                   aria-expanded="false"
                   style={{ 
-                    padding: isCollapsed ? '12px 4px' : undefined,
+                    padding: isCollapsed ? '12px 4px' : (isMobile ? '16px' : undefined),
                     justifyContent: isCollapsed ? 'center' : undefined,
                     display: 'flex',
                     alignItems: 'center'
@@ -218,7 +228,7 @@ export function PortfolioSidebar({ onToggle }: PortfolioSidebarProps) {
                       {isCollapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
                     </span>
                     {!isCollapsed && (
-                      <span className="hide-menu ms-3">Collapse</span>
+                      <span className="hide-menu ms-3">{isMobile ? 'Close' : 'Collapse'}</span>
                     )}
                   </div>
                 </a>

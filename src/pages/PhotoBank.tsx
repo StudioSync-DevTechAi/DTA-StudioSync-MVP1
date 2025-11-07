@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,10 +12,15 @@ import { Upload, X, Plus, ArrowLeft, ChevronDown, ChevronUp, Check, Image, Loade
 import { useToast } from "@/hooks/use-toast";
 import { PortfolioSidebar } from "@/components/portfolio/PortfolioSidebar";
 import { uploadImageDirect, uploadImageViaEdgeFunction, ImageUploadResponse, deleteImageByUuid } from "@/services/imageUpload/imageUploadService";
-import { createProjectDetails, updateProjectDetails, fetchProjectDetails, saveAlbumStorage, fetchAlbumsStorage, fetchSubEventsList, SubEvent, fetchAlbumsForLinking, linkAlbumToProject, AlbumLinkInfo, fetchLinkedAlbums, unlinkAlbumFromProject, deleteAlbumStorage, fetchAlbumById } from "@/hooks/photobank/api/photobankApi";
+import { createProjectDetails, updateProjectDetails, fetchProjectDetails, saveAlbumStorage, fetchAlbumsStorage, fetchSubEventsList, SubEvent, fetchAlbumsForLinking, linkAlbumToProject, AlbumLinkInfo, fetchLinkedAlbums, unlinkAlbumFromProject, deleteAlbumStorage, fetchAlbumById, fetchAllProjectsForUser } from "@/hooks/photobank/api/photobankApi";
 import { buildProjectImageObjectsJSON } from "@/utils/projectImageObjectsBuilder";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { loadAlbumPreview, loadLocalAlbumPreview, loadProjectPreview } from "@/services/preview";
+import { AlbumPreview } from "@/components/photobank/AlbumPreview";
+import { ProjectPreview } from "@/components/photobank/ProjectPreview";
+import type { AlbumPreviewData, ProjectPreviewData } from "@/services/preview/types";
 
 interface UploadedImage {
   id: string;
@@ -43,10 +48,55 @@ interface Album {
 
 export default function PhotoBank() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+
+  // Clean up URL parameters on mount (remove encoded strings like %7B%22text%22%3A%22StudioSyncWork%22%7D and className)
+  useEffect(() => {
+    const currentUrl = window.location.href;
+    const url = new URL(currentUrl);
+    const searchParams = url.searchParams;
+    let hasChanges = false;
+
+    // Remove any parameters that contain encoded JSON objects
+    for (const [key, value] of searchParams.entries()) {
+      if (value.includes('%7B%22className%22') || 
+          value.includes('{"className"') ||
+          value.includes('%7B%22text%22%3A%22StudioSyncWork%22%7D') || 
+          value.includes('{"text":"StudioSyncWork"}') ||
+          key.includes('%7B%22className%22') ||
+          key.includes('%7B%22text%22%3A%22StudioSyncWork%22%7D')) {
+        searchParams.delete(key);
+        hasChanges = true;
+      }
+    }
+
+    // Clean up path and hash
+    if (url.pathname.includes('%7B%22className%22') || 
+        url.pathname.includes('%7B%22text%22%3A%22StudioSyncWork%22%7D')) {
+      url.pathname = url.pathname
+        .replace(/%7B%22className%22[^%]*%7D/g, '')
+        .replace(/%7B%22text%22%3A%22StudioSyncWork%22%7D/g, '');
+      hasChanges = true;
+    }
+
+    if (url.hash.includes('%7B%22className%22') || 
+        url.hash.includes('%7B%22text%22%3A%22StudioSyncWork%22%7D')) {
+      url.hash = url.hash
+        .replace(/%7B%22className%22[^%]*%7D/g, '')
+        .replace(/%7B%22text%22%3A%22StudioSyncWork%22%7D/g, '');
+      hasChanges = true;
+    }
+
+    // Update URL if changes were made
+    if (hasChanges) {
+      const newUrl = url.pathname + (url.search ? url.search : '') + (url.hash ? url.hash : '');
+      window.history.replaceState({}, '', newUrl);
+    }
+  }, []);
 
   // Handle window resize for responsive behavior
   useEffect(() => {
@@ -212,11 +262,22 @@ export default function PhotoBank() {
   const [isLoadingAlbums, setIsLoadingAlbums] = useState(false);
   const [linkedAlbumIds, setLinkedAlbumIds] = useState<Set<string>>(new Set()); // Track already linked albums
 
-  // Album Gallery Modal state
-  const [albumGalleryModalOpen, setAlbumGalleryModalOpen] = useState(false);
+  // Album Gallery state - inline view instead of modal
+  const [expandedAlbumId, setExpandedAlbumId] = useState<string | null>(null); // Track which album is expanded inline
+  const [hoveredAlbumId, setHoveredAlbumId] = useState<string | null>(null); // Track which album is being hovered for preview
+  const [previewLoadingAlbums, setPreviewLoadingAlbums] = useState<Set<string>>(new Set()); // Track albums loading preview on hover
+  const [albumPreviewData, setAlbumPreviewData] = useState<Record<string, AlbumPreviewData>>({}); // Store preview data by album ID
+  const [albumPreviewPosition, setAlbumPreviewPosition] = useState<{ x: number; y: number } | null>(null); // Position for album preview
+  
+  // Project preview state
+  const [hoveredProjectId, setHoveredProjectId] = useState<string | null>(null); // Track which project is being hovered for preview
+  const [previewLoadingProjects, setPreviewLoadingProjects] = useState<Set<string>>(new Set()); // Track projects loading preview on hover
+  const [projectPreviewData, setProjectPreviewData] = useState<Record<string, ProjectPreviewData>>({}); // Store preview data by project ID
+  const [projectPreviewPosition, setProjectPreviewPosition] = useState<{ x: number; y: number } | null>(null); // Position for project preview
+  const [albumGalleryModalOpen, setAlbumGalleryModalOpen] = useState(false); // Keep for backward compatibility
   const [selectedAlbumForGallery, setSelectedAlbumForGallery] = useState<Album | null>(null);
-  const [albumGalleryImages, setAlbumGalleryImages] = useState<Array<{ image_uuid: string; image_access_url: string }>>([]);
-  const [isLoadingAlbumGallery, setIsLoadingAlbumGallery] = useState(false);
+  const [albumGalleryImages, setAlbumGalleryImages] = useState<Record<string, Array<{ image_uuid: string; image_access_url: string }>>>({}); // Store images by album ID
+  const [isLoadingAlbumGallery, setIsLoadingAlbumGallery] = useState<Record<string, boolean>>({}); // Track loading by album ID
 
   // Created Projects state
   const [createdProjects, setCreatedProjects] = useState<Array<{
@@ -226,8 +287,58 @@ export default function PhotoBank() {
     main_event_name: string;
     created_at?: string;
   }>>([]);
-  const [showProjectForm, setShowProjectForm] = useState(true); // Show form by default
+  const [showProjectForm, setShowProjectForm] = useState(false); // Don't show form by default - wait for projects to load
   const [isEditingProject, setIsEditingProject] = useState(false); // Track if editing existing project
+  const [isLoadingProjects, setIsLoadingProjects] = useState(true); // Track loading state
+  const [projectEditModalOpen, setProjectEditModalOpen] = useState(false); // Modal for editing projects
+
+  // Load all projects for the user on component mount
+  useEffect(() => {
+    const loadUserProjects = async () => {
+      if (!user?.id) {
+        setIsLoadingProjects(false);
+        return;
+      }
+
+      try {
+        setIsLoadingProjects(true);
+        // Get authenticated user's email directly from Supabase auth session
+        // This ensures we get the actual logged-in Gmail/email from the account
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        const userEmail = authUser?.email || user.email || profile?.email;
+        
+        console.log('Loading projects for user:', {
+          userId: user.id,
+          email: userEmail,
+          authUserEmail: authUser?.email,
+          userEmailFromContext: user.email,
+          profileEmail: profile?.email
+        });
+        
+        const projects = await fetchAllProjectsForUser(user.id, userEmail);
+        setCreatedProjects(projects);
+        
+        // If projects exist, hide the form. Otherwise, show it for creating a new project
+        if (projects.length > 0) {
+          setShowProjectForm(false);
+        } else {
+          // Only show form if no projects exist AND not loading
+          setShowProjectForm(true);
+        }
+      } catch (error: any) {
+        console.error('Error loading user projects:', error);
+        toast({
+          title: "Warning",
+          description: "Failed to load your projects. Please refresh the page.",
+          variant: "default"
+        });
+      } finally {
+        setIsLoadingProjects(false);
+      }
+    };
+
+    loadUserProjects();
+  }, [user?.id, user?.email, profile?.email]); // Reload when user changes
   
   // Sub-Event Album Modal state
   const [subEventAlbumModalOpen, setSubEventAlbumModalOpen] = useState(false);
@@ -457,6 +568,8 @@ export default function PhotoBank() {
 
         // Create project in Project_Details_Table
         // Use already uploaded thumbnail UUID and URL (uploaded immediately on selection)
+        // Get authenticated user's email directly from Supabase auth session (Gmail/account email)
+        const userEmail = currentUser?.email || user.email || profile?.email;
         const projectResult = await createProjectDetails(user.id, {
           project_title: projectTitle,
           project_thumbnail_image_link: projectThumbnailUrl || undefined,
@@ -466,6 +579,7 @@ export default function PhotoBank() {
           sub_event_name: isOtherSubEvent ? customSubEventName : subEventName,
           custom_sub_event_name: isOtherSubEvent ? customSubEventName : undefined,
           project_last_modified_by: userName,
+          project_useremail: userEmail, // Include user email for filtering
         });
 
         // Store project ID and title in state
@@ -1284,6 +1398,8 @@ export default function PhotoBank() {
 
         // Create project in Project_Details_Table
         // Use already uploaded thumbnail UUID and URL (uploaded immediately on selection)
+        // Get authenticated user's email directly from Supabase auth session (Gmail/account email)
+        const userEmail = currentUser?.email || user.email || profile?.email;
         const projectResult = await createProjectDetails(user.id, {
           project_title: projectTitle,
           project_thumbnail_image_link: projectThumbnailUrl || undefined,
@@ -1293,6 +1409,7 @@ export default function PhotoBank() {
           sub_event_name: isOtherSubEvent ? customSubEventName : subEventName,
           custom_sub_event_name: isOtherSubEvent ? customSubEventName : undefined,
           project_last_modified_by: userName,
+          project_useremail: userEmail, // Include user email for filtering
         });
 
         // Store project ID and title in state
@@ -1552,38 +1669,51 @@ export default function PhotoBank() {
   };
 
   const handleOpenAlbumGallery = async (album: Album) => {
-    // Set the selected album
+    // Toggle expansion - if already expanded, collapse it
+    if (expandedAlbumId === album.id) {
+      setExpandedAlbumId(null);
+      return;
+    }
+
+    // Set the selected album and expand it inline
     setSelectedAlbumForGallery(album);
-    setAlbumGalleryModalOpen(true);
-    setIsLoadingAlbumGallery(true);
-    setAlbumGalleryImages([]);
+    setExpandedAlbumId(album.id);
+    setIsLoadingAlbumGallery(prev => ({ ...prev, [album.id]: true }));
+
+    // If images are already loaded, don't reload
+    if (albumGalleryImages[album.id]) {
+      setIsLoadingAlbumGallery(prev => ({ ...prev, [album.id]: false }));
+      return;
+    }
 
     try {
+      let images: Array<{ image_uuid: string; image_access_url: string }> = [];
+
       // If album has an albumId (saved to database), fetch images from database
       if (album.albumId) {
         const albumData = await fetchAlbumById(album.albumId);
         if (albumData && albumData.album_photos_kv_json?.images) {
-          setAlbumGalleryImages(albumData.album_photos_kv_json.images);
+          images = albumData.album_photos_kv_json.images;
         } else {
           // Fallback to local images if available
-          const localImages = album.images
+          images = album.images
             .filter(img => img.imageUuid && img.url)
             .map(img => ({
               image_uuid: img.imageUuid!,
               image_access_url: img.url!
             }));
-          setAlbumGalleryImages(localImages);
         }
       } else {
         // For unsaved albums, use local images
-        const localImages = album.images
+        images = album.images
           .filter(img => img.imageUuid && img.url)
           .map(img => ({
             image_uuid: img.imageUuid!,
             image_access_url: img.url!
           }));
-        setAlbumGalleryImages(localImages);
       }
+
+      setAlbumGalleryImages(prev => ({ ...prev, [album.id]: images }));
     } catch (error: any) {
       console.error('Error loading album gallery:', error);
       toast({
@@ -1598,17 +1728,233 @@ export default function PhotoBank() {
           image_uuid: img.imageUuid!,
           image_access_url: img.url!
         }));
-      setAlbumGalleryImages(localImages);
+      setAlbumGalleryImages(prev => ({ ...prev, [album.id]: localImages }));
     } finally {
-      setIsLoadingAlbumGallery(false);
+      setIsLoadingAlbumGallery(prev => ({ ...prev, [album.id]: false }));
+    }
+  };
+
+  // Load project preview data on hover using preview service
+  const handleProjectHover = async (projectId: string, event?: React.MouseEvent) => {
+    console.log('🎯 Project hover triggered:', projectId);
+    
+    // Calculate position for preview (to the right of the card, or below if near right edge)
+    if (event) {
+      const rect = event.currentTarget.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const previewWidth = 480;
+      const previewHeight = 400;
+      
+      let x = rect.right + 10; // Position to the right
+      let y = rect.top;
+      
+      // If preview would go off screen to the right, position to the left instead
+      if (x + previewWidth > viewportWidth) {
+        x = rect.left - previewWidth - 10;
+      }
+      
+      // If preview would go off screen at bottom, adjust y
+      if (y + previewHeight > viewportHeight) {
+        y = viewportHeight - previewHeight - 10;
+      }
+      
+      // Ensure preview doesn't go off screen at top
+      if (y < 10) {
+        y = 10;
+      }
+      
+      setProjectPreviewPosition({ x, y });
+    }
+    
+    // Always set hovered state immediately for visual feedback
+    setHoveredProjectId(projectId);
+    
+    // If preview data is already loaded, don't reload
+    if (projectPreviewData[projectId]) {
+      console.log('✅ Using cached project preview data for:', projectId);
+      return;
+    }
+
+    // Show loading indicator immediately
+    console.log('⏳ Starting project preview load for:', projectId);
+    setPreviewLoadingProjects(prev => {
+      const next = new Set(prev);
+      next.add(projectId);
+      return next;
+    });
+
+    try {
+      const result = await loadProjectPreview(projectId);
+      
+      if (result.success && result.data) {
+        console.log('✅ Project preview loaded successfully:', projectId, result.data);
+        setProjectPreviewData(prev => ({
+          ...prev,
+          [projectId]: result.data!,
+        }));
+      } else {
+        console.error('❌ Failed to load project preview:', result.error);
+      }
+    } catch (error: any) {
+      console.error('❌ Error loading project preview:', error);
+    } finally {
+      setPreviewLoadingProjects(prev => {
+        const next = new Set(prev);
+        next.delete(projectId);
+        return next;
+      });
+    }
+  };
+
+  // Load preview data on hover using preview service
+  const handleAlbumHover = async (album: Album, event?: React.MouseEvent) => {
+    // Immediate console log to confirm hover event is firing
+    console.log('🖱️ MOUSE HOVER DETECTED ON ALBUM CARD:', {
+      albumId: album.id,
+      albumName: album.name,
+      timestamp: new Date().toISOString(),
+      hasAlbumId: !!album.albumId,
+      imagesCount: album.images.length,
+      hasThumbnail: !!album.thumbnailUrl,
+      thumbnailUrl: album.thumbnailUrl
+    });
+    
+    // Calculate position for preview (to the right of the card, or below if near right edge)
+    if (event) {
+      const rect = event.currentTarget.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const previewWidth = 360;
+      const previewHeight = 400;
+      
+      let x = rect.right + 10; // Position to the right
+      let y = rect.top;
+      
+      // If preview would go off screen to the right, position to the left instead
+      if (x + previewWidth > viewportWidth) {
+        x = rect.left - previewWidth - 10;
+      }
+      
+      // If preview would go off screen at bottom, adjust y
+      if (y + previewHeight > viewportHeight) {
+        y = viewportHeight - previewHeight - 10;
+      }
+      
+      // Ensure preview doesn't go off screen at top
+      if (y < 10) {
+        y = 10;
+      }
+      
+      setAlbumPreviewPosition({ x, y });
+    }
+    
+    console.log('🎯 Album hover triggered:', album.id, album.name, { 
+      hasAlbumId: !!album.albumId, 
+      imagesCount: album.images.length,
+      hasThumbnail: !!album.thumbnailUrl 
+    });
+    
+    // Always set hovered state immediately for visual feedback
+    setHoveredAlbumId(album.id);
+    console.log('✅ hoveredAlbumId set to:', album.id);
+    
+    // If preview data is already loaded, don't reload
+    if (albumPreviewData[album.id]) {
+      console.log('✅ Using cached preview data for:', album.id);
+      return;
+    }
+
+    // Show loading indicator immediately
+    console.log('⏳ Starting preview load for:', album.id);
+    setPreviewLoadingAlbums(prev => {
+      const next = new Set(prev);
+      next.add(album.id);
+      console.log('📊 Loading albums set:', Array.from(next));
+      return next;
+    });
+
+    try {
+      let previewData: AlbumPreviewData;
+
+      if (album.albumId) {
+        // Load from database using preview service
+        const result = await loadAlbumPreview(album.albumId, album.name || 'Untitled Album', {
+          maxImages: 4,
+          includeThumbnail: true,
+        });
+
+        if (result.success && result.data) {
+          previewData = result.data;
+          // Also mark as linked if it's a linked album
+          previewData.is_linked = album.id.startsWith('linked-');
+        } else {
+          // Fallback to local data
+          previewData = loadLocalAlbumPreview(
+            album.id,
+            album.name || 'Untitled Album',
+            album.images,
+            album.thumbnailUrl
+          );
+          previewData.is_linked = album.id.startsWith('linked-');
+        }
+      } else {
+        // Load from local album data
+        previewData = loadLocalAlbumPreview(
+          album.id,
+          album.name || 'Untitled Album',
+          album.images,
+          album.thumbnailUrl
+        );
+        previewData.is_linked = album.id.startsWith('linked-');
+      }
+
+      // Store preview data
+      console.log('✅ Preview data loaded successfully:', previewData);
+      setAlbumPreviewData(prev => {
+        const updated = { ...prev, [album.id]: previewData };
+        console.log('💾 Stored preview data. Total albums with preview:', Object.keys(updated).length);
+        return updated;
+      });
+      
+      // Also store images for backward compatibility
+      setAlbumGalleryImages(prev => ({
+        ...prev,
+        [album.id]: previewData.images.map(img => ({
+          image_uuid: img.image_uuid,
+          image_access_url: img.image_access_url,
+        })),
+      }));
+    } catch (error) {
+      // Log error for debugging
+      console.error('❌ Error loading album preview:', error);
+      // Even on error, show something
+      const fallbackPreview = loadLocalAlbumPreview(
+        album.id,
+        album.name || 'Untitled Album',
+        album.images,
+        album.thumbnailUrl
+      );
+      fallbackPreview.is_linked = album.id.startsWith('linked-');
+      setAlbumPreviewData(prev => ({ ...prev, [album.id]: fallbackPreview }));
+    } finally {
+      // Remove loading indicator
+      console.log('🏁 Removing loading indicator for:', album.id);
+      setPreviewLoadingAlbums(prev => {
+        const next = new Set(prev);
+        next.delete(album.id);
+        console.log('📊 Loading albums set after removal:', Array.from(next));
+        return next;
+      });
     }
   };
 
   const handleCancel = () => {
-    // If editing an existing project, just close the form
+    // If editing an existing project, just close the form/modal
     if (isEditingProject) {
       setShowProjectForm(false);
       setIsEditingProject(false);
+      setProjectEditModalOpen(false);
       return;
     }
 
@@ -2139,9 +2485,10 @@ export default function PhotoBank() {
           description: `Project "${projectResult.main_event_name}" updated successfully.`
         });
 
-        // Hide the form after update
+        // Hide the form/modal after update
         setIsEditingProject(false);
         setShowProjectForm(false);
+        setProjectEditModalOpen(false);
         return;
       }
 
@@ -2168,6 +2515,17 @@ export default function PhotoBank() {
       });
 
       // Create new project in Project_Details_Table with album_ids and initial JSON
+      // Get authenticated user's email directly from Supabase auth session (Gmail/account email)
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      const userEmail = authUser?.email || user.email || profile?.email;
+      
+      console.log('Creating project with user email:', {
+        authUserEmail: authUser?.email,
+        userEmailFromContext: user.email,
+        profileEmail: profile?.email,
+        finalEmail: userEmail
+      });
+      
       const projectResult = await createProjectDetails(user.id, {
         project_title: projectTitle,
         project_thumbnail_image_link: thumbnailUrl || undefined,
@@ -2179,6 +2537,7 @@ export default function PhotoBank() {
         project_last_modified_by: userName,
         album_ids: albumIds.length > 0 ? albumIds : undefined, // Include album_ids array
         project_imageobjects_json: tempProjectImageObjectsJSON, // Include initial JSON
+        project_useremail: userEmail, // Include user email for filtering
       });
 
       // Now build the complete JSON with the actual Project_ID
@@ -2225,9 +2584,10 @@ export default function PhotoBank() {
       };
       setCreatedProjects(prev => [...prev, newProject]);
       
-      // Reset editing mode and hide the form
+      // Reset editing mode and hide the form/modal
       setIsEditingProject(false);
       setShowProjectForm(false);
+      setProjectEditModalOpen(false);
 
       toast({
         title: "Project created",
@@ -2273,6 +2633,26 @@ export default function PhotoBank() {
           <div className="container-fluid" style={{ paddingTop: 0 }}>
             <div className="min-h-screen bg-gray-50">
       <div className="max-w-6xl mx-auto px-6 pt-4 pb-6">
+        {/* Top Right Greeting with Avatar */}
+        <div className="mb-4 flex items-center justify-end gap-3">
+          {profile?.full_name && (
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-gray-700">
+                Hi {profile.full_name}
+              </span>
+              <Avatar className="h-10 w-10">
+                <AvatarImage 
+                  src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(profile.full_name)}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`}
+                  alt={profile.full_name}
+                />
+                <AvatarFallback className="bg-gray-200">
+                  {profile.full_name.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            </div>
+          )}
+        </div>
+        
         <div className="mb-6 flex items-center justify-center gap-3">
           <Button
             variant="ghost"
@@ -2335,7 +2715,12 @@ export default function PhotoBank() {
               {createdProjects.map((project) => (
                 <Card 
                   key={project.project_main_event_id} 
-                  className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                  className="relative overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                  onMouseEnter={(e) => handleProjectHover(project.project_main_event_id, e)}
+                  onMouseLeave={() => {
+                    setHoveredProjectId(null);
+                    setProjectPreviewPosition(null);
+                  }}
                   onClick={async () => {
                     try {
                       // Fetch full project details
@@ -2405,8 +2790,9 @@ export default function PhotoBank() {
                           // Continue even if albums fail to load
                         }
                         
-                        // Set editing mode
+                        // Set editing mode and open modal
                         setIsEditingProject(true);
+                        setProjectEditModalOpen(true);
                         setShowProjectForm(true);
                       }
                     } catch (error: any) {
@@ -2436,14 +2822,39 @@ export default function PhotoBank() {
                     <h3 className="font-semibold text-lg mb-1 truncate">{project.project_title}</h3>
                     <p className="text-sm text-gray-600 truncate">{project.main_event_name}</p>
                   </CardContent>
+                  
+                  {/* Project Preview Component - shows loading bar and preview cards */}
+                  {hoveredProjectId === project.project_main_event_id && projectPreviewPosition && (
+                    <div 
+                      className="fixed pointer-events-none" 
+                      style={{ 
+                        zIndex: 1000,
+                        left: `${projectPreviewPosition.x}px`,
+                        top: `${projectPreviewPosition.y}px`
+                      }}
+                    >
+                      <ProjectPreview
+                        project={projectPreviewData[project.project_main_event_id] || null}
+                        isLoading={previewLoadingProjects.has(project.project_main_event_id) || !projectPreviewData[project.project_main_event_id]}
+                      />
+                    </div>
+                  )}
                 </Card>
               ))}
             </div>
           </div>
         )}
 
-        {/* Project Form */}
-        {showProjectForm && (
+        {/* Loading indicator while projects are loading */}
+        {isLoadingProjects && (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <span className="ml-2 text-gray-600">Loading your projects...</span>
+          </div>
+        )}
+
+        {/* Project Form - Show below for new projects, in modal for editing */}
+        {!isLoadingProjects && showProjectForm && !isEditingProject && (
         <Card className="bg-white">
           <CardHeader>
             {isEditingTitle ? (
@@ -2726,7 +3137,27 @@ export default function PhotoBank() {
                           key={album.id} 
                           className="relative w-32 h-32 border-2 border-gray-300 rounded-lg overflow-hidden group bg-white cursor-pointer"
                           title={album.name || "Album"}
-                          onDoubleClick={() => handleOpenAlbumGallery(album)}
+                          onClick={(e) => {
+                            console.log('🖱️ CLICK on album card:', album.id, album.name);
+                            handleOpenAlbumGallery(album);
+                          }}
+                          onMouseEnter={(e) => {
+                            console.log('🖱️🖱️🖱️ onMouseEnter event fired on album card:', album.id, album.name);
+                            console.log('Event target:', e.target);
+                            console.log('Event currentTarget:', e.currentTarget);
+                            handleAlbumHover(album, e);
+                          }}
+                          onMouseMove={(e) => {
+                            // Additional test - fires on any mouse movement
+                            if (!hoveredAlbumId || hoveredAlbumId !== album.id) {
+                              console.log('🖱️ onMouseMove detected on album card:', album.id);
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            console.log('🖱️ onMouseLeave event fired on album card:', album.id);
+                            setHoveredAlbumId(null);
+                            setAlbumPreviewPosition(null);
+                          }}
                         >
                           <img
                             src={album.thumbnailUrl}
@@ -2734,14 +3165,14 @@ export default function PhotoBank() {
                             className="w-full h-full object-cover"
                           />
                           
-                          {/* Status label overlay - Always visible */}
-                          <div className="absolute top-0 left-0 right-0 bg-black/70 text-white text-xs font-semibold px-2 py-1 text-center">
+                          {/* Status label overlay - Always visible - pointer-events-none to allow hover */}
+                          <div className="absolute top-0 left-0 right-0 bg-black/70 text-white text-xs font-semibold px-2 py-1 text-center z-20 pointer-events-none">
                             {isLinkedAlbum ? "Linked" : isNewAlbum ? "New Album" : "Album"}
                           </div>
                           
-                          {/* Double-click hint overlay */}
-                          <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-xs px-2 py-1 text-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            Double-click to view gallery
+                          {/* Click hint overlay - pointer-events-none to allow hover */}
+                          <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-xs px-2 py-1 text-center opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none">
+                            Click to {expandedAlbumId === album.id ? 'collapse' : 'view gallery'}
                           </div>
                           
                           {/* X button to remove album - Always visible */}
@@ -2753,7 +3184,7 @@ export default function PhotoBank() {
                               e.stopPropagation();
                               handleRemoveAlbumThumbnail(album.id);
                             }}
-                            className="absolute top-1 right-1 bg-white/90 hover:bg-red-50 transition-colors p-1 h-auto z-10 shadow-sm"
+                            className="absolute top-1 right-1 bg-white/90 hover:bg-red-50 transition-colors p-1 h-auto z-40 shadow-sm"
                           >
                             <X className="h-4 w-4 text-gray-700 hover:text-red-600" />
                           </Button>
@@ -2768,23 +3199,101 @@ export default function PhotoBank() {
                                 e.stopPropagation();
                                 handleOpenCreateAlbumModal();
                               }}
-                              className="absolute bottom-1 right-1 bg-blue-500/90 hover:bg-blue-600 text-white transition-colors p-1 h-auto z-10 shadow-sm rounded-full"
+                              className="absolute bottom-1 right-1 bg-blue-500/90 hover:bg-blue-600 text-white transition-colors p-1 h-auto z-40 shadow-sm rounded-full"
                               title="Add more photos to this album"
                             >
                               <Plus className="h-4 w-4" />
                             </Button>
                           )}
                           
-                          {/* Album name overlay on hover */}
-                          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-2">
-                            <p className="text-white text-xs text-center font-medium line-clamp-2">
-                              {album.name || "Album"}
-                            </p>
-                          </div>
+                          {/* Album name overlay on hover - only show when not showing preview - pointer-events-none to allow hover */}
+                          {hoveredAlbumId !== album.id && (
+                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-2 z-30 pointer-events-none">
+                              <p className="text-white text-xs text-center font-medium line-clamp-2">
+                                {album.name || "Album"}
+                              </p>
+                            </div>
+                          )}
+                          
+                          {/* Album Preview Component - shows loading bar and preview cards - Must be last to appear on top */}
+                          {hoveredAlbumId === album.id && albumPreviewPosition && (
+                            <div 
+                              className="fixed pointer-events-none" 
+                              style={{ 
+                                zIndex: 1000,
+                                left: `${albumPreviewPosition.x}px`,
+                                top: `${albumPreviewPosition.y}px`
+                              }}
+                            >
+                              <AlbumPreview
+                                albums={albumPreviewData[album.id] ? [albumPreviewData[album.id]] : []}
+                                isLoading={previewLoadingAlbums.has(album.id) || !albumPreviewData[album.id]}
+                              />
+                            </div>
+                          )}
+                          
                         </div>
                       );
                     })}
                     </div>
+                    
+                    {/* Inline Album Gallery - Show below album thumbnails when expanded */}
+                    {expandedAlbumId && albums.find(a => a.id === expandedAlbumId) && (() => {
+                      const expandedAlbum = albums.find(a => a.id === expandedAlbumId)!;
+                      const images = albumGalleryImages[expandedAlbumId] || [];
+                      const isLoading = isLoadingAlbumGallery[expandedAlbumId] || false;
+                      
+                      return (
+                        <div className="mt-6 w-full border-t pt-6">
+                          <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-semibold">{expandedAlbum.name || "Album Gallery"}</h3>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setExpandedAlbumId(null)}
+                            >
+                              <X className="h-4 w-4 mr-2" />
+                              Close
+                            </Button>
+                          </div>
+                          
+                          {isLoading ? (
+                            <div className="flex items-center justify-center py-12">
+                              <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+                              <span className="ml-2 text-gray-600">Loading album images...</span>
+                            </div>
+                          ) : images.length === 0 ? (
+                            <div className="flex items-center justify-center py-12">
+                              <div className="text-center">
+                                <Image className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                                <p className="text-sm text-gray-600 mb-2">No images in this album yet.</p>
+                                <p className="text-xs text-gray-500">Add images to this album to see them here.</p>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                              {images.map((image, index) => (
+                                <div 
+                                  key={image.image_uuid || index} 
+                                  className="relative aspect-square border-2 border-gray-200 rounded-lg overflow-hidden group bg-gray-50"
+                                >
+                                  <img
+                                    src={image.image_access_url}
+                                    alt={`Album image ${index + 1}`}
+                                    className="w-full h-full object-cover"
+                                  />
+                                  {/* Image number overlay */}
+                                  <div className="absolute top-1 left-1 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                                    {index + 1}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
                 )}
                 <input
@@ -2840,6 +3349,427 @@ export default function PhotoBank() {
           </CardContent>
         </Card>
         )}
+
+        {/* Project Edit Modal - Opens when double-clicking a project card */}
+        <Dialog open={projectEditModalOpen} onOpenChange={(open) => {
+          setProjectEditModalOpen(open);
+          if (!open) {
+            setIsEditingProject(false);
+            setShowProjectForm(false);
+          }
+        }}>
+          <DialogContent className="w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:w-auto sm:max-w-4xl md:max-w-6xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Edit Project</DialogTitle>
+              <DialogDescription>
+                Update your project details, images, and albums.
+              </DialogDescription>
+            </DialogHeader>
+            
+            {isEditingProject && showProjectForm && (
+              <div className="mt-4">
+                {/* Render the same form but inside modal */}
+                <Card className="bg-white border-0 shadow-none">
+                  <CardHeader>
+                    {isEditingTitle ? (
+                      <Input
+                        ref={titleInputRef}
+                        value={projectTitle}
+                        onChange={(e) => setProjectTitle(e.target.value)}
+                        onBlur={handleTitleSave}
+                        onKeyDown={handleTitleKeyDown}
+                        className="text-2xl font-bold border-0 border-b-2 border-blue-500 focus-visible:ring-0 focus-visible:border-blue-600 px-0 py-1 h-auto"
+                        placeholder="Enter project title..."
+                      />
+                    ) : (
+                      <CardTitle 
+                        className="text-2xl font-bold cursor-pointer text-blue-600 hover:text-blue-700 transition-colors"
+                        onClick={() => setIsEditingTitle(true)}
+                      >
+                        {projectTitle || "Click and Edit Project Title"}
+                      </CardTitle>
+                    )}
+                  </CardHeader>
+                  <CardContent>
+                    <form onSubmit={(e) => {
+                      handleSubmit(e);
+                      setTimeout(() => setProjectEditModalOpen(false), 500);
+                    }} className="space-y-6">
+                      {/* Copy the form content from the regular form - using the same structure */}
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {/* Left Column - Thumbnail Upload */}
+                        <div className="flex flex-col">
+                          <Label>Thumbnail Upload</Label>
+                          <div
+                            onDragOver={handleThumbnailDragOver}
+                            onDrop={handleThumbnailDrop}
+                            onClick={() => thumbnailInputRef.current?.click()}
+                            className="mt-1 border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-gray-400 transition-colors bg-gray-50 hover:bg-gray-100 h-[300px] flex items-center justify-center max-w-[90%]"
+                          >
+                            {thumbnailPreview ? (
+                              <div className="relative w-full h-full flex items-center justify-center">
+                                <img
+                                  src={thumbnailPreview}
+                                  alt="Thumbnail preview"
+                                  className="max-h-full max-w-full rounded-lg object-contain"
+                                />
+                                {projectThumbnailUploadStatus === 'uploading' && (
+                                  <div className="absolute top-2 left-2 bg-blue-500 rounded-full p-2 z-10">
+                                    <Loader2 className="h-4 w-4 text-white animate-spin" />
+                                  </div>
+                                )}
+                                {projectThumbnailUploadStatus === 'success' && (
+                                  <div className="absolute top-2 left-2 bg-green-500 rounded-full p-2 z-10">
+                                    <Check className="h-4 w-4 text-white" />
+                                  </div>
+                                )}
+                                {projectThumbnailUploadStatus === 'error' && (
+                                  <div className="absolute top-2 left-2 bg-red-500 rounded-full p-2 z-10">
+                                    <X className="h-4 w-4 text-white" />
+                                  </div>
+                                )}
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    removeThumbnail();
+                                  }}
+                                  className="absolute top-2 right-2 bg-white/80 hover:bg-white"
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ) : (
+                              <div>
+                                <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                                <p className="text-sm font-medium text-gray-700 mb-1">
+                                  Upload a file or drag and drop
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  PNG, JPG, GIF up to 10MB
+                                </p>
+                              </div>
+                            )}
+                            <input
+                              ref={thumbnailInputRef}
+                              type="file"
+                              accept="image/png,image/jpeg,image/jpg,image/gif"
+                              onChange={handleThumbnailFileChange}
+                              className="hidden"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Right Column - Form Fields */}
+                        <div className="space-y-4">
+                          <div>
+                            <Label htmlFor="modal-mainEventName">Main Event Name *</Label>
+                            <Input
+                              id="modal-mainEventName"
+                              value={mainEventName}
+                              onChange={(e) => setMainEventName(e.target.value)}
+                              placeholder="e.g., Wedding, Corporate Event"
+                              required
+                            />
+                          </div>
+
+                          <div>
+                            <Label htmlFor="modal-mainEventDescription">Main Event Description</Label>
+                            <Textarea
+                              id="modal-mainEventDescription"
+                              value={mainEventDescription}
+                              onChange={(e) => setMainEventDescription(e.target.value)}
+                              placeholder="Describe the main event..."
+                              rows={3}
+                            />
+                          </div>
+
+                          <div>
+                            <Label htmlFor="modal-shortDescription">Short Description</Label>
+                            <Input
+                              id="modal-shortDescription"
+                              value={shortDescription}
+                              onChange={(e) => setShortDescription(e.target.value)}
+                              placeholder="Brief description..."
+                            />
+                          </div>
+
+                          <div>
+                            <Label htmlFor="modal-subEventName">Sub-Event Name</Label>
+                            <Select value={subEventName} onValueChange={setSubEventName}>
+                              <SelectTrigger id="modal-subEventName">
+                                <SelectValue placeholder="Select sub-event" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {isLoadingSubEvents ? (
+                                  <SelectItem value="loading" disabled>Loading...</SelectItem>
+                                ) : (
+                                  subEventsList.map((event) => (
+                                    <SelectItem key={event.sub_event_id} value={event.sub_event_name}>
+                                      {event.sub_event_name}
+                                    </SelectItem>
+                                  ))
+                                )}
+                                <SelectItem value="other">Other</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          {subEventName === "other" && (
+                            <div>
+                              <Label htmlFor="modal-customSubEventName">Custom Sub-Event Name</Label>
+                              <Input
+                                id="modal-customSubEventName"
+                                value={customSubEventName}
+                                onChange={(e) => {
+                                  setCustomSubEventName(e.target.value);
+                                  setIsOtherSubEvent(true);
+                                }}
+                                placeholder="Enter custom sub-event name..."
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Albums Section */}
+                      {albums.length > 0 && (
+                        <div className="mt-6">
+                          <div className="flex items-center justify-between mb-4">
+                            <Label className="text-lg font-semibold">Albums</Label>
+                            <div className="flex gap-2">
+                              {isProjectFieldsValid() && (
+                                <>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={isProjectFieldsValid() ? handleOpenCreateAlbumModal : undefined}
+                                    disabled={!isProjectFieldsValid()}
+                                    className="inline-flex items-center gap-2"
+                                  >
+                                    <Plus className="h-4 w-4" />
+                                    New Project Album
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={isProjectFieldsValid() ? handleOpenLinkAlbumModal : undefined}
+                                    disabled={!isProjectFieldsValid()}
+                                    className="inline-flex items-center gap-2"
+                                  >
+                                    <Plus className="h-4 w-4" />
+                                    Link Album
+                                  </Button>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                          <div className="space-y-4">
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                              {albums.map((album) => (
+                                <div
+                                  key={album.id}
+                                  className="relative group border-2 border-gray-200 rounded-lg overflow-hidden cursor-pointer hover:border-blue-500 transition-colors"
+                                  onClick={() => handleOpenAlbumGallery(album)}
+                                  onMouseEnter={(e) => {
+                                    console.log('🖱️ onMouseEnter event fired on album card (modal):', album.id, album.name);
+                                    handleAlbumHover(album, e);
+                                  }}
+                                  onMouseLeave={() => {
+                                    console.log('🖱️ onMouseLeave event fired on album card (modal):', album.id);
+                                    setHoveredAlbumId(null);
+                                    setAlbumPreviewPosition(null);
+                                  }}
+                                >
+                                  {album.thumbnailUrl ? (
+                                    <img
+                                      src={album.thumbnailUrl}
+                                      alt={album.name}
+                                      className="w-full h-32 object-cover"
+                                    />
+                                  ) : (
+                                    <div className="w-full h-32 bg-gray-100 flex items-center justify-center">
+                                      <Image className="h-8 w-8 text-gray-400" />
+                                    </div>
+                                  )}
+                                  <div className="p-2">
+                                    <p className="text-sm font-medium truncate">{album.name}</p>
+                                    <p className="text-xs text-gray-500">{album.images.length} images</p>
+                                  </div>
+                                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleRemoveAlbum(album.id);
+                                      }}
+                                      className="h-6 w-6 p-0 bg-white/80 hover:bg-white"
+                                    >
+                                      <X className="h-3 w-3" />
+                                    </Button>
+                                  </div>
+                                  {/* Album Preview Component - shows loading bar and preview cards - Must be last to appear on top */}
+                                  {hoveredAlbumId === album.id && (
+                                    <div className="absolute inset-0 z-[100] pointer-events-none" style={{ position: 'absolute' }}>
+                                      <AlbumPreview
+                                        albums={albumPreviewData[album.id] ? [albumPreviewData[album.id]] : []}
+                                        isLoading={previewLoadingAlbums.has(album.id) || !albumPreviewData[album.id]}
+                                      />
+                                    </div>
+                                  )}
+                                  
+                                  {/* Debug indicator - shows when hover is detected */}
+                                  {hoveredAlbumId === album.id && (
+                                    <div className="absolute top-0 left-0 bg-red-500 text-white text-xs px-1 z-[101] pointer-events-none">
+                                      HOVER
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                            
+                            {/* Inline Album Gallery - Show below albums when expanded */}
+                            {expandedAlbumId && albums.find(a => a.id === expandedAlbumId) && (() => {
+                              const expandedAlbum = albums.find(a => a.id === expandedAlbumId)!;
+                              const images = albumGalleryImages[expandedAlbumId] || [];
+                              const isLoading = isLoadingAlbumGallery[expandedAlbumId] || false;
+                              
+                              return (
+                                <div className="mt-4 border-t pt-4">
+                                  <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-lg font-semibold">{expandedAlbum.name || "Album Gallery"}</h3>
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => setExpandedAlbumId(null)}
+                                    >
+                                      <X className="h-4 w-4 mr-2" />
+                                      Close
+                                    </Button>
+                                  </div>
+                                  
+                                  {isLoading ? (
+                                    <div className="flex items-center justify-center py-12">
+                                      <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+                                      <span className="ml-2 text-gray-600">Loading album images...</span>
+                                    </div>
+                                  ) : images.length === 0 ? (
+                                    <div className="flex items-center justify-center py-12">
+                                      <div className="text-center">
+                                        <Image className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                                        <p className="text-sm text-gray-600 mb-2">No images in this album yet.</p>
+                                        <p className="text-xs text-gray-500">Add images to this album to see them here.</p>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                                      {images.map((image, index) => (
+                                        <div 
+                                          key={image.image_uuid || index} 
+                                          className="relative aspect-square border-2 border-gray-200 rounded-lg overflow-hidden group bg-gray-50"
+                                        >
+                                          <img
+                                            src={image.image_access_url}
+                                            alt={`Album image ${index + 1}`}
+                                            className="w-full h-full object-cover"
+                                          />
+                                          {/* Image number overlay */}
+                                          <div className="absolute top-1 left-1 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                                            {index + 1}
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })()}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Images Section */}
+                      {images.length > 0 && (
+                        <div className="mt-6">
+                          <Label className="text-lg font-semibold mb-4 block">Project Images</Label>
+                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            {images.map((image) => (
+                              <div key={image.id} className="relative group">
+                                <img
+                                  src={image.preview}
+                                  alt={`Preview ${image.id}`}
+                                  className="w-full h-32 object-cover rounded-lg"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => removeImage(image.id)}
+                                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 hover:bg-white"
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Form Actions */}
+                      <div className="flex gap-4 pt-6 border-t">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => {
+                            setProjectEditModalOpen(false);
+                            handleCancel();
+                          }}
+                        >
+                          Close
+                        </Button>
+                        {projectMainEventId && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                              setSubEventAlbumSubEventName("");
+                              setSubEventAlbumCustomSubEventName("");
+                              setSubEventAlbumIsOtherSubEvent(false);
+                              setSubEventAlbumImages([]);
+                              setSubEventAlbumThumbnailFile(null);
+                              setSubEventAlbumThumbnailPreview(null);
+                              setSubEventAlbumThumbnailUuid(null);
+                              setSubEventAlbumUploadProgress({});
+                              setSubEventAlbumUploadStatus({});
+                              setSubEventAlbumThumbnailUploadProgress(0);
+                              setSubEventAlbumThumbnailUploadStatus('pending');
+                              setSubEventAlbumIsUploadComplete(false);
+                              setSubEventAlbumModalOpen(true);
+                            }}
+                            className="inline-flex items-center gap-2"
+                          >
+                            <Plus className="h-4 w-4" />
+                            Add Sub-Event Album
+                          </Button>
+                        )}
+                        <Button type="submit">
+                          Edit Project
+                        </Button>
+                      </div>
+                    </form>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Create Album Modal */}

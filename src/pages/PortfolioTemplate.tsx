@@ -180,7 +180,7 @@ export default function PortfolioTemplate() {
         contact: {
           ...portfolioData.contact,
           ...editedData.contact
-        }
+        },
         // Note: gallery is already updated via onChange callbacks
       };
 
@@ -227,138 +227,138 @@ export default function PortfolioTemplate() {
           <div className="container-fluid" style={{ paddingTop: 0 }}>
             <div className="min-h-screen bg-gray-50">
               <div className="max-w-6xl mx-auto px-6 pt-4 pb-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="outline"
-              onClick={() => navigate('/portfolio')}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Portfolio
-            </Button>
-            <div>
-              <h1 className="text-3xl font-bold flex items-center gap-2">
-                {template.icon}
-                {template.name} Template
-              </h1>
-              <p className="text-muted-foreground">Customize your portfolio with this template</p>
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={handlePreview}>
-              <Eye className="h-4 w-4 mr-2" />
-              Preview
-            </Button>
-            {isEditing ? (
-              <>
-                <Button variant="outline" onClick={() => setIsEditing(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={handleSaveTemplate}>
-                  <Save className="h-4 w-4 mr-2" />
-                  Save Template
-                </Button>
-              </>
-            ) : (
-              <Button onClick={() => setIsEditing(true)}>
-                <Edit className="h-4 w-4 mr-2" />
-                Edit Template
-              </Button>
-            )}
-          </div>
-        </div>
+                {/* Header */}
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-4">
+                    <Button
+                      variant="outline"
+                      onClick={() => navigate('/portfolio')}
+                      className="flex items-center gap-2"
+                    >
+                      <ArrowLeft className="h-4 w-4" />
+                      Back to Portfolio
+                    </Button>
+                    <div>
+                      <h1 className="text-3xl font-bold flex items-center gap-2">
+                        {template.icon}
+                        {template.name} Template
+                      </h1>
+                      <p className="text-muted-foreground">Customize your portfolio with this template</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" onClick={handlePreview}>
+                      <Eye className="h-4 w-4 mr-2" />
+                      Preview
+                    </Button>
+                    {isEditing ? (
+                      <>
+                        <Button variant="outline" onClick={() => setIsEditing(false)}>
+                          Cancel
+                        </Button>
+                        <Button onClick={handleSaveTemplate}>
+                          <Save className="h-4 w-4 mr-2" />
+                          Save Template
+                        </Button>
+                      </>
+                    ) : (
+                      <Button onClick={() => setIsEditing(true)}>
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit Template
+                      </Button>
+                    )}
+                  </div>
+                </div>
 
-        {useWeddingTemplate ? (
-          <WeddingTemplate
-            data={{
-              hero: {
-                title: editedData?.hero.title || "Capturing Your Love Story",
-                subtitle: editedData?.hero.subtitle || "Elegant wedding photography that tells your unique story",
-                backgroundImage: editedData?.hero.backgroundImage || "https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&h=600&fit=crop",
-                ctaText: "View Our Work"
-              },
-              about: {
-                photographerName: portfolioData.name || "",
-                experience: portfolioData.about || "",
-                style: "Traditional, Modern, Documentary",
-                yearsExperience: 5,
-                description: "I specialize in capturing the most precious moments of your special day with elegance and artistry."
-              },
-              services: {
-                packages: [
-                  {
-                    name: "Basic Package",
-                    price: 1500,
-                    description: "Perfect for intimate weddings",
-                    features: ["4 hours coverage", "100 edited photos", "Online gallery"]
-                  },
-                  {
-                    name: "Premium Package", 
-                    price: 2500,
-                    description: "Complete wedding day coverage",
-                    features: ["8 hours coverage", "300 edited photos", "Online gallery", "Engagement session"]
-                  }
-                ],
-                additionalServices: ["Engagement Session", "Bridal Portraits", "Reception Coverage"]
-              },
-              testimonials: [
-                {
-                  clientName: "Sarah & John",
-                  weddingDate: "June 2023",
-                  review: "Absolutely amazing! Captured every moment perfectly.",
-                  rating: 5
-                }
-              ],
-              contact: {
-                email: portfolioData.contact.email || "",
-                phone: portfolioData.contact.phone || "",
-                location: portfolioData.contact.location || "",
-                website: portfolioData.contact.website || ""
-              },
-              gallery: portfolioData.gallery.map(img => ({
-                ...img,
-                x: Math.random() * 200,
-                y: Math.random() * 200,
-                width: 200,
-                height: 150,
-                zIndex: 1,
-                isSelected: false
-              }))
-            }}
-            onChange={(data) => {
-              // Update portfolio data with template data
-              setPortfolioData({
-                ...portfolioData,
-                name: data.about.photographerName,
-                about: data.about.description,
-                services: data.services.packages.map(pkg => pkg.name),
-                contact: data.contact,
-                gallery: data.gallery.map(img => ({
-                  id: img.id,
-                  url: img.url,
-                  title: img.title,
-                  category: img.category
-                }))
-              });
-            }}
-            onSave={handleSaveTemplate}
-            isEditing={isEditing}
-          />
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Main Content */}
-            <div className="lg:col-span-2 space-y-6">
-            {/* Hero Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Camera className="h-5 w-5" />
-                  Hero Section
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
+                {useWeddingTemplate ? (
+                  <WeddingTemplate
+                    data={{
+                      hero: {
+                        title: editedData?.hero.title || "Capturing Your Love Story",
+                        subtitle: editedData?.hero.subtitle || "Elegant wedding photography that tells your unique story",
+                        backgroundImage: editedData?.hero.backgroundImage || "https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&h=600&fit=crop",
+                        ctaText: "View Our Work"
+                      },
+                      about: {
+                        photographerName: portfolioData.name || "",
+                        experience: portfolioData.about || "",
+                        style: "Traditional, Modern, Documentary",
+                        yearsExperience: 5,
+                        description: "I specialize in capturing the most precious moments of your special day with elegance and artistry."
+                      },
+                      services: {
+                        packages: [
+                          {
+                            name: "Basic Package",
+                            price: 1500,
+                            description: "Perfect for intimate weddings",
+                            features: ["4 hours coverage", "100 edited photos", "Online gallery"]
+                          },
+                          {
+                            name: "Premium Package", 
+                            price: 2500,
+                            description: "Complete wedding day coverage",
+                            features: ["8 hours coverage", "300 edited photos", "Online gallery", "Engagement session"]
+                          }
+                        ],
+                        additionalServices: ["Engagement Session", "Bridal Portraits", "Reception Coverage"]
+                      },
+                      testimonials: [
+                        {
+                          clientName: "Sarah & John",
+                          weddingDate: "June 2023",
+                          review: "Absolutely amazing! Captured every moment perfectly.",
+                          rating: 5
+                        }
+                      ],
+                      contact: {
+                        email: portfolioData.contact.email || "",
+                        phone: portfolioData.contact.phone || "",
+                        location: portfolioData.contact.location || "",
+                        website: portfolioData.contact.website || ""
+                      },
+                      gallery: portfolioData.gallery.map(img => ({
+                        ...img,
+                        x: Math.random() * 200,
+                        y: Math.random() * 200,
+                        width: 200,
+                        height: 150,
+                        zIndex: 1,
+                        isSelected: false
+                      }))
+                    }}
+                    onChange={(data) => {
+                      // Update portfolio data with template data
+                      setPortfolioData({
+                        ...portfolioData,
+                        name: data.about.photographerName,
+                        about: data.about.description,
+                        services: data.services.packages.map(pkg => pkg.name),
+                        contact: data.contact,
+                        gallery: data.gallery.map(img => ({
+                          id: img.id,
+                          url: img.url,
+                          title: img.title,
+                          category: img.category
+                        }))
+                      });
+                    }}
+                    onSave={handleSaveTemplate}
+                    isEditing={isEditing}
+                  />
+                ) : (
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Main Content */}
+                    <div className="lg:col-span-2 space-y-6">
+                      {/* Hero Section */}
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <Camera className="h-5 w-5" />
+                            Hero Section
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
                 <div>
                   <label className="text-sm font-medium">Title</label>
                   <Input
@@ -627,7 +627,8 @@ export default function PortfolioTemplate() {
             </Card>
           </div>
         </div>
-        )}
+                )}
+              </div>
             </div>
           </div>
         </div>

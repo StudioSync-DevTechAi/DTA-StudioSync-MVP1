@@ -8,6 +8,9 @@ export * from './dashboard';
 // Finance services
 export * from './finance/queries';
 
+// Preview services
+export * from './preview';
+
 // Events services
 export * from './events/queries';
 

@@ -22,6 +22,8 @@ import {
   ToggleRight
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 interface S3Image {
   id: string;
@@ -47,6 +49,7 @@ export function ImageSelector({
   selectedImages, 
   onClose 
 }: ImageSelectorProps) {
+  const { user } = useAuth();
   const [images, setImages] = useState<S3Image[]>([]);
   const [filteredImages, setFilteredImages] = useState<S3Image[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -270,21 +273,41 @@ export function ImageSelector({
     });
   };
 
-  // Load images from S3 with pre-check
+  // Load images from Supabase Remote Image Storage filtered by user ID
   useEffect(() => {
     const loadImages = async () => {
+      if (!user?.id) {
+        setIsLoading(false);
+        return;
+      }
+
       setIsLoading(true);
       try {
-        // Check if AWS credentials are configured
-        const hasCredentials = import.meta.env.VITE_AWS_ACCESS_KEY_ID && 
-                              import.meta.env.VITE_AWS_ACCESS_KEY_ID !== 'your-access-key-id' &&
-                              import.meta.env.VITE_AWS_SECRET_ACCESS_KEY &&
-                              import.meta.env.VITE_AWS_SECRET_ACCESS_KEY !== 'your-secret-access-key' &&
-                              import.meta.env.VITE_AWS_BUCKET_NAME &&
-                              import.meta.env.VITE_AWS_BUCKET_NAME !== 'your-bucket-name';
+        // Fetch images from Supabase image_obj_storage_table filtered by user_id
+        const { data: supabaseImages, error } = await supabase
+          .from('image_obj_storage_table')
+          .select('image_uuid, image_access_url, file_name, file_size, mime_type, image_create_datetime')
+          .eq('user_id', user.id)
+          .order('image_create_datetime', { ascending: false });
+
+        if (error) {
+          throw error;
+        }
+
+        // Transform Supabase images to S3Image format
+        const transformedImages: S3Image[] = (supabaseImages || []).map((img) => ({
+          id: img.image_uuid,
+          url: img.image_access_url,
+          name: img.file_name || `Image ${img.image_uuid.substring(0, 8)}`,
+          size: img.file_size || 0,
+          lastModified: img.image_create_datetime || new Date().toISOString(),
+          category: "Remote Image Storage",
+          tags: [],
+          isSelected: false,
+        }));
 
         // Pre-check all images before displaying
-        const imagePromises = mockS3Images.map(async (image) => {
+        const imagePromises = transformedImages.map(async (image) => {
           setImageLoadStatus(prev => ({ ...prev, [image.id]: 'loading' }));
           const isLoaded = await preloadImage(image.url);
           setImageLoadStatus(prev => ({ ...prev, [image.id]: isLoaded ? 'loaded' : 'error' }));
@@ -297,36 +320,24 @@ export function ImageSelector({
 
         if (failedImages.length > 0) {
           console.warn('Failed to load images:', failedImages.map(img => img.name));
-          toast({
-            title: "Some images failed to load",
-            description: `${failedImages.length} images could not be loaded and were excluded`,
-            variant: "destructive"
-          });
         }
 
         setImages(validImages);
         setFilteredImages(validImages);
 
-        if (hasCredentials) {
-          toast({
-            title: "S3 Connected",
-            description: `${validImages.length} HD images loaded successfully - S3 integration ready`,
-          });
-        } else {
-          toast({
-            title: "High-Quality Mock Images",
-            description: `${validImages.length} HD images available for selection - Configure AWS S3 for real images`,
-          });
-        }
+        toast({
+          title: "Images Loaded",
+          description: `${validImages.length} images loaded from Remote Image Storage`,
+        });
       } catch (error) {
-        console.error('Error loading images:', error);
-        // Fallback to mock data
-        setImages(mockS3Images);
-        setFilteredImages(mockS3Images);
+        console.error('Error loading images from Supabase:', error);
+        // Fallback to empty array if error
+        setImages([]);
+        setFilteredImages([]);
         
         toast({
           title: "Error loading images",
-          description: "Using high-quality mock images - check S3 configuration",
+          description: "Failed to load images from Remote Image Storage",
           variant: "destructive"
         });
       } finally {
@@ -335,7 +346,7 @@ export function ImageSelector({
     };
 
     loadImages();
-  }, [toast]);
+  }, [user?.id, toast]);
 
   // Filter images based on search, category, and album
   useEffect(() => {
@@ -1028,7 +1039,7 @@ export function ImageSelector({
                 <div>
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                     <ImageIcon className="h-5 w-5" />
-                    S3 Image Library
+                    Remote Image Storage
                   </h3>
                   <div className={viewMode === 'grid' 
                     ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" 
