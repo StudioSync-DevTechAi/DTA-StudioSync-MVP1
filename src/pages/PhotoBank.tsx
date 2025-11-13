@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
-import { Upload, X, Plus, ArrowLeft, ChevronDown, ChevronUp, Check, Image, Loader2 } from "lucide-react";
+import { Upload, X, Plus, ArrowLeft, ChevronDown, ChevronUp, Check, Image, Loader2, Pencil } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { PortfolioSidebar } from "@/components/portfolio/PortfolioSidebar";
 import { uploadImageDirect, uploadImageViaEdgeFunction, ImageUploadResponse, deleteImageByUuid } from "@/services/imageUpload/imageUploadService";
@@ -2715,7 +2715,7 @@ export default function PhotoBank() {
               {createdProjects.map((project) => (
                 <Card 
                   key={project.project_main_event_id} 
-                  className="relative overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                  className="relative overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group"
                   onMouseEnter={(e) => handleProjectHover(project.project_main_event_id, e)}
                   onMouseLeave={() => {
                     setHoveredProjectId(null);
@@ -2739,9 +2739,111 @@ export default function PhotoBank() {
                       </div>
                     )}
                     {/* Project title overlay at the top */}
-                    <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/70 to-transparent p-3">
+                    <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/70 to-transparent p-3 z-10">
                       <h3 className="font-semibold text-lg text-white truncate">{project.project_title}</h3>
                     </div>
+                    
+                    {/* Edit Project Button - Visible on hover */}
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="absolute top-2 right-2 bg-white hover:bg-white shadow-lg opacity-20 group-hover:opacity-100 transition-all duration-200 z-30 h-9 w-9 rounded-full border border-gray-300 pointer-events-auto"
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              try {
+                                // Fetch full project details
+                                const projectData = await fetchProjectDetails(project.project_main_event_id);
+                                if (projectData) {
+                                  // Set this project as active and populate form
+                                  setProjectMainEventId(project.project_main_event_id);
+                                  setProjectTitle(projectData.project_title);
+                                  setMainEventName(projectData.main_event_name);
+                                  setMainEventDescription(projectData.main_event_desc || "");
+                                  setShortDescription(projectData.short_description || "");
+                                  setSubEventName(projectData.sub_event_name || "");
+                                  setCustomSubEventName(projectData.custom_sub_event_name || "");
+                                  setIsOtherSubEvent(!!projectData.custom_sub_event_name);
+                                  setProjectThumbnailUrl(projectData.project_thumbnail_image_link || null);
+                                  setThumbnailPreview(projectData.project_thumbnail_image_link || null);
+                                  
+                                  // Load albums for this project
+                                  try {
+                                    // Fetch saved albums from database
+                                    const savedAlbums = await fetchAlbumsStorage(project.project_main_event_id);
+                                    const albumsFromDB: Album[] = savedAlbums.map((album: any) => ({
+                                      id: album.album_id,
+                                      name: album.album_name || "Click and Edit Project Title",
+                                      images: (album.album_photos_kv_json?.images || []).map((img: any) => ({
+                                        id: img.image_uuid,
+                                        file: new File([], ''), // Dummy file for display
+                                        preview: img.image_access_url,
+                                        url: img.image_access_url,
+                                        imageUuid: img.image_uuid,
+                                      })),
+                                      thumbnailUrl: album.album_photos_kv_json?.album_thumbnail_url || undefined,
+                                      albumId: album.album_id,
+                                      isEditingTitle: false,
+                                      mainEventName: projectData.main_event_name,
+                                      mainEventDescription: projectData.main_event_desc || "",
+                                      shortDescription: projectData.short_description || "",
+                                      subEventName: projectData.sub_event_name || "",
+                                      customSubEventName: projectData.custom_sub_event_name || "",
+                                      isOtherSubEvent: !!projectData.custom_sub_event_name,
+                                      isNewProjectAlbum: false,
+                                    }));
+                                    
+                                    // Fetch linked albums
+                                    const linkedAlbums = await fetchLinkedAlbums(project.project_main_event_id);
+                                    const linkedAlbumsFormatted: Album[] = linkedAlbums.map(linkedAlbum => ({
+                                      id: `linked-${linkedAlbum.album_id}`,
+                                      name: linkedAlbum.album_name || "Click and Edit Project Title",
+                                      images: [],
+                                      thumbnailUrl: linkedAlbum.album_thumbnail_url || undefined,
+                                      albumId: linkedAlbum.album_id,
+                                      isEditingTitle: false,
+                                      mainEventName: projectData.main_event_name,
+                                      mainEventDescription: projectData.main_event_desc || "",
+                                      shortDescription: projectData.short_description || "",
+                                      subEventName: linkedAlbum.sub_event_name || "",
+                                      customSubEventName: "",
+                                      isOtherSubEvent: false,
+                                      isNewProjectAlbum: false,
+                                    }));
+                                    
+                                    // Combine saved and linked albums
+                                    setAlbums([...albumsFromDB, ...linkedAlbumsFormatted]);
+                                    setLinkedAlbumIds(new Set(linkedAlbums.map(a => a.album_id)));
+                                  } catch (albumError: any) {
+                                    console.warn('Error loading albums:', albumError);
+                                    // Continue even if albums fail to load
+                                  }
+                                  
+                                  // Set editing mode and open modal
+                                  setIsEditingProject(true);
+                                  setProjectEditModalOpen(true);
+                                  setShowProjectForm(true);
+                                }
+                              } catch (error: any) {
+                                console.error('Error loading project:', error);
+                                toast({
+                                  title: "Error loading project",
+                                  description: error.message || "Failed to load project details",
+                                  variant: "destructive"
+                                });
+                              }
+                            }}
+                          >
+                            <Pencil className="h-4 w-4 text-gray-700" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Edit Project</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
                   
                   {/* Project Preview Component - shows loading bar and preview cards */}
