@@ -20,6 +20,8 @@ const Portfolio = React.lazy(() => import("./pages/Portfolio"));
 const PortfolioTemplate = React.lazy(() => import("./pages/PortfolioTemplate"));
 const PortfolioEditor = React.lazy(() => import("./pages/PortfolioEditor"));
 const PhotoBank = React.lazy(() => import("./pages/PhotoBank"));
+const ProjectEdit = React.lazy(() => import("./pages/ProjectEdit"));
+const AlbumGallery = React.lazy(() => import("./pages/AlbumGallery"));
 const PhotographersPortal = React.lazy(() => import("./pages/PhotographersPortal"));
 const Profile = React.lazy(() => import("./pages/Profile"));
 const Settings = React.lazy(() => import("./pages/Settings"));
@@ -59,6 +61,8 @@ function App() {
           <Route path="/portfolio/template/:templateId" element={<PortfolioTemplate />} />
           <Route path="/portfolio/editor" element={<PortfolioEditor />} />
           <Route path="/photobank" element={<PhotoBank />} />
+          <Route path="/photobank/project/:projectId/edit" element={<ProjectEdit />} />
+          <Route path="/photobank/project/:projectId/album/:albumId" element={<AlbumGallery />} />
           
           {/* Protected routes - require authentication */}
           <Route path="/dashboard" element={

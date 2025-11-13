@@ -114,4 +114,73 @@
     background-color: #f9fafb !important;
     color: #111827 !important;
   }
+
+  /* Range slider styles */
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #3b82f6;
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #3b82f6;
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  input[type="range"]::-webkit-slider-thumb:hover {
+    background: #2563eb;
+    transform: scale(1.1);
+  }
+
+  input[type="range"]::-moz-range-thumb:hover {
+    background: #2563eb;
+    transform: scale(1.1);
+  }
+
+  /* Slide animation for photo viewer */
+  @keyframes slide-in-from-left {
+    0% {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    100% {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slide-in-from-right {
+    0% {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+    100% {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  .animate-slide-in-from-left {
+    animation: slide-in-from-left 0.5s ease-in-out;
+  }
+
+  .animate-slide-in-from-right {
+    animation: slide-in-from-right 0.5s ease-in-out;
+  }
 }
