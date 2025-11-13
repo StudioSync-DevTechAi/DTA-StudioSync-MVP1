@@ -2721,91 +2721,12 @@ export default function PhotoBank() {
                     setHoveredProjectId(null);
                     setProjectPreviewPosition(null);
                   }}
-                  onClick={async () => {
-                    try {
-                      // Fetch full project details
-                      const projectData = await fetchProjectDetails(project.project_main_event_id);
-                      if (projectData) {
-                        // Set this project as active and populate form
-                        setProjectMainEventId(project.project_main_event_id);
-                        setProjectTitle(projectData.project_title);
-                        setMainEventName(projectData.main_event_name);
-                        setMainEventDescription(projectData.main_event_desc || "");
-                        setShortDescription(projectData.short_description || "");
-                        setSubEventName(projectData.sub_event_name || "");
-                        setCustomSubEventName(projectData.custom_sub_event_name || "");
-                        setIsOtherSubEvent(!!projectData.custom_sub_event_name);
-                        setProjectThumbnailUrl(projectData.project_thumbnail_image_link || null);
-                        setThumbnailPreview(projectData.project_thumbnail_image_link || null);
-                        
-                        // Load albums for this project
-                        try {
-                          // Fetch saved albums from database
-                          const savedAlbums = await fetchAlbumsStorage(project.project_main_event_id);
-                          const albumsFromDB: Album[] = savedAlbums.map((album: any) => ({
-                            id: album.album_id,
-                            name: album.album_name || "Click and Edit Project Title",
-                            images: (album.album_photos_kv_json?.images || []).map((img: any) => ({
-                              id: img.image_uuid,
-                              file: new File([], ''), // Dummy file for display
-                              preview: img.image_access_url,
-                              url: img.image_access_url,
-                              imageUuid: img.image_uuid,
-                            })),
-                            thumbnailUrl: album.album_photos_kv_json?.album_thumbnail_url || undefined,
-                            albumId: album.album_id,
-                            isEditingTitle: false,
-                            mainEventName: projectData.main_event_name,
-                            mainEventDescription: projectData.main_event_desc || "",
-                            shortDescription: projectData.short_description || "",
-                            subEventName: projectData.sub_event_name || "",
-                            customSubEventName: projectData.custom_sub_event_name || "",
-                            isOtherSubEvent: !!projectData.custom_sub_event_name,
-                            isNewProjectAlbum: false,
-                          }));
-                          
-                          // Fetch linked albums
-                          const linkedAlbums = await fetchLinkedAlbums(project.project_main_event_id);
-                          const linkedAlbumsFormatted: Album[] = linkedAlbums.map(linkedAlbum => ({
-                            id: `linked-${linkedAlbum.album_id}`,
-                            name: linkedAlbum.album_name || "Click and Edit Project Title",
-                            images: [],
-                            thumbnailUrl: linkedAlbum.album_thumbnail_url || undefined,
-                            albumId: linkedAlbum.album_id,
-                            isEditingTitle: false,
-                            mainEventName: projectData.main_event_name,
-                            mainEventDescription: projectData.main_event_desc || "",
-                            shortDescription: projectData.short_description || "",
-                            subEventName: linkedAlbum.sub_event_name || "",
-                            customSubEventName: "",
-                            isOtherSubEvent: false,
-                            isNewProjectAlbum: false,
-                          }));
-                          
-                          // Combine saved and linked albums
-                          setAlbums([...albumsFromDB, ...linkedAlbumsFormatted]);
-                          setLinkedAlbumIds(new Set(linkedAlbums.map(a => a.album_id)));
-                        } catch (albumError: any) {
-                          console.warn('Error loading albums:', albumError);
-                          // Continue even if albums fail to load
-                        }
-                        
-                        // Set editing mode and open modal
-                        setIsEditingProject(true);
-                        setProjectEditModalOpen(true);
-                        setShowProjectForm(true);
-                      }
-                    } catch (error: any) {
-                      console.error('Error loading project:', error);
-                      toast({
-                        title: "Error loading project",
-                        description: error.message || "Failed to load project details",
-                        variant: "destructive"
-                      });
-                    }
+                  onClick={() => {
+                    // Navigate to project edit page on single click
+                    navigate(`/photobank/project/${project.project_main_event_id}/edit`);
                   }}
                 >
-                  <div className="aspect-video overflow-hidden bg-gray-100">
+                  <div className="aspect-video overflow-hidden bg-gray-100 relative">
                     {project.project_thumbnail_image_link ? (
                       <img
                         src={project.project_thumbnail_image_link}
@@ -2817,11 +2738,11 @@ export default function PhotoBank() {
                         <Image className="h-12 w-12 text-gray-400" />
                       </div>
                     )}
+                    {/* Project title overlay at the top */}
+                    <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/70 to-transparent p-3">
+                      <h3 className="font-semibold text-lg text-white truncate">{project.project_title}</h3>
+                    </div>
                   </div>
-                  <CardContent className="p-4">
-                    <h3 className="font-semibold text-lg mb-1 truncate">{project.project_title}</h3>
-                    <p className="text-sm text-gray-600 truncate">{project.main_event_name}</p>
-                  </CardContent>
                   
                   {/* Project Preview Component - shows loading bar and preview cards */}
                   {hoveredProjectId === project.project_main_event_id && projectPreviewPosition && (
