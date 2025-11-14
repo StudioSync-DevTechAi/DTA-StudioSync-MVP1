@@ -124,7 +124,7 @@ export default function ProjectEdit() {
         >
           <div className="body-wrapper-inner" style={{ paddingTop: 0 }}>
             <div className="container-fluid" style={{ paddingTop: 0 }}>
-              <div className="min-h-screen bg-gray-50">
+              <div className="min-h-screen bg-white">
                 <div className="max-w-6xl mx-auto px-6 pt-4 pb-6">
                   <div className="flex items-center justify-center py-12">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />

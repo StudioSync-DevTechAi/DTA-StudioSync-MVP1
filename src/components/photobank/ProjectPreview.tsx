@@ -7,14 +7,25 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Image, Folder } from 'lucide-react';
 import type { ProjectPreviewData } from '@/services/preview/types';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface ProjectPreviewProps {
   project: ProjectPreviewData | null;
   isLoading?: boolean;
+  projectId?: string;
 }
 
-export function ProjectPreview({ project, isLoading }: ProjectPreviewProps) {
+export function ProjectPreview({ project, isLoading, projectId }: ProjectPreviewProps) {
+  const navigate = useNavigate();
   const [hoveredAlbumIndex, setHoveredAlbumIndex] = useState<number | null>(null);
+
+  const handleAlbumClick = (e: React.MouseEvent, albumId: string) => {
+    e.stopPropagation(); // Prevent any parent click handlers
+    if (projectId && albumId) {
+      console.log('Navigating to album gallery:', projectId, albumId);
+      navigate(`/photobank/project/${projectId}/album/${albumId}`);
+    }
+  };
 
   if (isLoading || !project) {
     return (
@@ -53,7 +64,11 @@ export function ProjectPreview({ project, isLoading }: ProjectPreviewProps) {
   const currentMainImage = getMainImage();
 
   return (
-    <div className="fixed bg-white rounded-lg shadow-2xl border border-gray-300 overflow-hidden pointer-events-auto" style={{ zIndex: 1000, width: '480px', maxHeight: '600px' }}>
+    <div 
+      className="fixed bg-white rounded-lg shadow-2xl border border-gray-300 overflow-hidden pointer-events-auto" 
+      style={{ zIndex: 1000, width: '480px', maxHeight: '600px' }}
+      onClick={(e) => e.stopPropagation()} // Prevent clicks from bubbling to parent
+    >
       <div className="w-full h-full bg-white flex flex-col">
         {/* Top Section - Title only with white background */}
         <div className="px-4 py-3 bg-white flex-shrink-0">
@@ -101,6 +116,7 @@ export function ProjectPreview({ project, isLoading }: ProjectPreviewProps) {
                   className="relative aspect-square rounded overflow-hidden border border-gray-700 bg-gray-900 cursor-pointer transition-transform hover:scale-105"
                   onMouseEnter={() => setHoveredAlbumIndex(index)}
                   onMouseLeave={() => setHoveredAlbumIndex(null)}
+                  onClick={(e) => handleAlbumClick(e, album.album_id)}
                 >
                   {album.thumbnail_url ? (
                     <img
