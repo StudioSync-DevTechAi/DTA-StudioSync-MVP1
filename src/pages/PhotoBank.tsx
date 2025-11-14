@@ -274,6 +274,8 @@ export default function PhotoBank() {
   const [previewLoadingProjects, setPreviewLoadingProjects] = useState<Set<string>>(new Set()); // Track projects loading preview on hover
   const [projectPreviewData, setProjectPreviewData] = useState<Record<string, ProjectPreviewData>>({}); // Store preview data by project ID
   const [projectPreviewPosition, setProjectPreviewPosition] = useState<{ x: number; y: number } | null>(null); // Position for project preview
+  const projectHoverTimeoutRef = useRef<NodeJS.Timeout | null>(null); // Timeout ref for 2 second delay
+  const currentHoveredProjectRef = useRef<string | null>(null); // Track current hovered project for timeout check
   const [albumGalleryModalOpen, setAlbumGalleryModalOpen] = useState(false); // Keep for backward compatibility
   const [selectedAlbumForGallery, setSelectedAlbumForGallery] = useState<Album | null>(null);
   const [albumGalleryImages, setAlbumGalleryImages] = useState<Record<string, Array<{ image_uuid: string; image_access_url: string }>>>({}); // Store images by album ID
@@ -1734,7 +1736,7 @@ export default function PhotoBank() {
     }
   };
 
-  // Load project preview data on hover using preview service
+  // Load project preview data on hover using preview service with 2 second delay
   const handleProjectHover = async (projectId: string, event?: React.MouseEvent) => {
     console.log('🎯 Project hover triggered:', projectId);
     
@@ -1769,42 +1771,73 @@ export default function PhotoBank() {
     
     // Always set hovered state immediately for visual feedback
     setHoveredProjectId(projectId);
+    currentHoveredProjectRef.current = projectId;
     
-    // If preview data is already loaded, don't reload
+    // Clear any existing timeout
+    if (projectHoverTimeoutRef.current) {
+      clearTimeout(projectHoverTimeoutRef.current);
+      projectHoverTimeoutRef.current = null;
+    }
+    
+    // If preview data is already loaded, show it immediately
     if (projectPreviewData[projectId]) {
       console.log('✅ Using cached project preview data for:', projectId);
       return;
     }
 
-    // Show loading indicator immediately
-    console.log('⏳ Starting project preview load for:', projectId);
-    setPreviewLoadingProjects(prev => {
-      const next = new Set(prev);
-      next.add(projectId);
-      return next;
-    });
-
-    try {
-      const result = await loadProjectPreview(projectId);
-      
-      if (result.success && result.data) {
-        console.log('✅ Project preview loaded successfully:', projectId, result.data);
-        setProjectPreviewData(prev => ({
-          ...prev,
-          [projectId]: result.data!,
-        }));
-      } else {
-        console.error('❌ Failed to load project preview:', result.error);
+    // Wait 2 seconds before loading preview
+    projectHoverTimeoutRef.current = setTimeout(async () => {
+      // Double-check we're still hovering over this project
+      if (currentHoveredProjectRef.current !== projectId) {
+        return; // Don't load if hovered project changed
       }
-    } catch (error: any) {
-      console.error('❌ Error loading project preview:', error);
-    } finally {
+      
+      // Show loading indicator
+      console.log('⏳ Starting project preview load for:', projectId);
       setPreviewLoadingProjects(prev => {
         const next = new Set(prev);
-        next.delete(projectId);
+        next.add(projectId);
         return next;
       });
+
+      try {
+        const result = await loadProjectPreview(projectId);
+        
+        // Check again after loading (in case user moved away)
+        if (currentHoveredProjectRef.current !== projectId) {
+          return;
+        }
+        
+        if (result.success && result.data) {
+          console.log('✅ Project preview loaded successfully:', projectId, result.data);
+          setProjectPreviewData(prev => ({
+            ...prev,
+            [projectId]: result.data!,
+          }));
+        } else {
+          console.error('❌ Failed to load project preview:', result.error);
+        }
+      } catch (error: any) {
+        console.error('❌ Error loading project preview:', error);
+      } finally {
+        setPreviewLoadingProjects(prev => {
+          const next = new Set(prev);
+          next.delete(projectId);
+          return next;
+        });
+      }
+    }, 2000); // 2 second delay
+  };
+
+  const handleProjectHoverLeave = () => {
+    // Clear timeout if mouse leaves before 2 seconds
+    if (projectHoverTimeoutRef.current) {
+      clearTimeout(projectHoverTimeoutRef.current);
+      projectHoverTimeoutRef.current = null;
     }
+    currentHoveredProjectRef.current = null;
+    setHoveredProjectId(null);
+    setProjectPreviewPosition(null);
   };
 
   // Load preview data on hover using preview service
@@ -2631,7 +2664,7 @@ export default function PhotoBank() {
       >
         <div className="body-wrapper-inner" style={{ paddingTop: 0 }}>
           <div className="container-fluid" style={{ paddingTop: 0 }}>
-            <div className="min-h-screen bg-gray-50">
+            <div className="min-h-screen bg-white">
       <div className="max-w-6xl mx-auto px-6 pt-4 pb-6">
         {/* Top Right Greeting with Avatar */}
         <div className="mb-4 flex items-center justify-end gap-3">
@@ -2717,10 +2750,7 @@ export default function PhotoBank() {
                   key={project.project_main_event_id} 
                   className="relative overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group"
                   onMouseEnter={(e) => handleProjectHover(project.project_main_event_id, e)}
-                  onMouseLeave={() => {
-                    setHoveredProjectId(null);
-                    setProjectPreviewPosition(null);
-                  }}
+                  onMouseLeave={handleProjectHoverLeave}
                   onClick={() => {
                     // Navigate to project edit page on single click
                     navigate(`/photobank/project/${project.project_main_event_id}/edit`);
@@ -2859,6 +2889,7 @@ export default function PhotoBank() {
                       <ProjectPreview
                         project={projectPreviewData[project.project_main_event_id] || null}
                         isLoading={previewLoadingProjects.has(project.project_main_event_id) || !projectPreviewData[project.project_main_event_id]}
+                        projectId={project.project_main_event_id}
                       />
                     </div>
                   )}

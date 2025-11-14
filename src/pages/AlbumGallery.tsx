@@ -193,8 +193,26 @@ export default function AlbumGallery() {
     }
   };
 
+  const handleGridChangeEnd = (value: number) => {
+    // Snap to nearest value when released - smooth snapping
+    // Calculate distance to each option and choose nearest
+    const distances = [
+      { cols: 2, position: 0 },
+      { cols: 3, position: 50 },
+      { cols: 4, position: 100 }
+    ];
+    
+    const nearest = distances.reduce((prev, curr) => {
+      const prevDist = Math.abs(value - prev.position);
+      const currDist = Math.abs(value - curr.position);
+      return currDist < prevDist ? curr : prev;
+    });
+    
+    setGridColumns(nearest.cols);
+  };
+
   const getSliderValue = () => {
-    // Convert columns back to slider value
+    // Convert columns back to slider value for smooth positioning
     if (gridColumns === 2) return 0;
     if (gridColumns === 3) return 50;
     return 100;
@@ -257,7 +275,7 @@ export default function AlbumGallery() {
         >
           <div className="body-wrapper-inner" style={{ paddingTop: 0 }}>
             <div className="container-fluid" style={{ paddingTop: 0 }}>
-              <div className="min-h-screen bg-gray-50">
+              <div className="min-h-screen bg-white">
                 <div className="max-w-6xl mx-auto px-6 pt-4 pb-6">
                   <div className="flex items-center justify-center py-12">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -306,29 +324,52 @@ export default function AlbumGallery() {
                   </div>
                 </div>
 
-                {/* Grid View Selector */}
+                {/* Grid View Selector - Volume Bar Style */}
                 {images.length > 0 && (
                   <div className="mb-6 flex items-center gap-4">
                     <span className="text-sm text-gray-600 whitespace-nowrap">Grid View:</span>
-                    <div className="flex items-center gap-3 flex-1 max-w-md">
-                      <span className="text-xs text-gray-500">2</span>
-                      <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        step="1"
-                        value={getSliderValue()}
-                        onChange={(e) => handleGridChange(Number(e.target.value))}
-                        className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                        style={{
-                          background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${getSliderValue()}%, #e5e7eb ${getSliderValue()}%, #e5e7eb 100%)`
-                        }}
-                      />
-                      <span className="text-xs text-gray-500">4</span>
+                    <div className="flex items-center gap-2 flex-1 max-w-md">
+                      {/* Volume bar style indicator */}
+                      <div className="flex items-end gap-1 h-8 flex-1">
+                        {[2, 3, 4].map((cols) => {
+                          const isActive = gridColumns === cols;
+                          const height = cols === 2 ? 'h-3' : cols === 3 ? 'h-5' : 'h-8';
+                          return (
+                            <div
+                              key={cols}
+                              className={`flex-1 rounded-t transition-all duration-200 ${
+                                isActive 
+                                  ? 'bg-blue-500' 
+                                  : 'bg-gray-300 hover:bg-gray-400'
+                              } ${height} cursor-pointer`}
+                              onClick={() => setGridColumns(cols)}
+                            />
+                          );
+                        })}
+                      </div>
+                      {/* Slider for smooth control */}
+                      <div className="flex items-center gap-2 flex-1 max-w-xs">
+                        <span className="text-xs text-gray-500 font-medium">2</span>
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          step="1"
+                          value={getSliderValue()}
+                          onChange={(e) => handleGridChange(Number(e.target.value))}
+                          onMouseUp={(e) => handleGridChangeEnd(Number((e.target as HTMLInputElement).value))}
+                          onTouchEnd={(e) => handleGridChangeEnd(Number((e.target as HTMLInputElement).value))}
+                          className="flex-1 h-1.5 bg-gray-200 rounded-full appearance-none cursor-pointer"
+                          style={{
+                            background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${getSliderValue()}%, #e5e7eb ${getSliderValue()}%, #e5e7eb 100%)`
+                          }}
+                        />
+                        <span className="text-xs text-gray-500 font-medium">4</span>
+                      </div>
+                      <span className="text-sm font-medium text-gray-700 min-w-[70px] text-right">
+                        {gridColumns} per row
+                      </span>
                     </div>
-                    <span className="text-sm font-medium text-gray-700 min-w-[60px]">
-                      {gridColumns} per row
-                    </span>
                   </div>
                 )}
 
