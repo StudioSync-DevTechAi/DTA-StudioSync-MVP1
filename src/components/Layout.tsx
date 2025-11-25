@@ -15,6 +15,7 @@ import {
   User,
   ArrowLeft,
   Shield,
+  FolderKanban,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { useEffect, useState } from "react";
@@ -80,10 +81,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <img 
                 src="/photosyncwork-logo.svg" 
                 alt="StudioSyncWork Logo" 
-                className="h-8 w-8 object-contain"
+                className="h-8 w-8 object-contain flex-shrink-0"
               />
-              <div className="flex-1">
-                <h1 className="text-2xl font-semibold">StudioSyncWork</h1>
+              <div className="flex-1 min-w-0">
+                <button
+                  onClick={() => navigate("/dashboard")}
+                  className="w-full text-left cursor-pointer hover:opacity-80 transition-opacity"
+                >
+                  <h1 className="text-xl font-semibold truncate">StudioSyncWork</h1>
+                </button>
                 <WorkInProgress size="sm" className="mt-1" />
               </div>
             </div>
@@ -110,6 +116,38 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 </PermissionGuard>
               );
             })}
+            
+            {/* View Projects Button - Show on estimates page and new project page */}
+            {(location.pathname === "/estimates" || location.pathname === "/estimates/projects/new") && (
+              <button
+                onClick={() => {
+                  navigate("/estimates/projects");
+                }}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors w-full text-left",
+                  "hover:bg-accent/50 text-muted-foreground"
+                )}
+              >
+                <FolderKanban className="h-5 w-5 flex-shrink-0" />
+                <span className="truncate">View Projects</span>
+              </button>
+            )}
+            
+            {/* View Projects Button - Show when on projects page */}
+            {location.pathname === "/estimates/projects" && (
+              <button
+                onClick={() => {
+                  navigate("/estimates");
+                }}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors w-full text-left",
+                  "bg-accent text-accent-foreground"
+                )}
+              >
+                <FileText className="h-5 w-5 flex-shrink-0" />
+                <span className="truncate">View Projects</span>
+              </button>
+            )}
             
             {/* Role Management - Only for managers */}
             <PermissionGuard role="manager">
@@ -191,14 +229,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 Dashboard
               </Button>
             )}
-            <div className="flex items-center space-x-2">
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="flex items-center space-x-2 cursor-pointer hover:opacity-80 transition-opacity"
+            >
               <img 
                 src="/photosyncwork-logo.svg" 
                 alt="StudioSyncWork Logo" 
-                className="h-6 w-6 object-contain"
+                className="h-6 w-6 object-contain flex-shrink-0"
               />
-              <h1 className="text-xl font-semibold">StudioSyncWork</h1>
-            </div>
+              <h1 className="text-xl font-semibold truncate">StudioSyncWork</h1>
+            </button>
           </div>
         </div>
         <div className="flex items-center gap-2">

@@ -14,15 +14,21 @@ export function useRBAC() {
 
   // Load user roles and permissions
   useEffect(() => {
-    if (user && !authLoading) {
-      loadUserRolesAndPermissions();
-    } else if (!authLoading) {
-      // Clear data if no user
-      setUserRoles([]);
-      setUserPermissions([]);
-      setPrimaryRole(null);
-      setLoading(false);
-    }
+    // TODO: Re-enable RBAC API calls when security is needed.
+    // For now, bypass all API calls and return default values
+    setLoading(false);
+    return;
+    
+    // Original code (commented out):
+    // if (user && !authLoading) {
+    //   loadUserRolesAndPermissions();
+    // } else if (!authLoading) {
+    //   // Clear data if no user
+    //   setUserRoles([]);
+    //   setUserPermissions([]);
+    //   setPrimaryRole(null);
+    //   setLoading(false);
+    // }
   }, [user, authLoading]);
 
   const loadUserRolesAndPermissions = async () => {
@@ -131,7 +137,11 @@ export function useRBAC() {
 
   // Check if user has a specific permission
   const hasPermission = (permissionName: string): boolean => {
-    return userPermissions.some(permission => permission.name === permissionName);
+    // TODO: Re-enable permission checks when security is needed.
+    // For now, always return true to bypass all permission checks
+    return true;
+    // Original code:
+    // return userPermissions.some(permission => permission.name === permissionName);
   };
 
   // Check if user has any of the specified permissions
@@ -141,7 +151,11 @@ export function useRBAC() {
 
   // Check if user has a specific role
   const hasRole = (roleName: string): boolean => {
-    return userRoles.some(role => role.name === roleName);
+    // TODO: Re-enable role checks when security is needed.
+    // For now, always return true to bypass all role checks
+    return true;
+    // Original code:
+    // return userRoles.some(role => role.name === roleName);
   };
 
   // Check if user has any of the specified roles

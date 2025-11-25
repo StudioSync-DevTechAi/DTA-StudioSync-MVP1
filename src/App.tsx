@@ -28,6 +28,8 @@ const Settings = React.lazy(() => import("./pages/Settings"));
 const Dashboard = React.lazy(() => import("./pages/Dashboard"));
 const Index = React.lazy(() => import("./pages/Index"));
 const EstimatesPage = React.lazy(() => import("./pages/estimates/EstimatesPage"));
+const ProjectsPage = React.lazy(() => import("./pages/projects/ProjectsPage"));
+const NewProjectPage = React.lazy(() => import("./pages/projects/NewProjectPage"));
 const FinancesPage = React.lazy(() => import("./pages/finances/FinancesPage"));
 const InvoicesPage = React.lazy(() => import("./pages/invoices/InvoicesPage"));
 const Hire = React.lazy(() => import("./pages/Hire"));
@@ -88,6 +90,16 @@ function App() {
           <Route path="/estimates" element={
             <AuthGuard>
               <EstimatesPage />
+            </AuthGuard>
+          } />
+          <Route path="/estimates/projects" element={
+            <AuthGuard>
+              <ProjectsPage />
+            </AuthGuard>
+          } />
+          <Route path="/estimates/projects/new" element={
+            <AuthGuard>
+              <NewProjectPage />
             </AuthGuard>
           } />
           <Route path="/quote-enquiries" element={
