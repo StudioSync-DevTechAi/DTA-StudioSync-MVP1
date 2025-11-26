@@ -1,9 +1,8 @@
 import { supabase } from "@/integrations/supabase/client";
 import { Invoice } from "@/components/invoices/types";
-import { v4 as uuidv4 } from "uuid";
 
-// Convert from our application type to Firestore type
-export const mapInvoiceToFirestoreInvoice = (invoice: Invoice) => {
+// Convert from our application type to Supabase type
+export const mapInvoiceToSupabaseInvoice = (invoice: Invoice) => {
   return {
     id: invoice.id || undefined,
     display_number: invoice.displayNumber,
@@ -24,8 +23,8 @@ export const mapInvoiceToFirestoreInvoice = (invoice: Invoice) => {
   };
 };
 
-// Convert from Firestore type to our application type
-export const mapFirestoreInvoiceToInvoice = (item: any): Invoice => {
+// Convert from Supabase type to our application type
+export const mapSupabaseInvoiceToInvoice = (item: any): Invoice => {
   return {
     id: item.id,
     displayNumber: item.display_number,
@@ -53,20 +52,22 @@ export const generateInvoiceNumber = async (): Promise<string> => {
   const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
   
   // Get count of invoices this month to determine the next sequential number
-  const invoicesRef = collection(firestore, "invoices");
-  const q = query(invoicesRef);
-  const querySnapshot = await getDocs(q);
+  const prefix = `INV-${year}${month}-`;
+  
+  // Fetch invoices with the current month/year prefix
+  const { data: invoices, error } = await supabase
+    .from('invoices')
+    .select('display_number')
+    .like('display_number', `${prefix}%`);
+  
+  if (error) {
+    console.error("Error fetching invoices for number generation:", error);
+    // Fallback: just return a number based on timestamp
+    return `${prefix}001`;
+  }
   
   // Count invoices with the current month/year prefix
-  const prefix = `INV-${year}${month}-`;
-  let count = 0;
-  
-  querySnapshot.forEach(doc => {
-    const data = doc.data();
-    if (data.display_number && data.display_number.startsWith(prefix)) {
-      count++;
-    }
-  });
+  const count = invoices?.length || 0;
   
   // Format: INV-YYYYMM-XXX where XXX is sequential
   const sequentialNumber = (count + 1).toString().padStart(3, '0');
@@ -76,14 +77,17 @@ export const generateInvoiceNumber = async (): Promise<string> => {
 // Fetch all invoices
 export const fetchInvoices = async (): Promise<Invoice[]> => {
   try {
-    const invoicesRef = collection(firestore, "invoices");
-    const q = query(invoicesRef, orderBy("date", "desc"));
-    const querySnapshot = await getDocs(q);
+    const { data, error } = await supabase
+      .from('invoices')
+      .select('*')
+      .order('date', { ascending: false });
     
-    return querySnapshot.docs.map(doc => mapFirestoreInvoiceToInvoice({
-      id: doc.id,
-      ...doc.data()
-    }));
+    if (error) {
+      console.error("Error fetching invoices:", error);
+      throw error;
+    }
+    
+    return (data || []).map(item => mapSupabaseInvoiceToInvoice(item));
   } catch (error) {
     console.error("Error fetching invoices:", error);
     throw error;
@@ -98,20 +102,20 @@ export const addInvoice = async (invoice: Invoice): Promise<Invoice> => {
       invoice.displayNumber = await generateInvoiceNumber();
     }
     
-    // Generate ID if not provided
-    if (!invoice.id) {
-      invoice.id = uuidv4();
+    const invoiceData = mapInvoiceToSupabaseInvoice(invoice);
+    
+    const { data, error } = await supabase
+      .from('invoices')
+      .insert(invoiceData)
+      .select()
+      .single();
+    
+    if (error) {
+      console.error("Error adding invoice:", error);
+      throw error;
     }
     
-    const invoiceData = mapInvoiceToFirestoreInvoice(invoice);
-    const invoicesRef = collection(firestore, "invoices");
-    
-    const docRef = await addDoc(invoicesRef, invoiceData);
-    
-    return {
-      ...invoice,
-      id: docRef.id
-    };
+    return mapSupabaseInvoiceToInvoice(data);
   } catch (error) {
     console.error("Error adding invoice:", error);
     throw error;
@@ -121,20 +125,27 @@ export const addInvoice = async (invoice: Invoice): Promise<Invoice> => {
 // Update an existing invoice
 export const updateInvoice = async (invoice: Invoice): Promise<Invoice> => {
   try {
-    const invoiceData = mapInvoiceToFirestoreInvoice(invoice);
+    if (!invoice.id) {
+      throw new Error("Invoice ID is required for update");
+    }
+    
+    const invoiceData = mapInvoiceToSupabaseInvoice(invoice);
     // Remove id from update data as it's used in the where clause
     const { id, ...updateData } = invoiceData;
     
-    const invoiceRef = doc(firestore, "invoices", invoice.id);
-    await updateDoc(invoiceRef, updateData);
+    const { data, error } = await supabase
+      .from('invoices')
+      .update(updateData)
+      .eq('id', invoice.id)
+      .select()
+      .single();
     
-    // Get the updated document
-    const docSnap = await getDoc(invoiceRef);
+    if (error) {
+      console.error("Error updating invoice:", error);
+      throw error;
+    }
     
-    return mapFirestoreInvoiceToInvoice({
-      id: docSnap.id,
-      ...docSnap.data()
-    });
+    return mapSupabaseInvoiceToInvoice(data);
   } catch (error) {
     console.error("Error updating invoice:", error);
     throw error;

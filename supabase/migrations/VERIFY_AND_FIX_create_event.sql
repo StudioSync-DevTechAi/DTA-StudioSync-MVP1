@@ -1,14 +1,20 @@
 -- ============================================
--- CREATE EVENT RPC FUNCTION
+-- VERIFY AND FIX create_event FUNCTION
 -- ============================================
--- This function creates/updates an event in events_details_table
--- ============================================
--- Created: 2025-01-25
--- Purpose: Save event cards from Page 2 to events_details_table
--- Updated: 2025-01-25 - Added p_pg_type and p_vg_type parameters
+-- Run this script to verify the function exists and fix it if needed
 -- ============================================
 
--- Drop ALL existing versions of the function first (to avoid function overloading issues)
+-- Step 1: Check if function exists
+SELECT 
+  routine_name,
+  routine_type,
+  data_type,
+  routine_definition
+FROM information_schema.routines
+WHERE routine_schema = 'public'
+  AND routine_name = 'create_event';
+
+-- Step 2: Drop ALL existing versions (if any)
 DO $$ 
 DECLARE
   r RECORD;
@@ -20,9 +26,11 @@ BEGIN
     AND pronamespace = 'public'::regnamespace
   ) LOOP
     EXECUTE 'DROP FUNCTION IF EXISTS ' || r.oid::regprocedure || ' CASCADE';
+    RAISE NOTICE 'Dropped function: %', r.oid::regprocedure;
   END LOOP;
 END $$;
 
+-- Step 3: Create the function with correct signature
 CREATE OR REPLACE FUNCTION public.create_event(
   p_event_name TEXT,
   p_event_start_date DATE,
@@ -36,12 +44,12 @@ CREATE OR REPLACE FUNCTION public.create_event(
   p_project_uuid UUID,
   p_photography_eventowner_phno TEXT,
   p_event_client_phno TEXT,
-  p_event_uuid UUID DEFAULT NULL, -- If provided, update existing event; otherwise create new
+  p_event_uuid UUID DEFAULT NULL,
   p_event_days_count DECIMAL(5,2) DEFAULT NULL,
   p_event_photographers_days_count DECIMAL(5,2) DEFAULT NULL,
   p_event_videographers_days_count DECIMAL(5,2) DEFAULT NULL,
-  p_pg_type JSONB DEFAULT NULL, -- PG-Type JSON: {"type": "EF"} or {"type": "GH"}
-  p_vg_type JSONB DEFAULT NULL  -- VG-Type JSON: {"type": "AB"} or {"type": "CD"}
+  p_pg_type JSONB DEFAULT NULL,
+  p_vg_type JSONB DEFAULT NULL
 )
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -158,17 +166,25 @@ EXCEPTION
 END;
 $$;
 
--- Grant execute permission
+-- Step 4: Grant permissions
 GRANT EXECUTE ON FUNCTION public.create_event TO authenticated;
 GRANT EXECUTE ON FUNCTION public.create_event TO anon;
 
--- Add comment for documentation
-COMMENT ON FUNCTION public.create_event IS 
-'Creates or updates an event in events_details_table.
-If p_event_uuid is provided, updates existing event; otherwise creates new event.
-Returns event_uuid on success.
-Usage:
-  - Create new: create_event(..., NULL)
-  - Update existing: create_event(..., existing_uuid)
-';
+-- Step 5: Verify the function was created
+SELECT 
+  routine_name,
+  routine_type,
+  data_type
+FROM information_schema.routines
+WHERE routine_schema = 'public'
+  AND routine_name = 'create_event';
+
+-- Step 6: Show function parameters
+SELECT 
+  p.proname AS function_name,
+  pg_get_function_arguments(p.oid) AS arguments
+FROM pg_proc p
+JOIN pg_namespace n ON p.pronamespace = n.oid
+WHERE n.nspname = 'public'
+  AND p.proname = 'create_event';
 

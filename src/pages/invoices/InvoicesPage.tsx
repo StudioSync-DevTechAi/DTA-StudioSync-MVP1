@@ -9,8 +9,6 @@ import { InvoiceFilters } from "@/components/invoices/components/InvoiceFilters"
 import { InvoicesList } from "@/components/invoices/components/InvoicesList";
 import { useInvoices } from "@/hooks/invoices/useInvoices";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PermissionGuard } from "@/components/rbac/PermissionGuard";
-import { PERMISSIONS } from "@/types/rbac";
 
 export default function InvoicesPage() {
   const {
@@ -85,12 +83,10 @@ export default function InvoicesPage() {
               Manage your client invoices and payments
             </p>
           </div>
-          <PermissionGuard permission={PERMISSIONS.INVOICES_CREATE}>
-            <Button className="gap-2" onClick={() => setShowNewInvoice(true)}>
-              <Plus className="h-4 w-4" />
-              New Invoice
-            </Button>
-          </PermissionGuard>
+          <Button className="gap-2" onClick={() => setShowNewInvoice(true)}>
+            <Plus className="h-4 w-4" />
+            New Invoice
+          </Button>
         </div>
 
         {/* Statistics Cards */}
@@ -110,25 +106,23 @@ export default function InvoicesPage() {
           sortBy={sortBy}
           setSortBy={setSortBy}
           onViewDetails={setSelectedInvoice}
-          onRecordPayment={hasPermission(PERMISSIONS.INVOICES_PAYMENT) ? handleRecordPayment : undefined}
+          onRecordPayment={handleRecordPayment}
         />
       </div>
 
       {/* Modals */}
-      <PermissionGuard permission={PERMISSIONS.INVOICES_CREATE}>
-        <InvoiceForm 
-          open={showNewInvoice} 
-          onClose={() => setShowNewInvoice(false)} 
-          onSave={handleSaveInvoice}
-          editingInvoice={selectedInvoice}
-        />
-      </PermissionGuard>
+      <InvoiceForm 
+        open={showNewInvoice} 
+        onClose={() => setShowNewInvoice(false)} 
+        onSave={handleSaveInvoice}
+        editingInvoice={selectedInvoice}
+      />
       
       <InvoiceDetails
         invoice={selectedInvoice}
         open={!!selectedInvoice}
         onClose={() => setSelectedInvoice(null)}
-        onEdit={hasPermission(PERMISSIONS.INVOICES_EDIT) ? () => setShowNewInvoice(true) : undefined}
+        onEdit={() => setShowNewInvoice(true)}
       />
     </Layout>
   );

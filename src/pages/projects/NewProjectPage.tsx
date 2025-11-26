@@ -117,6 +117,7 @@ export default function NewProjectPage() {
   const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
   const [isPriceDetailsExpanded, setIsPriceDetailsExpanded] = useState(false);
   const [isEditingPriceCard, setIsEditingPriceCard] = useState(false);
+  const [costItemsUuid, setCostItemsUuid] = useState<string | null>(null);
   const [editingPackageNameId, setEditingPackageNameId] = useState<string | null>(null);
   const [photographyOwner, setPhotographyOwner] = useState<{
     photography_owner_phno: string;
@@ -579,6 +580,7 @@ export default function NewProjectPage() {
   const [loadingVideographers, setLoadingVideographers] = useState(false);
   const [isSavingEvents, setIsSavingEvents] = useState(false);
   const [eventsSaved, setEventsSaved] = useState(false); // Track if events have been saved on page 2
+  const [savedEventsSnapshot, setSavedEventsSnapshot] = useState<EventPackage[]>([]); // Snapshot of saved events to detect changes
 
   // Load form data from sessionStorage on component mount
   // This runs FIRST and provides fallback data even if database query fails
@@ -1819,6 +1821,62 @@ export default function NewProjectPage() {
     );
   };
 
+  // Check if there are any unsaved changes across all events
+  const hasAnyUnsavedChanges = (): boolean => {
+    // If events haven't been saved yet, check if there are valid events to save
+    if (!eventsSaved || savedEventsSnapshot.length === 0) {
+      const validEventCards = eventPackages.filter(
+        (pkg) => pkg.eventType && pkg.startDate
+      );
+      return validEventCards.length > 0;
+    }
+
+    // Compare current events with saved snapshot
+    // Check if number of events changed
+    const validCurrentEvents = eventPackages.filter(
+      (pkg) => pkg.eventType && pkg.startDate
+    );
+    const validSavedEvents = savedEventsSnapshot.filter(
+      (pkg) => pkg.eventType && pkg.startDate
+    );
+
+    if (validCurrentEvents.length !== validSavedEvents.length) {
+      return true; // Number of events changed
+    }
+
+    // Check each current event against saved snapshot
+    for (const currentPkg of validCurrentEvents) {
+      const savedPkg = savedEventsSnapshot.find((sp) => sp.id === currentPkg.id);
+      
+      if (!savedPkg) {
+        return true; // New event added
+      }
+
+      // Compare all fields
+      if (
+        currentPkg.eventType !== savedPkg.eventType ||
+        currentPkg.customEventTypeName !== savedPkg.customEventTypeName ||
+        currentPkg.photographersCount !== savedPkg.photographersCount ||
+        currentPkg.videographersCount !== savedPkg.videographersCount ||
+        currentPkg.pgType !== savedPkg.pgType ||
+        currentPkg.vgType !== savedPkg.vgType ||
+        currentPkg.daysCount !== savedPkg.daysCount ||
+        currentPkg.startHour !== savedPkg.startHour ||
+        currentPkg.startMinute !== savedPkg.startMinute ||
+        currentPkg.photographyCoordinatorId !== savedPkg.photographyCoordinatorId ||
+        currentPkg.videographyCoordinatorId !== savedPkg.videographyCoordinatorId ||
+        currentPkg.packageName !== savedPkg.packageName ||
+        JSON.stringify(currentPkg.prepChecklist) !== JSON.stringify(savedPkg.prepChecklist) ||
+        currentPkg.deliverablesNotes !== savedPkg.deliverablesNotes ||
+        (currentPkg.startDate?.getTime() !== savedPkg.startDate?.getTime())
+      ) {
+        return true; // Event changed
+      }
+    }
+
+    return false; // No changes detected
+  };
+
   const handleSaveEventCard = async (eventId: string) => {
     const eventIndex = eventPackages.findIndex((pkg) => pkg.id === eventId);
     if (eventIndex === -1) return;
@@ -2103,9 +2161,9 @@ export default function NewProjectPage() {
       
       // Price details
       const priceDetails = [
-        { label: "Actual Price:", value: `₹${actualPrice.toLocaleString()}` },
-        { label: "Sub Total:", value: `₹${subtotal.toLocaleString()}` },
-        { label: "GST (18%):", value: `₹${gst.toLocaleString()}` },
+        { label: "Actual Price:", value: `Rs.${actualPrice.toLocaleString()}` },
+        { label: "Sub Total:", value: `Rs.${subtotal.toLocaleString()}` },
+        { label: "GST (18%):", value: `Rs.${gst.toLocaleString()}` },
       ];
       
       // Draw price details inside the card
@@ -2149,7 +2207,7 @@ export default function NewProjectPage() {
         color: rgb(0, 0, 0),
       });
       
-      pricePage.drawText(`₹${total.toLocaleString()}`, {
+      pricePage.drawText(`Rs.${total.toLocaleString()}`, {
         x: width - 200,
         y: yPos,
         size: 18,
@@ -2275,7 +2333,7 @@ export default function NewProjectPage() {
       // Format prices with commas
       const formatPrice = (value: string) => {
         const num = parseFloat(value) || 0;
-        return `₹${num.toLocaleString()}`;
+        return `Rs.${num.toLocaleString()}`;
       };
       
       // Draw updated price details
@@ -2499,6 +2557,67 @@ export default function NewProjectPage() {
     navigate("/estimates");
   };
 
+  // Save price card details to cost_items_table
+  const saveCostItems = async () => {
+    if (!projectEstimateUuid) {
+      console.error('Cannot save cost items: missing project UUID');
+      return null;
+    }
+
+    // Get client phone number
+    const clientPhno = (projectDetails?.clientid_phno || formData.clientPhone || '').replace(/\s/g, '');
+    if (!clientPhno) {
+      console.error('Cannot save cost items: missing client phone number');
+      return null;
+    }
+
+    // Get price values - use editablePrices if available, otherwise calculate
+    const { actualPrice } = calculatePrice();
+    const actualPriceValue = editablePrices.actualPrice 
+      ? parseFloat(editablePrices.actualPrice.replace(/,/g, '')) 
+      : actualPrice;
+    // Calculate GST from actualPrice (18%)
+    const gstValue = actualPriceValue * 0.18;
+    // Sub total = actualPrice + GST
+    const subtotalValue = actualPriceValue + gstValue;
+    // Total = actualPrice + GST
+    const totalValue = actualPriceValue + gstValue;
+
+    try {
+      // Call Supabase RPC function to insert or update cost items
+      const { data, error } = await supabase.rpc('create_or_update_cost_items', {
+        p_project_uuid: projectEstimateUuid,
+        p_clientid_phno: clientPhno,
+        p_actual_price: actualPriceValue,
+        p_subtotal_price: subtotalValue,
+        p_totalprice_withgst: totalValue,
+        p_cost_items_uuid: costItemsUuid || null,
+      });
+
+      if (error) {
+        console.error('Error saving cost items:', error);
+        return null;
+      }
+
+      if (data && (data as any).success) {
+        const result = {
+          cost_items_uuid: (data as any).cost_items_uuid,
+          project_uuid: (data as any).project_uuid,
+          clientid_phno: (data as any).clientid_phno,
+        };
+        setCostItemsUuid(result.cost_items_uuid);
+        console.log('Cost items saved successfully:', result);
+        return result;
+      } else {
+        console.error('Failed to save cost items:', data);
+        return null;
+      }
+    } catch (error: any) {
+      console.error('Exception saving cost items:', error);
+      return null;
+    }
+  };
+
   const handleSaveEvent = async (isSubmit: boolean = false) => {
     if (!projectEstimateUuid) {
       alert('Project UUID not found. Please go back to Page 1 and click Next.');
@@ -2586,6 +2705,9 @@ export default function NewProjectPage() {
         }
       }
 
+      // Save cost items (price card) to cost_items_table
+      await saveCostItems();
+
       // Show success message
       if (savedCount > 0) {
         if (failedCount > 0) {
@@ -2595,9 +2717,17 @@ export default function NewProjectPage() {
         }
         // Mark events as saved to enable Next button
         setEventsSaved(true);
+        // Save a deep copy snapshot of all events for change detection
+        const snapshot = updatedPackages.map((pkg) => ({
+          ...pkg,
+          startDate: pkg.startDate ? new Date(pkg.startDate) : undefined,
+          prepChecklist: pkg.prepChecklist ? JSON.parse(JSON.stringify(pkg.prepChecklist)) : undefined,
+        }));
+        setSavedEventsSnapshot(snapshot);
       } else {
         alert('Failed to save events. Please check the console for errors.');
         setEventsSaved(false);
+        setSavedEventsSnapshot([]);
       }
     } catch (error: any) {
       console.error('Exception saving events:', error);
@@ -3015,7 +3145,7 @@ export default function NewProjectPage() {
                         <Button 
                           onClick={() => handleSaveEvent(false)} 
                           className="bg-blue-600 hover:bg-blue-700 text-white"
-                          disabled={isSavingEvents}
+                          disabled={isSavingEvents || (eventsSaved && !hasAnyUnsavedChanges())}
                         >
                           {isSavingEvents ? (
                             <>
@@ -3093,7 +3223,7 @@ export default function NewProjectPage() {
                                   </h3>
                                 )}
                                 {!isExpanded && pkg.daysCount && (
-                                  <span className="text-sm text-muted-foreground absolute left-1/2 transform -translate-x-1/2">
+                                  <span className="text-sm text-muted-foreground absolute left-[42%] transform -translate-x-1/2">
                                     Days {pkg.daysCount || "1"}
                                   </span>
                                 )}
@@ -3812,11 +3942,15 @@ export default function NewProjectPage() {
                               onClick={() => {
                                 setIsEditingPriceCard(true);
                                 // Initialize editable prices with current calculated values
+                                // Only actualPrice is editable, others are calculated
+                                const gstCalc = actualPrice * 0.18;
+                                const subtotalCalc = actualPrice + gstCalc; // Sub total = actualPrice + GST
+                                const totalCalc = actualPrice + gstCalc; // Total = actualPrice + GST
                                 setEditablePrices({
                                   actualPrice: actualPrice.toLocaleString(),
-                                  subtotal: subtotal.toLocaleString(),
-                                  gst: gst.toLocaleString(),
-                                  total: total.toLocaleString(),
+                                  subtotal: subtotalCalc.toLocaleString(),
+                                  gst: gstCalc.toLocaleString(),
+                                  total: totalCalc.toLocaleString(),
                                 });
                               }}
                               className="h-8 px-2"
@@ -3828,7 +3962,10 @@ export default function NewProjectPage() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => setIsEditingPriceCard(false)}
+                              onClick={async () => {
+                                await saveCostItems();
+                                setIsEditingPriceCard(false);
+                              }}
                               className="h-8 px-2 text-green-600 hover:text-green-700"
                               title="Save price values"
                             >
@@ -3853,6 +3990,7 @@ export default function NewProjectPage() {
                       <div className="space-y-3">
                         {isEditingPriceCard ? (
                           <>
+                            {/* Row 1: Actual Price (editable) */}
                             <div className="flex justify-between items-center text-sm">
                               <span className="text-muted-foreground">Actual price:</span>
                               <div className="flex items-center gap-2">
@@ -3862,83 +4000,113 @@ export default function NewProjectPage() {
                                   value={editablePrices.actualPrice}
                                   onChange={(e) => {
                                     const value = e.target.value.replace(/[^0-9,]/g, '');
-                                    setEditablePrices(prev => ({ ...prev, actualPrice: value }));
+                                    const actualPriceNum = parseFloat(value.replace(/,/g, '')) || 0;
+                                    const gstValue = actualPriceNum * 0.18;
+                                    const subtotalValue = actualPriceNum + gstValue; // Sub total = actualPrice + GST
+                                    const totalValue = actualPriceNum + gstValue;
+                                    setEditablePrices(prev => ({
+                                      ...prev,
+                                      actualPrice: value,
+                                      subtotal: subtotalValue.toLocaleString(),
+                                      gst: gstValue.toLocaleString(),
+                                      total: totalValue.toLocaleString(),
+                                    }));
                                   }}
                                   className="w-24 h-8 text-right"
                                   placeholder="0"
                                 />
                               </div>
                             </div>
-                            <div className="flex justify-between items-center text-sm">
-                              <span className="text-muted-foreground">Sub total:</span>
-                              <div className="flex items-center gap-2">
-                                <span>₹</span>
-                                <Input
-                                  type="text"
-                                  value={editablePrices.subtotal}
-                                  onChange={(e) => {
-                                    const value = e.target.value.replace(/[^0-9,]/g, '');
-                                    setEditablePrices(prev => ({ ...prev, subtotal: value }));
-                                  }}
-                                  className="w-24 h-8 text-right"
-                                  placeholder="0"
-                                />
-                              </div>
-                            </div>
+                            {/* Row 2: GST (not editable, calculated) */}
                             <div className="flex justify-between items-center text-sm">
                               <span className="text-muted-foreground">GST (18%):</span>
                               <div className="flex items-center gap-2">
                                 <span>₹</span>
-                                <Input
-                                  type="text"
-                                  value={editablePrices.gst}
-                                  onChange={(e) => {
-                                    const value = e.target.value.replace(/[^0-9,]/g, '');
-                                    setEditablePrices(prev => ({ ...prev, gst: value }));
-                                  }}
-                                  className="w-24 h-8 text-right"
-                                  placeholder="0"
-                                />
+                                <span className="w-24 h-8 text-right flex items-center justify-end">
+                                  {(() => {
+                                    const actualPriceNum = parseFloat(editablePrices.actualPrice.replace(/,/g, '')) || 0;
+                                    const gstValue = actualPriceNum * 0.18;
+                                    return gstValue.toLocaleString();
+                                  })()}
+                                </span>
                               </div>
                             </div>
+                            {/* Row 3: Sub Total (not editable, actualPrice + GST) */}
+                            <div className="flex justify-between items-center text-sm">
+                              <span className="text-muted-foreground">Sub total:</span>
+                              <div className="flex items-center gap-2">
+                                <span>₹</span>
+                                <span className="w-24 h-8 text-right flex items-center justify-end">
+                                  {(() => {
+                                    const actualPriceNum = parseFloat(editablePrices.actualPrice.replace(/,/g, '')) || 0;
+                                    const gstValue = actualPriceNum * 0.18;
+                                    const subtotalValue = actualPriceNum + gstValue;
+                                    return subtotalValue.toLocaleString();
+                                  })()}
+                                </span>
+                              </div>
+                            </div>
+                            {/* Row 4: Total Price (not editable, calculated as actualPrice + GST) */}
                             <div className="border-t pt-3 mt-3">
                               <div className="flex justify-between items-center">
                                 <span className="font-semibold">Total price:</span>
                                 <div className="flex items-center gap-2">
                                   <span>₹</span>
-                                  <Input
-                                    type="text"
-                                    value={editablePrices.total}
-                                    onChange={(e) => {
-                                      const value = e.target.value.replace(/[^0-9,]/g, '');
-                                      setEditablePrices(prev => ({ ...prev, total: value }));
-                                    }}
-                                    className="w-32 h-8 text-right font-bold text-blue-600"
-                                    placeholder="0"
-                                  />
+                                  <span className="w-32 h-8 text-right font-bold text-blue-600 flex items-center justify-end">
+                                    {(() => {
+                                      const actualPriceNum = parseFloat(editablePrices.actualPrice.replace(/,/g, '')) || 0;
+                                      const gstValue = actualPriceNum * 0.18;
+                                      const totalValue = actualPriceNum + gstValue;
+                                      return totalValue.toLocaleString();
+                                    })()}
+                                  </span>
                                 </div>
                               </div>
                             </div>
                           </>
                         ) : (
                           <>
+                            {/* Row 1: Actual Price */}
                             <div className="flex justify-between text-sm">
                               <span className="text-muted-foreground">Actual price:</span>
                               <span>₹{editablePrices.actualPrice || actualPrice.toLocaleString()}</span>
                             </div>
-                            <div className="flex justify-between text-sm">
-                              <span className="text-muted-foreground">Sub total:</span>
-                              <span>₹{editablePrices.subtotal || subtotal.toLocaleString()}</span>
-                            </div>
+                            {/* Row 2: GST */}
                             <div className="flex justify-between text-sm">
                               <span className="text-muted-foreground">GST (18%):</span>
-                              <span>₹{editablePrices.gst || gst.toLocaleString()}</span>
+                              <span>₹{(() => {
+                                const actualPriceNum = editablePrices.actualPrice 
+                                  ? parseFloat(editablePrices.actualPrice.replace(/,/g, '')) 
+                                  : actualPrice;
+                                const gstValue = actualPriceNum * 0.18;
+                                return gstValue.toLocaleString();
+                              })()}</span>
                             </div>
+                            {/* Row 3: Sub Total */}
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground">Sub total:</span>
+                              <span>₹{(() => {
+                                const actualPriceNum = editablePrices.actualPrice 
+                                  ? parseFloat(editablePrices.actualPrice.replace(/,/g, '')) 
+                                  : actualPrice;
+                                const gstValue = actualPriceNum * 0.18;
+                                const subtotalValue = actualPriceNum + gstValue;
+                                return subtotalValue.toLocaleString();
+                              })()}</span>
+                            </div>
+                            {/* Row 4: Total Price */}
                             <div className="border-t pt-3 mt-3">
                               <div className="flex justify-between">
                                 <span className="font-semibold">Total price:</span>
                                 <span className="font-bold text-blue-600 text-lg">
-                                  ₹{editablePrices.total || total.toLocaleString()}
+                                  ₹{(() => {
+                                    const actualPriceNum = editablePrices.actualPrice 
+                                      ? parseFloat(editablePrices.actualPrice.replace(/,/g, '')) 
+                                      : actualPrice;
+                                    const gstValue = actualPriceNum * 0.18;
+                                    const totalValue = actualPriceNum + gstValue;
+                                    return totalValue.toLocaleString();
+                                  })()}
                                 </span>
                               </div>
                             </div>
