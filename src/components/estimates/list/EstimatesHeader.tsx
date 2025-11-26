@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import { PermissionGuard } from "@/components/rbac/PermissionGuard";
 import { PERMISSIONS } from "@/types/rbac";
 import { useNavigate } from "react-router-dom";
+import { DraftsBox } from "@/components/estimates/DraftsBox";
 
 interface EstimatesHeaderProps {
   onNewEstimate: () => void;
@@ -25,12 +26,15 @@ export function EstimatesHeader({ onNewEstimate, canCreate = true, showActions =
   return (
     <div className="flex items-center justify-between">
       <div className="space-y-1">
-        <h1 
-          className="text-2xl font-semibold cursor-pointer hover:opacity-80 transition-opacity"
-          onClick={handleHeaderClick}
-        >
-          Estimates
-        </h1>
+        <div className="flex items-center gap-4">
+          <h1 
+            className="text-2xl font-semibold cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={handleHeaderClick}
+          >
+            Estimates
+          </h1>
+          <DraftsBox />
+        </div>
         <p className="text-sm text-muted-foreground">
           Create and manage your photography service estimates.
         </p>
