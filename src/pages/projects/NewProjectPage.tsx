@@ -20,9 +20,10 @@ import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { TimePickerClock } from "@/components/ui/time-picker-clock";
-import { CalendarIcon, ArrowRight, Plus, Trash2, Pencil, Eye, Download, Share2, ChevronDown, ChevronUp, Phone, X, Save } from "lucide-react";
+import { CalendarIcon, ArrowRight, Plus, Trash2, Pencil, Eye, Download, Share2, ChevronDown, ChevronUp, Phone, X, Save, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 
 interface ChecklistItem {
   id: string;
@@ -73,6 +74,9 @@ export default function NewProjectPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   
+  // Get projectUuid from URL if editing existing project
+  const projectUuidFromUrl = searchParams.get('projectUuid');
+  
   // Initialize currentPage from URL query parameter, fallback to 1
   const pageFromUrl = searchParams.get('page');
   const initialPage = pageFromUrl ? parseInt(pageFromUrl, 10) : 1;
@@ -92,12 +96,21 @@ export default function NewProjectPage() {
     endMinute: "",
     endConfirmationStatus: false, // false = tentative (left/grey), true = confirmed (right/green)
   });
-  const [eventPackages, setEventPackages] = useState<EventPackage[]>([
-    { id: "1", eventType: "wedding", photographersCount: "5", videographersCount: "2", prepChecklist: [] as ChecklistItem[] },
-    { id: "2", eventType: "engagement", photographersCount: "4", videographersCount: "1", prepChecklist: [] as ChecklistItem[] },
-    { id: "3", eventType: "", photographersCount: "", videographersCount: "", prepChecklist: [] as ChecklistItem[] },
-  ]);
-  const [selectedFormat, setSelectedFormat] = useState("standard_wedding");
+  const [eventPackages, setEventPackages] = useState<EventPackage[]>([]);
+  const [selectedFormat, setSelectedFormat] = useState("standard_wedding.pdf");
+  // PDF path - using public folder path for Vite static assets
+  const [selectedPdfPath, setSelectedPdfPath] = useState("/docs/test-pdfloader/file-sample_150kB.pdf");
+  const [editedPdfBlob, setEditedPdfBlob] = useState<Blob | null>(null);
+  const [isEditingPdf, setIsEditingPdf] = useState(false);
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [pdfEditText, setPdfEditText] = useState<string>("");
+  // Editable price fields
+  const [editablePrices, setEditablePrices] = useState({
+    actualPrice: "",
+    subtotal: "",
+    gst: "",
+    total: "",
+  });
   const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
   const [isPriceDetailsExpanded, setIsPriceDetailsExpanded] = useState(false);
   const [editingPackageNameId, setEditingPackageNameId] = useState<string | null>(null);
@@ -107,7 +120,18 @@ export default function NewProjectPage() {
     photography_owner_name: string;
   } | null>(null);
   const [loadingOwner, setLoadingOwner] = useState(false);
-  const [projectEstimateUuid, setProjectEstimateUuid] = useState<string | null>(null);
+  // Initialize projectEstimateUuid from URL or sessionStorage
+  const [projectEstimateUuid, setProjectEstimateUuid] = useState<string | null>(
+    projectUuidFromUrl || sessionStorage.getItem("newProjectEstimateUuid")
+  );
+
+  // Update projectEstimateUuid when URL parameter changes
+  useEffect(() => {
+    if (projectUuidFromUrl) {
+      setProjectEstimateUuid(projectUuidFromUrl);
+      sessionStorage.setItem("newProjectEstimateUuid", projectUuidFromUrl);
+    }
+  }, [projectUuidFromUrl]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [projectDetails, setProjectDetails] = useState<{
     project_name: string;
@@ -120,6 +144,7 @@ export default function NewProjectPage() {
   const [videographers, setVideographers] = useState<Videographer[]>([]);
   const [loadingPhotographers, setLoadingPhotographers] = useState(false);
   const [loadingVideographers, setLoadingVideographers] = useState(false);
+  const [isSavingEvents, setIsSavingEvents] = useState(false);
 
   // Load form data from sessionStorage on component mount
   // This runs FIRST and provides fallback data even if database query fails
@@ -158,14 +183,32 @@ export default function NewProjectPage() {
         setFormData(parsed);
       }
 
-      if (savedEventPackages) {
+      // Only load event packages from sessionStorage if we're on Page 2 or 3
+      // For fresh navigation from Page 1, we'll initialize with empty event cards
+      const currentPageNum = pageFromUrl ? parseInt(pageFromUrl, 10) : (savedCurrentPage ? parseInt(savedCurrentPage, 10) : 1);
+      
+      if (savedEventPackages && (currentPageNum === 2 || currentPageNum === 3)) {
         const parsed = JSON.parse(savedEventPackages);
         // Convert date strings back to Date objects in event packages
         const packagesWithDates = parsed.map((pkg: any) => {
           if (pkg.startDate) pkg.startDate = new Date(pkg.startDate);
           return pkg;
         });
-        setEventPackages(packagesWithDates);
+        // Only set if we have packages, otherwise will be initialized later
+        if (packagesWithDates.length > 0) {
+          setEventPackages(packagesWithDates);
+        }
+      } else if (currentPageNum === 2) {
+        // If on Page 2 and no saved event packages, initialize with one empty event card
+        const newPackage: EventPackage = {
+          id: Date.now().toString(),
+          eventType: "",
+          photographersCount: "",
+          videographersCount: "",
+          prepChecklist: [],
+          isSaved: false,
+        };
+        setEventPackages([newPackage]);
       }
 
       if (savedSelectedFormat) {
@@ -474,13 +517,25 @@ export default function NewProjectPage() {
               setCurrentPage(draftData.currentPage);
             }
 
-            // Restore event packages
-            if (draftData.eventPackages && Array.isArray(draftData.eventPackages)) {
+            // Restore event packages only if they exist in draft
+            // If no draft event packages, start with one empty event card
+            if (draftData.eventPackages && Array.isArray(draftData.eventPackages) && draftData.eventPackages.length > 0) {
               const restoredPackages = draftData.eventPackages.map((pkg: any) => ({
                 ...pkg,
                 startDate: pkg.startDate ? new Date(pkg.startDate) : undefined,
               }));
               setEventPackages(restoredPackages);
+            } else if (currentPage === 2 && eventPackages.length === 0) {
+              // If on Page 2 and no event packages, initialize with one empty event card
+              const newPackage: EventPackage = {
+                id: Date.now().toString(),
+                eventType: "",
+                photographersCount: "",
+                videographersCount: "",
+                prepChecklist: [],
+                isSaved: false,
+              };
+              setEventPackages([newPackage]);
             }
 
             // Restore selected format
@@ -500,7 +555,7 @@ export default function NewProjectPage() {
     loadDraftFromDatabase();
   }, [projectEstimateUuid]); // Only run when projectEstimateUuid changes (on mount or when set)
 
-  // Fetch project details for Page 2 display (client name, etc.) - separate from draft loading
+  // Fetch project and client details for Page 2 - using RPC function
   useEffect(() => {
     const fetchProjectDetailsForPage2 = async () => {
       // Only fetch if we have UUID and we're on page 2
@@ -509,76 +564,69 @@ export default function NewProjectPage() {
       }
 
       // If we already have the details, don't fetch again
-      if (projectDetails) {
+      if (projectDetails && projectDetails.client_name) {
         return;
       }
 
       setLoadingProjectDetails(true);
       try {
-        // Direct query: Fetch project estimation details (without drafted_json for this fetch)
-        // Use maybeSingle() to handle cases where project doesn't exist yet or RLS blocks access
-        const { data: projectData, error: projectError } = await supabase
-          .from('project_estimation_table')
-          .select('project_name, project_type, clientid_phno')
-          .eq('project_estimate_uuid', projectEstimateUuid)
-          .maybeSingle(); // Changed from .single() to .maybeSingle() to handle 0 rows gracefully
+        // Use RPC function to get project estimation details
+        const { data: rpcData, error: rpcError } = await supabase.rpc('get_project_estimation_details', {
+          p_project_estimate_uuid: projectEstimateUuid
+        });
 
-        if (projectError) {
-          // If 406 error, columns might not exist - that's okay, we'll use sessionStorage data
-          if (projectError.code === 'PGRST116' || projectError.code === '406') {
-            console.warn('Project details not available yet or columns missing. Using sessionStorage data.');
-            // Use data from sessionStorage/formData as fallback
-            const savedProjectName = sessionStorage.getItem('newProjectName');
-            const savedProjectType = sessionStorage.getItem('newProjectType');
-            const clientName = formData.clientFullName || '';
-            const clientPhno = formData.clientPhone?.replace(/\s/g, '') || '';
-            
-            if (savedProjectName || savedProjectType || clientName) {
-              setProjectDetails({
-                project_name: savedProjectName || formData.projectName || '',
-                project_type: savedProjectType || formData.eventType || '',
-                clientid_phno: clientPhno,
-                client_name: clientName
-              });
-            }
-            return;
-          }
-          console.error('Error fetching project details:', projectError);
-          return;
-        }
-
-        if (projectData) {
-          // Fetch client name using clientid_phno
-          const { data: clientData, error: clientError } = await supabase
-            .from('client_details_table')
-            .select('client_name')
-            .eq('clientid_phno', projectData.clientid_phno)
-            .maybeSingle(); // Changed from .single() to .maybeSingle()
-
-          if (clientError) {
-            console.warn('Error fetching client name:', clientError);
-          }
-
-          setProjectDetails({
-            project_name: projectData.project_name || '',
-            project_type: projectData.project_type || '',
-            clientid_phno: projectData.clientid_phno || '',
-            client_name: clientData?.client_name || formData.clientFullName || ''
-          });
-        } else {
-          // No project data found - use sessionStorage/formData as fallback
-          console.warn('Project not found in database, using sessionStorage data');
+        if (rpcError) {
+          console.error('Error fetching project details via RPC:', rpcError);
+          // Fallback to sessionStorage
           const savedProjectName = sessionStorage.getItem('newProjectName');
           const savedProjectType = sessionStorage.getItem('newProjectType');
-          const clientName = formData.clientFullName || '';
-          const clientPhno = formData.clientPhone?.replace(/\s/g, '') || '';
+          const savedClientName = sessionStorage.getItem('newProjectClientName');
+          const savedClientPhone = sessionStorage.getItem('newProjectClientPhone');
           
-          if (savedProjectName || savedProjectType || clientName) {
+          if (savedProjectName || savedProjectType || savedClientName) {
             setProjectDetails({
               project_name: savedProjectName || formData.projectName || '',
               project_type: savedProjectType || formData.eventType || '',
-              clientid_phno: clientPhno,
-              client_name: clientName
+              clientid_phno: savedClientPhone || formData.clientPhone?.replace(/\s/g, '') || '',
+              client_name: savedClientName || formData.clientFullName || ''
+            });
+          }
+          return;
+        }
+
+        if (rpcData && typeof rpcData === 'object' && 'project_name' in rpcData) {
+          // RPC function returned data successfully
+          setProjectDetails({
+            project_name: rpcData.project_name || '',
+            project_type: rpcData.project_type || '',
+            clientid_phno: rpcData.clientid_phno || '',
+            client_name: rpcData.client_name || ''
+          });
+          
+          // Also update sessionStorage with fetched data for consistency
+          try {
+            if (rpcData.project_name) sessionStorage.setItem('newProjectName', rpcData.project_name);
+            if (rpcData.project_type) sessionStorage.setItem('newProjectType', rpcData.project_type);
+            if (rpcData.client_name) sessionStorage.setItem('newProjectClientName', rpcData.client_name);
+            if (rpcData.clientid_phno) sessionStorage.setItem('newProjectClientPhone', rpcData.clientid_phno);
+            if (rpcData.photography_owner_phno) sessionStorage.setItem('newProjectPhotographyOwnerPhno', rpcData.photography_owner_phno);
+          } catch (e) {
+            console.warn('Failed to update sessionStorage:', e);
+          }
+        } else {
+          // RPC returned empty or invalid data - use sessionStorage as fallback
+          console.warn('RPC returned empty data, using sessionStorage');
+          const savedProjectName = sessionStorage.getItem('newProjectName');
+          const savedProjectType = sessionStorage.getItem('newProjectType');
+          const savedClientName = sessionStorage.getItem('newProjectClientName');
+          const savedClientPhone = sessionStorage.getItem('newProjectClientPhone');
+          
+          if (savedProjectName || savedProjectType || savedClientName) {
+            setProjectDetails({
+              project_name: savedProjectName || formData.projectName || '',
+              project_type: savedProjectType || formData.eventType || '',
+              clientid_phno: savedClientPhone || formData.clientPhone?.replace(/\s/g, '') || '',
+              client_name: savedClientName || formData.clientFullName || ''
             });
           }
         }
@@ -587,12 +635,15 @@ export default function NewProjectPage() {
         // Use sessionStorage data as fallback
         const savedProjectName = sessionStorage.getItem('newProjectName');
         const savedProjectType = sessionStorage.getItem('newProjectType');
-        if (savedProjectName || savedProjectType || formData.clientFullName) {
+        const savedClientName = sessionStorage.getItem('newProjectClientName');
+        const savedClientPhone = sessionStorage.getItem('newProjectClientPhone');
+        
+        if (savedProjectName || savedProjectType || savedClientName) {
           setProjectDetails({
             project_name: savedProjectName || formData.projectName || '',
             project_type: savedProjectType || formData.eventType || '',
-            clientid_phno: formData.clientPhone?.replace(/\s/g, '') || '',
-            client_name: formData.clientFullName || ''
+            clientid_phno: savedClientPhone || formData.clientPhone?.replace(/\s/g, '') || '',
+            client_name: savedClientName || formData.clientFullName || ''
           });
         }
       } finally {
@@ -601,7 +652,131 @@ export default function NewProjectPage() {
     };
 
     fetchProjectDetailsForPage2();
-  }, [projectEstimateUuid, currentPage, projectDetails, formData]);
+    
+    // Initialize event packages with one empty event card when Page 2 loads
+    // Only if we don't already have event packages (fresh load, not from draft/sessionStorage)
+    if (currentPage === 2 && eventPackages.length === 0) {
+      const newPackage: EventPackage = {
+        id: Date.now().toString(),
+        eventType: "",
+        photographersCount: "",
+        videographersCount: "",
+        prepChecklist: [],
+        isSaved: false,
+      };
+      setEventPackages([newPackage]);
+    }
+  }, [projectEstimateUuid, currentPage, eventPackages.length]);
+
+  // Load existing events when opening a project from dashboard
+  useEffect(() => {
+    const loadExistingEvents = async () => {
+      // Only load if we have a projectEstimateUuid and we're on Page 2
+      if (!projectEstimateUuid || currentPage !== 2) {
+        return;
+      }
+
+      // Don't reload if we already have events loaded
+      if (eventPackages.length > 0 && eventPackages.some(pkg => pkg.event_uuid)) {
+        return;
+      }
+
+      try {
+        console.log('Loading existing events for project:', projectEstimateUuid);
+        
+        // Fetch events from events_details_table
+        const { data: eventsData, error: eventsError } = await supabase
+          .from('events_details_table' as any)
+          .select(`
+            event_uuid,
+            event_name,
+            event_start_date,
+            event_start_time,
+            event_photographers_count,
+            event_videographers_count,
+            event_photo_coordinator_phno,
+            event_video_coordinator_phno,
+            event_deliverables_notes_json,
+            event_prep_checklist_json,
+            event_days_count,
+            photography_workdays,
+            videography_workdays,
+            event_photographers_days_count,
+            event_videographers_days_count
+          `)
+          .eq('project_uuid', projectEstimateUuid)
+          .order('event_start_date', { ascending: true });
+
+        if (eventsError) {
+          console.error('Error fetching existing events:', eventsError);
+          return;
+        }
+
+        if (eventsData && eventsData.length > 0) {
+          console.log(`Loaded ${eventsData.length} existing events`);
+          
+          // Transform database events to EventPackage format
+          const loadedEvents: EventPackage[] = eventsData.map((event: any) => {
+            // Parse start date and time
+            const startDate = event.event_start_date ? new Date(event.event_start_date) : undefined;
+            const startTime = event.event_start_time ? event.event_start_time.split(':') : null;
+            
+            // Parse checklist
+            let prepChecklist: ChecklistItem[] = [];
+            if (event.event_prep_checklist_json && Array.isArray(event.event_prep_checklist_json)) {
+              prepChecklist = event.event_prep_checklist_json.map((item: any, index: number) => ({
+                id: item.id || `checklist-${index}`,
+                text: item.text || item,
+                checked: item.checked || false
+              }));
+            }
+
+            return {
+              id: Date.now().toString() + Math.random(), // Generate unique ID
+              event_uuid: event.event_uuid,
+              packageName: event.event_name || `Event Package ${eventsData.indexOf(event) + 1}`,
+              eventType: event.event_name || "",
+              photographersCount: event.event_photographers_count?.toString() || "",
+              videographersCount: event.event_videographers_count?.toString() || "",
+              startDate: startDate,
+              startHour: startTime ? startTime[0] : "",
+              startMinute: startTime ? startTime[1] : "",
+              photographyCoordinatorId: event.event_photo_coordinator_phno || undefined,
+              videographyCoordinatorId: event.event_video_coordinator_phno || undefined,
+              deliverablesNotes: event.event_deliverables_notes_json || "",
+              savedDeliverablesNotes: event.event_deliverables_notes_json || "",
+              hasSavedDeliverablesNotes: !!event.event_deliverables_notes_json,
+              prepChecklist: prepChecklist,
+              daysCount: event.event_days_count?.toString() || "",
+              photographyWorkdays: event.photography_workdays?.toString() || "",
+              videographyWorkdays: event.videography_workdays?.toString() || "",
+              isSaved: true, // These are already saved
+            };
+          });
+
+          setEventPackages(loadedEvents);
+        } else {
+          // No existing events, initialize with one empty event card
+          console.log('No existing events found, initializing with empty event card');
+          if (eventPackages.length === 0) {
+            const newPackage: EventPackage = {
+              id: Date.now().toString(),
+              eventType: "",
+              photographersCount: "",
+              videographersCount: "",
+              prepChecklist: [],
+              isSaved: false,
+            };
+            setEventPackages([newPackage]);
+          }
+        }
+      } catch (error) {
+        console.error('Exception loading existing events:', error);
+      }
+    };
+
+    loadExistingEvents();
+  }, [projectEstimateUuid, currentPage]);
 
   // Fetch photographers and videographers when Page 2 loads
   useEffect(() => {
@@ -780,17 +955,37 @@ export default function NewProjectPage() {
           const uuid = data.project_estimate_uuid;
           setProjectEstimateUuid(uuid);
           
-          // Save project metadata to sessionStorage for use in page 2
+          // Save project and client info to sessionStorage for use in page 2
           try {
+            // Project Info
             sessionStorage.setItem('newProjectEstimateUuid', uuid);
             sessionStorage.setItem('newProjectPhotographyOwnerPhno', photographyOwner?.photography_owner_phno || '');
             sessionStorage.setItem('newProjectName', formData.projectName);
             sessionStorage.setItem('newProjectType', formData.eventType);
+            
+            // Client Info
+            sessionStorage.setItem('newProjectClientName', formData.clientFullName);
+            sessionStorage.setItem('newProjectClientEmail', formData.clientEmail);
+            sessionStorage.setItem('newProjectClientPhone', formData.clientPhone.replace(/\s/g, '')); // Remove spaces
           } catch (e) {
-            console.warn('Failed to save project metadata to sessionStorage:', e);
+            console.warn('Failed to save project and client info to sessionStorage:', e);
           }
           
           console.log('Project estimation created successfully with is_drafted=true:', uuid);
+          
+          // Initialize event packages with one empty event card when navigating to Page 2
+          // Only if we don't already have event packages (fresh navigation from Page 1)
+          if (eventPackages.length === 0) {
+            const newPackage: EventPackage = {
+              id: Date.now().toString(),
+              eventType: "",
+              photographersCount: "",
+              videographersCount: "",
+              prepChecklist: [],
+              isSaved: false,
+            };
+            setEventPackages([newPackage]);
+          }
           
           // Navigate to next page
           setCurrentPage(2);
@@ -808,7 +1003,7 @@ export default function NewProjectPage() {
       // Save all unsaved events before moving to page 3
       await saveUnsavedEvents();
       
-      // Update drafted_json when moving to page 3
+      // Update drafted_json with events and all column info when moving to page 3
       if (projectEstimateUuid) {
         const draftedJson = buildDraftedJson();
         try {
@@ -817,11 +1012,14 @@ export default function NewProjectPage() {
             p_is_drafted: true,
             p_drafted_json: draftedJson as any,
           });
+          console.log('Project JSON updated with events and all column info');
         } catch (error) {
           console.warn('Failed to update draft status:', error);
         }
       }
+      // Navigate to Page 3 (Quotation Format Selection)
       setCurrentPage(3);
+      setSearchParams({ page: '3' });
     } else if (currentPage === 3) {
       // Handle final submission or navigation
       handleSaveEvent();
@@ -838,9 +1036,11 @@ export default function NewProjectPage() {
 
   // Convert coordinator ID (phone number) to phone number (already stored as phone number)
   const getCoordinatorPhone = (coordinatorId: string | undefined, type: 'photo' | 'video'): string | null => {
-    if (!coordinatorId) return null;
+    if (!coordinatorId || coordinatorId.trim() === '') return null;
     // Coordinator ID is now the phone number directly, just remove spaces
-    return coordinatorId.replace(/\s/g, '');
+    const cleaned = coordinatorId.replace(/\s/g, '');
+    // Return null if empty after cleaning
+    return cleaned === '' ? null : cleaned;
   };
 
   // Convert EventPackage to database format and save to events_details_table
@@ -879,40 +1079,88 @@ export default function NewProjectPage() {
         ? eventPackage.customEventTypeName
         : eventPackage.eventType;
       
+      // Get client phone number - ensure it exists
+      const clientPhno = (projectDetails?.clientid_phno || formData.clientPhone || '').replace(/\s/g, '');
+      if (!clientPhno) {
+        console.error('Cannot save event: missing client phone number');
+        return null;
+      }
+
+      // Get coordinator phone numbers
+      const photoCoordinatorPhno = getCoordinatorPhone(eventPackage.photographyCoordinatorId, 'photo');
+      const videoCoordinatorPhno = getCoordinatorPhone(eventPackage.videographyCoordinatorId, 'video');
+
       const requestData = {
         p_event_name: eventName,
         p_event_start_date: format(eventPackage.startDate, 'yyyy-MM-dd'),
         p_event_start_time: (eventPackage.startHour && eventPackage.startMinute)
           ? formatTime(eventPackage.startHour, eventPackage.startMinute)
           : null,
-        p_event_photo_coordinator_phno: getCoordinatorPhone(eventPackage.photographyCoordinatorId, 'photo'),
-        p_event_video_coordinator_phno: getCoordinatorPhone(eventPackage.videographyCoordinatorId, 'video'),
+        p_event_photo_coordinator_phno: photoCoordinatorPhno,
+        p_event_video_coordinator_phno: videoCoordinatorPhno,
         p_event_photographers_count: parseInt(eventPackage.photographersCount || '0', 10),
         p_event_videographers_count: parseInt(eventPackage.videographersCount || '0', 10),
         p_event_deliverables_notes_json: eventPackage.savedDeliverablesNotes || eventPackage.deliverablesNotes || null,
         p_event_prep_checklist_json: checklistJson as any,
         p_project_uuid: projectEstimateUuid,
         p_photography_eventowner_phno: photographyOwner.photography_owner_phno,
-        p_event_client_phno: formData.clientPhone.replace(/\s/g, ''), // Remove spaces
+        p_event_client_phno: clientPhno,
         p_event_uuid: eventPackage.event_uuid || null, // If exists, update; otherwise create new
         p_event_days_count: eventPackage.daysCount ? parseFloat(eventPackage.daysCount) : null,
         p_photography_workdays: eventPackage.photographyWorkdays ? parseFloat(eventPackage.photographyWorkdays) : null,
         p_videography_workdays: eventPackage.videographyWorkdays ? parseFloat(eventPackage.videographyWorkdays) : null,
+        p_event_photographers_days_count: eventPackage.photographyWorkdays ? parseFloat(eventPackage.photographyWorkdays) : null, // PGDays -> event_photographers_days_count
+        p_event_videographers_days_count: eventPackage.videographyWorkdays ? parseFloat(eventPackage.videographyWorkdays) : null, // VGDays -> event_videographers_days_count
       };
+
+      // Log the request data for debugging
+      console.log('Saving event with data:', {
+        project_uuid: projectEstimateUuid,
+        client_phno: clientPhno,
+        photo_coordinator: photoCoordinatorPhno,
+        video_coordinator: videoCoordinatorPhno,
+        photography_owner: photographyOwner.photography_owner_phno,
+        event_name: eventName
+      });
 
       // Call Supabase RPC function
       const { data, error } = await supabase.rpc('create_event', requestData);
 
       if (error) {
         console.error(`Error saving event ${index + 1}:`, error);
+        console.error('Request data sent:', requestData);
         return null;
       }
 
-      if (data && data.success) {
-        console.log(`Event ${index + 1} saved successfully:`, data.event_uuid);
-        return data.event_uuid;
+      if (data && (data as any).success) {
+        const eventUuid = (data as any).event_uuid;
+        const isDuplicate = (data as any).is_duplicate || false;
+        const isUpdate = (data as any).is_update || false;
+        
+        if (isDuplicate) {
+          console.log(`Duplicate event detected for event ${index + 1}. Existing event updated with UUID:`, eventUuid);
+        } else if (isUpdate) {
+          console.log(`Event ${index + 1} updated successfully with UUID:`, eventUuid);
+        } else {
+          console.log(`Event ${index + 1} created successfully with UUID:`, eventUuid);
+        }
+        
+        return eventUuid;
       } else {
         console.error(`Failed to save event ${index + 1}:`, data);
+        if ((data as any)?.error_detail) {
+          console.error('Detailed error:', (data as any).error_detail);
+          console.error('Foreign key values that failed:', {
+            project_uuid: (data as any).project_uuid,
+            client_phno: (data as any).client_phno,
+            photo_coordinator: (data as any).photo_coordinator,
+            video_coordinator: (data as any).video_coordinator
+          });
+        }
+        // Show user-friendly error message
+        if (data?.error && data.error.includes('Foreign key')) {
+          alert(`Failed to save event: ${data.error}\n\nPlease ensure:\n- Project exists\n- Client phone number is correct\n- Coordinator phone numbers exist in the database (or leave empty)`);
+        }
         return null;
       }
     } catch (error: any) {
@@ -1013,6 +1261,39 @@ export default function NewProjectPage() {
     setEditingPackageNameId(null);
   };
 
+  // Save event card data to sessionStorage
+  const saveEventCardToSessionStorage = (eventPackage: EventPackage) => {
+    try {
+      const eventCardData = {
+        id: eventPackage.id,
+        eventType: eventPackage.eventType,
+        customEventTypeName: eventPackage.customEventTypeName,
+        photographersCount: eventPackage.photographersCount,
+        photographyWorkdays: eventPackage.photographyWorkdays,
+        videographersCount: eventPackage.videographersCount,
+        videographyWorkdays: eventPackage.videographyWorkdays,
+        startDate: eventPackage.startDate?.toISOString(),
+        startHour: eventPackage.startHour,
+        startMinute: eventPackage.startMinute,
+        daysCount: eventPackage.daysCount,
+        photographyCoordinatorId: eventPackage.photographyCoordinatorId,
+        videographyCoordinatorId: eventPackage.videographyCoordinatorId,
+        deliverablesNotes: eventPackage.deliverablesNotes,
+        savedDeliverablesNotes: eventPackage.savedDeliverablesNotes,
+        prepChecklist: eventPackage.prepChecklist,
+        packageName: eventPackage.packageName,
+        event_uuid: eventPackage.event_uuid,
+        isSaved: eventPackage.isSaved,
+      };
+      
+      const allEventCards = JSON.parse(sessionStorage.getItem('eventCardsData') || '{}');
+      allEventCards[eventPackage.id] = eventCardData;
+      sessionStorage.setItem('eventCardsData', JSON.stringify(allEventCards));
+    } catch (error) {
+      console.error('Error saving event card to sessionStorage:', error);
+    }
+  };
+
   const handleEventPackageChange = (id: string, field: keyof EventPackage, value: string | Date | ChecklistItem[] | undefined) => {
     // When certain fields change, mark the event as unsaved so it gets saved again
     const fieldsThatRequireResave = ['eventType', 'startDate', 'startHour', 'startMinute', 
@@ -1028,6 +1309,8 @@ export default function NewProjectPage() {
           if (fieldsThatRequireResave.includes(field)) {
             updated.isSaved = false;
           }
+          // Auto-save to sessionStorage
+          saveEventCardToSessionStorage(updated);
           return updated;
         }
         return pkg;
@@ -1153,6 +1436,393 @@ export default function NewProjectPage() {
   };
 
   // Calculate event-wise cost breakdown
+  // PDF Editing Functions
+  const loadPdfWithPriceCard = async () => {
+    try {
+      const { actualPrice, subtotal, gst, total } = calculatePrice();
+      
+      // Fetch the original PDF
+      const response = await fetch(selectedPdfPath);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch PDF: ${response.statusText}`);
+      }
+      const arrayBuffer = await response.arrayBuffer();
+      
+      // Load PDF
+      const pdfDoc = await PDFDocument.load(arrayBuffer);
+      const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+      
+      // Add a new page for price card
+      const pricePage = pdfDoc.addPage([595, 842]); // A4 size
+      const { width, height } = pricePage.getSize();
+      
+      // Start from top of page (PDF coordinates: y=0 is bottom, y=height is top)
+      let currentY = height - 50; // Start 50 points from top
+      
+      // Title
+      pricePage.drawText("Price Summary", {
+        x: 70,
+        y: currentY,
+        size: 24,
+        font: helveticaBold,
+        color: rgb(0, 0, 0),
+      });
+      
+      currentY -= 40; // Move down for price details
+      
+      // Draw price card background (positioned below title)
+      const cardY = currentY - 200; // Card height will be 200
+      pricePage.drawRectangle({
+        x: 50,
+        y: cardY,
+        width: width - 100,
+        height: 200,
+        borderColor: rgb(0.8, 0.8, 0.8),
+        borderWidth: 2,
+        color: rgb(0.98, 0.98, 0.98),
+      });
+      
+      // Price details
+      const priceDetails = [
+        { label: "Actual Price:", value: `₹${actualPrice.toLocaleString()}` },
+        { label: "Sub Total:", value: `₹${subtotal.toLocaleString()}` },
+        { label: "GST (18%):", value: `₹${gst.toLocaleString()}` },
+      ];
+      
+      // Draw price details inside the card
+      let yPos = currentY - 20;
+      priceDetails.forEach((detail) => {
+        pricePage.drawText(detail.label, {
+          x: 70,
+          y: yPos,
+          size: 12,
+          font: helveticaFont,
+          color: rgb(0, 0, 0),
+        });
+        
+        pricePage.drawText(detail.value, {
+          x: width - 200,
+          y: yPos,
+          size: 12,
+          font: helveticaFont,
+          color: rgb(0, 0, 0),
+        });
+        
+        yPos -= 30;
+      });
+      
+      // Draw separator line before total
+      pricePage.drawLine({
+        start: { x: 70, y: yPos - 10 },
+        end: { x: width - 70, y: yPos - 10 },
+        thickness: 1,
+        color: rgb(0.7, 0.7, 0.7),
+      });
+      
+      yPos -= 20;
+      
+      // Total Price (larger and bold)
+      pricePage.drawText("Total Price:", {
+        x: 70,
+        y: yPos,
+        size: 16,
+        font: helveticaBold,
+        color: rgb(0, 0, 0),
+      });
+      
+      pricePage.drawText(`₹${total.toLocaleString()}`, {
+        x: width - 200,
+        y: yPos,
+        size: 18,
+        font: helveticaBold,
+        color: rgb(0, 0.4, 0.8),
+      });
+      
+      yPos -= 50;
+      
+      // Add editable text area label
+      pricePage.drawText("Additional Notes:", {
+        x: 70,
+        y: yPos,
+        size: 14,
+        font: helveticaBold,
+        color: rgb(0, 0, 0),
+      });
+      
+      // Draw a box for additional notes
+      pricePage.drawRectangle({
+        x: 70,
+        y: yPos - 100,
+        width: width - 140,
+        height: 80,
+        borderColor: rgb(0.7, 0.7, 0.7),
+        borderWidth: 1,
+        color: rgb(1, 1, 1),
+      });
+      
+      // Save PDF as blob
+      const pdfBytes = await pdfDoc.save();
+      const blob = new Blob([pdfBytes], { type: "application/pdf" });
+      setEditedPdfBlob(blob);
+      
+      console.log("PDF with price card created successfully");
+      return blob;
+    } catch (error) {
+      console.error("Error loading PDF with price card:", error);
+      throw error;
+    }
+  };
+
+  const handleEditPdf = async () => {
+    setIsEditingPdf(true);
+    try {
+      // Load PDF with price card if not already loaded
+      let blob = editedPdfBlob;
+      if (!blob) {
+        blob = await loadPdfWithPriceCard();
+        setEditedPdfBlob(blob);
+      }
+      
+      // Initialize editable prices from current calculated values
+      const { actualPrice, subtotal, gst, total } = calculatePrice();
+      setEditablePrices({
+        actualPrice: actualPrice.toLocaleString(),
+        subtotal: subtotal.toLocaleString(),
+        gst: gst.toLocaleString(),
+        total: total.toLocaleString(),
+      });
+      
+      // Show the PDF in viewer
+      const url = URL.createObjectURL(blob);
+      setSelectedPdfPath(url);
+      setPdfEditText(""); // Initialize with empty text or load from saved state
+    } catch (error) {
+      console.error("Error editing PDF:", error);
+    }
+  };
+
+  const handleSavePdf = async () => {
+    try {
+      // Ensure we have a blob to work with
+      let workingBlob = editedPdfBlob;
+      if (!workingBlob) {
+        workingBlob = await loadPdfWithPriceCard();
+        setEditedPdfBlob(workingBlob);
+      }
+      
+      // Create a new PDF with edited text and prices
+      const arrayBuffer = await workingBlob.arrayBuffer();
+      const pdfDoc = await PDFDocument.load(arrayBuffer);
+      const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+      
+      // Get the last page (price card page)
+      const pages = pdfDoc.getPages();
+      const pricePage = pages[pages.length - 1];
+      const { width, height } = pricePage.getSize();
+      
+      // Clear and redraw the entire price card section with updated values
+      let currentY = height - 50;
+      
+      // Redraw title
+      pricePage.drawText("Price Summary", {
+        x: 70,
+        y: currentY,
+        size: 24,
+        font: helveticaBold,
+        color: rgb(0, 0, 0),
+      });
+      
+      currentY -= 40;
+      
+      // Redraw price card background
+      const cardY = currentY - 200;
+      pricePage.drawRectangle({
+        x: 50,
+        y: cardY,
+        width: width - 100,
+        height: 200,
+        borderColor: rgb(0.8, 0.8, 0.8),
+        borderWidth: 2,
+        color: rgb(0.98, 0.98, 0.98),
+      });
+      
+      // Parse editable prices (remove commas and convert to numbers)
+      const actualPriceValue = editablePrices.actualPrice.replace(/,/g, '') || calculatePrice().actualPrice.toString();
+      const subtotalValue = editablePrices.subtotal.replace(/,/g, '') || calculatePrice().subtotal.toString();
+      const gstValue = editablePrices.gst.replace(/,/g, '') || calculatePrice().gst.toString();
+      const totalValue = editablePrices.total.replace(/,/g, '') || calculatePrice().total.toString();
+      
+      // Format prices with commas
+      const formatPrice = (value: string) => {
+        const num = parseFloat(value) || 0;
+        return `₹${num.toLocaleString()}`;
+      };
+      
+      // Draw updated price details
+      const priceDetails = [
+        { label: "Actual Price:", value: formatPrice(actualPriceValue) },
+        { label: "Sub Total:", value: formatPrice(subtotalValue) },
+        { label: "GST (18%):", value: formatPrice(gstValue) },
+      ];
+      
+      let yPos = currentY - 20;
+      priceDetails.forEach((detail) => {
+        pricePage.drawText(detail.label, {
+          x: 70,
+          y: yPos,
+          size: 12,
+          font: helveticaFont,
+          color: rgb(0, 0, 0),
+        });
+        
+        pricePage.drawText(detail.value, {
+          x: width - 200,
+          y: yPos,
+          size: 12,
+          font: helveticaFont,
+          color: rgb(0, 0, 0),
+        });
+        
+        yPos -= 30;
+      });
+      
+      // Draw separator line
+      pricePage.drawLine({
+        start: { x: 70, y: yPos - 10 },
+        end: { x: width - 70, y: yPos - 10 },
+        thickness: 1,
+        color: rgb(0.7, 0.7, 0.7),
+      });
+      
+      yPos -= 20;
+      
+      // Draw updated total
+      pricePage.drawText("Total Price:", {
+        x: 70,
+        y: yPos,
+        size: 16,
+        font: helveticaBold,
+        color: rgb(0, 0, 0),
+      });
+      
+      pricePage.drawText(formatPrice(totalValue), {
+        x: width - 200,
+        y: yPos,
+        size: 18,
+        font: helveticaBold,
+        color: rgb(0, 0.4, 0.8),
+      });
+      
+      yPos -= 50;
+      
+      // Draw additional notes label
+      pricePage.drawText("Additional Notes:", {
+        x: 70,
+        y: yPos,
+        size: 14,
+        font: helveticaBold,
+        color: rgb(0, 0, 0),
+      });
+      
+      // Draw notes box
+      pricePage.drawRectangle({
+        x: 70,
+        y: yPos - 100,
+        width: width - 140,
+        height: 80,
+        borderColor: rgb(0.7, 0.7, 0.7),
+        borderWidth: 1,
+        color: rgb(1, 1, 1),
+      });
+      
+      // Add edited text if provided
+      if (pdfEditText.trim()) {
+        const lines = pdfEditText.split('\n');
+        let textY = yPos - 20;
+        
+        lines.forEach((line, index) => {
+          if (index < 5) { // Limit to 5 lines
+            pricePage.drawText(line, {
+              x: 80,
+              y: textY,
+              size: 11,
+              font: helveticaFont,
+              color: rgb(0, 0, 0),
+              maxWidth: width - 160,
+            });
+            textY -= 15;
+          }
+        });
+      }
+      
+      // Save updated PDF
+      const pdfBytes = await pdfDoc.save();
+      const blob = new Blob([pdfBytes], { type: "application/pdf" });
+      setEditedPdfBlob(blob);
+      
+      // Update preview
+      const url = URL.createObjectURL(blob);
+      setSelectedPdfPath(url);
+      
+      setIsEditingPdf(false);
+      console.log("PDF saved successfully with edited text and prices");
+    } catch (error) {
+      console.error("Error saving PDF:", error);
+    }
+  };
+
+  const handleDownloadPdf = async () => {
+    try {
+      let blob = editedPdfBlob;
+      
+      // If no edited PDF exists, create one
+      if (!blob) {
+        blob = await loadPdfWithPriceCard();
+      }
+      
+      // Create download link
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `quotation_${formData.projectName || "project"}_${new Date().toISOString().split("T")[0]}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading PDF:", error);
+    }
+  };
+
+  const handlePreviewPdf = async () => {
+    setIsPreviewMode(true);
+    try {
+      let blob = editedPdfBlob;
+      
+      // If no edited PDF exists, create one
+      if (!blob) {
+        blob = await loadPdfWithPriceCard();
+      }
+      
+      const url = URL.createObjectURL(blob);
+      setSelectedPdfPath(url);
+    } catch (error) {
+      console.error("Error previewing PDF:", error);
+    }
+  };
+
+  // Auto-load PDF with price card when Standard Wedding is selected on Page 3
+  useEffect(() => {
+    if (currentPage === 3 && selectedFormat === "standard_wedding.pdf" && !editedPdfBlob && !isEditingPdf) {
+      loadPdfWithPriceCard().then((blob) => {
+        const url = URL.createObjectURL(blob);
+        setSelectedPdfPath(url);
+      }).catch(console.error);
+    }
+  }, [currentPage, selectedFormat, editedPdfBlob, isEditingPdf]);
+
   const calculateEventWiseCosts = () => {
     const basePricePerPhotographer = 10000;
     const basePricePerVideographer = 15000;
@@ -1212,11 +1882,57 @@ export default function NewProjectPage() {
   };
 
   const handleSaveEvent = async (isSubmit: boolean = false) => {
-    // TODO: Implement save logic for event packages
-    // Save eventPackages to database using projectEstimateUuid
+    if (!projectEstimateUuid) {
+      alert('Project UUID not found. Please go back to Page 1 and click Next.');
+      return;
+    }
+
+    // Validate and save all event cards with valid data
+    setIsSavingEvents(true);
     
-    if (projectEstimateUuid) {
-      try {
+    try {
+      // Filter valid event cards (must have eventType and startDate)
+      const validEventCards = eventPackages.filter(
+        (pkg) => pkg.eventType && pkg.startDate
+      );
+
+      if (validEventCards.length === 0) {
+        alert('No valid event cards to save. Please add at least one event with Event Type and Start Date.');
+        setIsSavingEvents(false);
+        return;
+      }
+
+      // Save events sequentially
+      const updatedPackages = [...eventPackages];
+      let savedCount = 0;
+      let failedCount = 0;
+
+      for (let i = 0; i < validEventCards.length; i++) {
+        const pkg = validEventCards[i];
+        const eventIndex = eventPackages.findIndex((ep) => ep.id === pkg.id);
+        
+        if (eventIndex === -1) continue;
+
+        const eventUuid = await saveEventToDatabase(pkg, eventIndex);
+        
+        if (eventUuid) {
+          // Update the event package with the UUID and mark as saved
+          updatedPackages[eventIndex] = {
+            ...pkg,
+            event_uuid: eventUuid,
+            isSaved: true,
+          };
+          savedCount++;
+        } else {
+          failedCount++;
+        }
+      }
+
+      // Update state with all saved events
+      setEventPackages(updatedPackages);
+
+      // Update draft status
+      if (projectEstimateUuid) {
         if (isSubmit) {
           // When submitting, set is_drafted = false
           const { data, error } = await supabase.rpc('update_project_draft_status', {
@@ -1228,6 +1944,7 @@ export default function NewProjectPage() {
           if (error) {
             console.error('Error updating draft status:', error);
             alert(`Error: ${error.message || 'Failed to submit project'}`);
+            setIsSavingEvents(false);
             return;
           }
 
@@ -1249,36 +1966,49 @@ export default function NewProjectPage() {
             console.log('Draft saved successfully');
           }
         }
-      } catch (error: any) {
-        console.error('Exception updating draft status:', error);
-        if (isSubmit) {
-          alert(`Error: ${error.message || 'Failed to submit project'}`);
-          return;
-        }
       }
+
+      // Show success message
+      if (savedCount > 0) {
+        if (failedCount > 0) {
+          alert(`${savedCount} event(s) saved successfully. ${failedCount} event(s) failed to save.`);
+        } else {
+          alert(`${savedCount} event(s) saved successfully!`);
+        }
+      } else {
+        alert('Failed to save events. Please check the console for errors.');
+      }
+    } catch (error: any) {
+      console.error('Exception saving events:', error);
+      alert(`Error: ${error.message || 'Failed to save events'}`);
+    } finally {
+      setIsSavingEvents(false);
     }
     
-    // Clear sessionStorage after successful save/submit
-    try {
-      sessionStorage.removeItem("newProjectFormData");
-      sessionStorage.removeItem("newProjectCurrentPage");
-      sessionStorage.removeItem("newProjectEventPackages");
-      sessionStorage.removeItem("newProjectSelectedFormat");
-      sessionStorage.removeItem("newProjectEstimateUuid");
-      sessionStorage.removeItem("newProjectPhotographyOwnerPhno");
-      sessionStorage.removeItem("newProjectName");
-      sessionStorage.removeItem("newProjectType");
-      sessionStorage.removeItem("newProjectLastModified");
-    } catch (error) {
-      console.error("Error clearing sessionStorage:", error);
-    }
-    
+    // Only clear sessionStorage and navigate if submitting (isSubmit = true)
     if (isSubmit) {
+      // Clear sessionStorage after successful submit
+      try {
+        sessionStorage.removeItem("newProjectFormData");
+        sessionStorage.removeItem("newProjectCurrentPage");
+        sessionStorage.removeItem("newProjectEventPackages");
+        sessionStorage.removeItem("newProjectSelectedFormat");
+        sessionStorage.removeItem("newProjectEstimateUuid");
+        sessionStorage.removeItem("newProjectPhotographyOwnerPhno");
+        sessionStorage.removeItem("newProjectName");
+        sessionStorage.removeItem("newProjectType");
+        sessionStorage.removeItem("newProjectLastModified");
+      } catch (error) {
+        console.error("Error clearing sessionStorage:", error);
+      }
+      
       alert("Project submitted successfully!");
       navigate("/estimates/projects");
     } else {
-      alert("Draft saved successfully!");
-      navigate("/estimates");
+      // Stay on the current page (Page 2) after saving events
+      // Don't navigate - allow user to proceed to next page for quote documentation
+      // Don't clear sessionStorage - keep the data for the next page
+      console.log("Events saved successfully. Staying on Events Details page.");
     }
   };
 
@@ -1630,7 +2360,7 @@ export default function NewProjectPage() {
                   <div className="mb-6">
                     <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
                       <div>
-                        <h2 className="text-2xl font-semibold">Event Details</h2>
+                        <h2 className="text-2xl font-semibold">Events Details</h2>
                         <div className="flex flex-wrap items-center gap-2 text-sm mt-2">
                           <span className="font-medium">Project:</span>
                           <span className="text-muted-foreground">{formData.projectName || "Not set"}</span>
@@ -1653,8 +2383,19 @@ export default function NewProjectPage() {
                         <Button variant="outline" onClick={handleCancel}>
                           Cancel
                         </Button>
-                        <Button onClick={handleSaveEvent} className="bg-blue-600 hover:bg-blue-700 text-white">
-                          Save Event
+                        <Button 
+                          onClick={() => handleSaveEvent(false)} 
+                          className="bg-blue-600 hover:bg-blue-700 text-white"
+                          disabled={isSavingEvents}
+                        >
+                          {isSavingEvents ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Saving Events...
+                            </>
+                          ) : (
+                            'Save Events'
+                          )}
                         </Button>
                       </div>
                     </div>
@@ -1675,7 +2416,29 @@ export default function NewProjectPage() {
                         const isExpanded = expandedEventId === pkg.id;
                         
                         return (
-                          <Card key={pkg.id} className="p-4 w-[45%]">
+                          <Card 
+                            key={pkg.id} 
+                            className="p-4 w-[45%] relative"
+                            onClick={(e) => {
+                              // Only save if clicking on the card itself (white space), not on interactive elements
+                              const target = e.target as HTMLElement;
+                              // Check if click is on the card container or non-interactive elements
+                              if (target.closest('.p-4') && 
+                                  !target.closest('button') && 
+                                  !target.closest('input') && 
+                                  !target.closest('select') && 
+                                  !target.closest('[role="button"]') &&
+                                  !target.closest('[role="combobox"]') &&
+                                  !target.closest('[role="option"]')) {
+                                saveEventCardToSessionStorage(pkg);
+                              }
+                            }}
+                          >
+                            {/* Green dot indicator for saved events */}
+                            {pkg.event_uuid && (
+                              <div className="absolute top-2 left-2 w-3 h-3 bg-green-500 rounded-full border-2 border-white shadow-sm" 
+                                   title="Event saved to database" />
+                            )}
                             <div className="space-y-4">
                               <div className="flex items-center justify-between">
                                 {editingPackageNameId === pkg.id ? (
@@ -1816,56 +2579,68 @@ export default function NewProjectPage() {
 
                                   {/* Second row: PGs No, PGDays, VGs No, VGDays */}
                                   <div className="grid grid-cols-4 gap-4">
-                                    <Input
-                                      id={`photographers-${pkg.id}`}
-                                      type="number"
-                                      min="0"
-                                      placeholder="PGs No"
-                                      value={pkg.photographersCount}
-                                      onChange={(e) =>
-                                        handleEventPackageChange(
-                                          pkg.id,
-                                          "photographersCount",
-                                          e.target.value
-                                        )
-                                      }
-                                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                                    />
-                                    <Input
-                                      id={`photographyWorkdays-${pkg.id}`}
-                                      type="number"
-                                      step="0.1"
-                                      min="0"
-                                      placeholder="PGDays"
-                                      value={pkg.photographyWorkdays || ""}
-                                      onChange={(e) => handleEventPackageChange(pkg.id, "photographyWorkdays", e.target.value)}
-                                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                                    />
-                                    <Input
-                                      id={`videographers-${pkg.id}`}
-                                      type="number"
-                                      min="0"
-                                      placeholder="VGs No"
-                                      value={pkg.videographersCount}
-                                      onChange={(e) =>
-                                        handleEventPackageChange(
-                                          pkg.id,
-                                          "videographersCount",
-                                          e.target.value
-                                        )
-                                      }
-                                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                                    />
-                                    <Input
-                                      id={`videographyWorkdays-${pkg.id}`}
-                                      type="number"
-                                      step="0.1"
-                                      min="0"
-                                      placeholder="VGDays"
-                                      value={pkg.videographyWorkdays || ""}
-                                      onChange={(e) => handleEventPackageChange(pkg.id, "videographyWorkdays", e.target.value)}
-                                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                                    />
+                                    <div className="space-y-2">
+                                      <Label htmlFor={`photographers-${pkg.id}`} className="text-sm font-medium leading-none">PGs No</Label>
+                                      <Input
+                                        id={`photographers-${pkg.id}`}
+                                        type="number"
+                                        min="0"
+                                        placeholder="PGs No"
+                                        value={pkg.photographersCount}
+                                        onChange={(e) =>
+                                          handleEventPackageChange(
+                                            pkg.id,
+                                            "photographersCount",
+                                            e.target.value
+                                          )
+                                        }
+                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                      />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label htmlFor={`photographyWorkdays-${pkg.id}`} className="text-sm font-medium leading-none">PGDays</Label>
+                                      <Input
+                                        id={`photographyWorkdays-${pkg.id}`}
+                                        type="number"
+                                        step="0.1"
+                                        min="0"
+                                        placeholder="PGDays"
+                                        value={pkg.photographyWorkdays || ""}
+                                        onChange={(e) => handleEventPackageChange(pkg.id, "photographyWorkdays", e.target.value)}
+                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                      />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label htmlFor={`videographers-${pkg.id}`} className="text-sm font-medium leading-none">VGs No</Label>
+                                      <Input
+                                        id={`videographers-${pkg.id}`}
+                                        type="number"
+                                        min="0"
+                                        placeholder="VGs No"
+                                        value={pkg.videographersCount}
+                                        onChange={(e) =>
+                                          handleEventPackageChange(
+                                            pkg.id,
+                                            "videographersCount",
+                                            e.target.value
+                                          )
+                                        }
+                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                      />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label htmlFor={`videographyWorkdays-${pkg.id}`} className="text-sm font-medium leading-none">VGDays</Label>
+                                      <Input
+                                        id={`videographyWorkdays-${pkg.id}`}
+                                        type="number"
+                                        step="0.1"
+                                        min="0"
+                                        placeholder="VGDays"
+                                        value={pkg.videographyWorkdays || ""}
+                                        onChange={(e) => handleEventPackageChange(pkg.id, "videographyWorkdays", e.target.value)}
+                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                      />
+                                    </div>
                                   </div>
                                 </div>
                               ) : (
@@ -1915,56 +2690,68 @@ export default function NewProjectPage() {
 
                                       {/* Second row: PGs No, PGDays, VGs No, VGDays */}
                                       <div className="grid grid-cols-4 gap-4">
-                                        <Input
-                                          id={`photographers-${pkg.id}`}
-                                          type="number"
-                                          min="0"
-                                          placeholder="PGs No"
-                                          value={pkg.photographersCount}
-                                          onChange={(e) =>
-                                            handleEventPackageChange(
-                                              pkg.id,
-                                              "photographersCount",
-                                              e.target.value
-                                            )
-                                          }
-                                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                                        />
-                                        <Input
-                                          id={`photographyWorkdays-${pkg.id}`}
-                                          type="number"
-                                          step="0.1"
-                                          min="0"
-                                          placeholder="PGDays"
-                                          value={pkg.photographyWorkdays || ""}
-                                          onChange={(e) => handleEventPackageChange(pkg.id, "photographyWorkdays", e.target.value)}
-                                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                                        />
-                                        <Input
-                                          id={`videographers-${pkg.id}`}
-                                          type="number"
-                                          min="0"
-                                          placeholder="VGs No"
-                                          value={pkg.videographersCount}
-                                          onChange={(e) =>
-                                            handleEventPackageChange(
-                                              pkg.id,
-                                              "videographersCount",
-                                              e.target.value
-                                            )
-                                          }
-                                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                                        />
-                                        <Input
-                                          id={`videographyWorkdays-${pkg.id}`}
-                                          type="number"
-                                          step="0.1"
-                                          min="0"
-                                          placeholder="VGDays"
-                                          value={pkg.videographyWorkdays || ""}
-                                          onChange={(e) => handleEventPackageChange(pkg.id, "videographyWorkdays", e.target.value)}
-                                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                                        />
+                                        <div className="space-y-2">
+                                          <Label htmlFor={`photographers-${pkg.id}`} className="text-sm font-medium leading-none">PGs No</Label>
+                                          <Input
+                                            id={`photographers-${pkg.id}`}
+                                            type="number"
+                                            min="0"
+                                            placeholder="PGs No"
+                                            value={pkg.photographersCount}
+                                            onChange={(e) =>
+                                              handleEventPackageChange(
+                                                pkg.id,
+                                                "photographersCount",
+                                                e.target.value
+                                              )
+                                            }
+                                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                          />
+                                        </div>
+                                        <div className="space-y-2">
+                                          <Label htmlFor={`photographyWorkdays-${pkg.id}`} className="text-sm font-medium leading-none">PGDays</Label>
+                                          <Input
+                                            id={`photographyWorkdays-${pkg.id}`}
+                                            type="number"
+                                            step="0.1"
+                                            min="0"
+                                            placeholder="PGDays"
+                                            value={pkg.photographyWorkdays || ""}
+                                            onChange={(e) => handleEventPackageChange(pkg.id, "photographyWorkdays", e.target.value)}
+                                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                          />
+                                        </div>
+                                        <div className="space-y-2">
+                                          <Label htmlFor={`videographers-${pkg.id}`} className="text-sm font-medium leading-none">VGs No</Label>
+                                          <Input
+                                            id={`videographers-${pkg.id}`}
+                                            type="number"
+                                            min="0"
+                                            placeholder="VGs No"
+                                            value={pkg.videographersCount}
+                                            onChange={(e) =>
+                                              handleEventPackageChange(
+                                                pkg.id,
+                                                "videographersCount",
+                                                e.target.value
+                                              )
+                                            }
+                                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                          />
+                                        </div>
+                                        <div className="space-y-2">
+                                          <Label htmlFor={`videographyWorkdays-${pkg.id}`} className="text-sm font-medium leading-none">VGDays</Label>
+                                          <Input
+                                            id={`videographyWorkdays-${pkg.id}`}
+                                            type="number"
+                                            step="0.1"
+                                            min="0"
+                                            placeholder="VGDays"
+                                            value={pkg.videographyWorkdays || ""}
+                                            onChange={(e) => handleEventPackageChange(pkg.id, "videographyWorkdays", e.target.value)}
+                                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                          />
+                                        </div>
                                       </div>
                                     </>
                                   ) : (
@@ -2088,7 +2875,8 @@ export default function NewProjectPage() {
                                     </div>
 
                                     {/* Days Count Input */}
-                                    <div className="flex-shrink-0">
+                                    <div className="flex-shrink-0 space-y-2">
+                                      <Label htmlFor={`daysCount-${pkg.id}`} className="text-sm font-medium leading-none">Days No.</Label>
                                       <Input
                                         id={`daysCount-${pkg.id}`}
                                         type="number"
@@ -2450,29 +3238,58 @@ export default function NewProjectPage() {
                     <div className="flex items-end justify-between gap-4">
                       <div className="flex flex-col">
                         <Label className="text-sm text-muted-foreground mb-2">Select a template</Label>
-                        <Select value={selectedFormat} onValueChange={setSelectedFormat}>
+                        <Select 
+                          value={selectedFormat} 
+                          onValueChange={(value) => {
+                            setSelectedFormat(value);
+                            // Reset edited PDF when template changes
+                            setEditedPdfBlob(null);
+                            setIsEditingPdf(false);
+                            setIsPreviewMode(false);
+                            if (value === "standard_wedding.pdf") {
+                              setSelectedPdfPath("/docs/test-pdfloader/file-sample_150kB.pdf");
+                            } else {
+                              setSelectedPdfPath(`/docs/test-pdfloader/${value}`);
+                            }
+                          }}
+                        >
                           <SelectTrigger className="w-48">
                             <SelectValue placeholder="Select template" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="standard_wedding">Standard Wedding</SelectItem>
-                            <SelectItem value="premium_wedding">Premium Wedding</SelectItem>
-                            <SelectItem value="corporate">Corporate</SelectItem>
-                            <SelectItem value="portrait">Portrait</SelectItem>
-                            <SelectItem value="event">Event</SelectItem>
+                            <SelectItem value="standard_wedding.pdf">Standard Wedding</SelectItem>
+                            <SelectItem value="file-sample_150kB.pdf">Sample Template</SelectItem>
+                            <SelectItem value="premium_wedding.pdf">Premium Wedding</SelectItem>
+                            <SelectItem value="corporate.pdf">Corporate</SelectItem>
+                            <SelectItem value="portrait.pdf">Portrait</SelectItem>
+                            <SelectItem value="event.pdf">Event</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm" className="h-9">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="h-9"
+                          onClick={handleEditPdf}
+                        >
                           <Pencil className="h-4 w-4 mr-2" />
                           Edit
                         </Button>
-                        <Button variant="outline" size="sm" className="h-9">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="h-9"
+                          onClick={handlePreviewPdf}
+                        >
                           <Eye className="h-4 w-4 mr-2" />
                           Preview
                         </Button>
-                        <Button className="bg-blue-600 hover:bg-blue-700 text-white h-9" size="sm">
+                        <Button 
+                          className="bg-blue-600 hover:bg-blue-700 text-white h-9" 
+                          size="sm"
+                          onClick={handleDownloadPdf}
+                        >
                           <Download className="h-4 w-4 mr-2" />
                           Download PDF
                         </Button>
@@ -2484,18 +3301,150 @@ export default function NewProjectPage() {
                     </div>
 
                     {/* PDF Viewer Area */}
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-12 min-h-[500px] flex flex-col items-center justify-center bg-gray-50">
-                      <div className="text-center space-y-4 mb-6">
-                        <p className="text-lg font-semibold text-gray-700">
-                          Your quotation will appear here
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          Please select a quotation format and then choose 'Preview' or 'Edit' to begin.
-                        </p>
-                      </div>
-                      <Button variant="outline" className="h-10 px-4 py-2 bg-white">
-                        Upload Custom Template
-                      </Button>
+                    <div className="border-2 border-gray-300 rounded-lg bg-white min-h-[600px] flex flex-col">
+                      {isEditingPdf ? (
+                        <div className="flex flex-col h-full">
+                          {/* PDF Viewer */}
+                          <div className="flex-1 w-full h-full border-b">
+                            <iframe
+                              src={selectedPdfPath}
+                              className="w-full h-full min-h-[400px] border-0"
+                              title="PDF Viewer"
+                            />
+                          </div>
+                          
+                          {/* Editable Form Section */}
+                          <div className="p-6 bg-gray-50 border-t max-h-[400px] overflow-y-auto">
+                            <div className="space-y-6">
+                              {/* Price Table Editor */}
+                              <div className="border rounded-lg p-4 bg-white">
+                                <h3 className="font-semibold text-lg mb-4">Edit Price Summary</h3>
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div className="space-y-2">
+                                    <Label htmlFor="edit-actual-price">Actual Price (₹)</Label>
+                                    <Input
+                                      id="edit-actual-price"
+                                      type="text"
+                                      value={editablePrices.actualPrice}
+                                      onChange={(e) => {
+                                        const value = e.target.value.replace(/[^0-9,]/g, '');
+                                        setEditablePrices(prev => ({ ...prev, actualPrice: value }));
+                                      }}
+                                      placeholder="Enter actual price"
+                                    />
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label htmlFor="edit-subtotal">Sub Total (₹)</Label>
+                                    <Input
+                                      id="edit-subtotal"
+                                      type="text"
+                                      value={editablePrices.subtotal}
+                                      onChange={(e) => {
+                                        const value = e.target.value.replace(/[^0-9,]/g, '');
+                                        setEditablePrices(prev => ({ ...prev, subtotal: value }));
+                                      }}
+                                      placeholder="Enter subtotal"
+                                    />
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label htmlFor="edit-gst">GST (18%) (₹)</Label>
+                                    <Input
+                                      id="edit-gst"
+                                      type="text"
+                                      value={editablePrices.gst}
+                                      onChange={(e) => {
+                                        const value = e.target.value.replace(/[^0-9,]/g, '');
+                                        setEditablePrices(prev => ({ ...prev, gst: value }));
+                                      }}
+                                      placeholder="Enter GST amount"
+                                    />
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label htmlFor="edit-total">Total Price (₹)</Label>
+                                    <Input
+                                      id="edit-total"
+                                      type="text"
+                                      value={editablePrices.total}
+                                      onChange={(e) => {
+                                        const value = e.target.value.replace(/[^0-9,]/g, '');
+                                        setEditablePrices(prev => ({ ...prev, total: value }));
+                                      }}
+                                      placeholder="Enter total price"
+                                      className="font-semibold"
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              {/* Additional Notes Editor */}
+                              <div className="border rounded-lg p-4 bg-white">
+                                <Label htmlFor="pdf-edit-text" className="mb-2 block font-semibold">
+                                  Edit Additional Notes:
+                                </Label>
+                                <Textarea
+                                  id="pdf-edit-text"
+                                  value={pdfEditText}
+                                  onChange={(e) => setPdfEditText(e.target.value)}
+                                  placeholder="Enter additional notes or text to add to the price card page..."
+                                  rows={6}
+                                  className="mb-3"
+                                />
+                              </div>
+                              
+                              {/* Action Buttons */}
+                              <div className="flex gap-2 justify-end">
+                                <Button 
+                                  variant="outline" 
+                                  onClick={() => {
+                                    setIsEditingPdf(false);
+                                    if (editedPdfBlob) {
+                                      const url = URL.createObjectURL(editedPdfBlob);
+                                      setSelectedPdfPath(url);
+                                    }
+                                  }}
+                                >
+                                  Cancel
+                                </Button>
+                                <Button onClick={handleSavePdf} className="bg-blue-600 hover:bg-blue-700">
+                                  <Save className="h-4 w-4 mr-2" />
+                                  Save PDF
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ) : selectedPdfPath ? (
+                        <div className="flex-1 w-full h-full">
+                          <iframe
+                            src={selectedPdfPath}
+                            className="w-full h-full min-h-[600px] border-0"
+                            title="PDF Viewer"
+                            onLoad={() => {
+                              // Auto-load PDF with price card when Standard Wedding is selected
+                              if (selectedFormat === "standard_wedding.pdf" && !editedPdfBlob && !isEditingPdf && !isPreviewMode) {
+                                loadPdfWithPriceCard().then((blob) => {
+                                  const url = URL.createObjectURL(blob);
+                                  setSelectedPdfPath(url);
+                                }).catch(console.error);
+                              }
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center p-12 min-h-[500px] bg-gray-50">
+                          <div className="text-center space-y-4 mb-6">
+                            <p className="text-lg font-semibold text-gray-700">
+                              Your quotation will appear here
+                            </p>
+                            <p className="text-sm text-gray-500">
+                              Please select a quotation format and then choose 'Preview' or 'Edit' to begin.
+                            </p>
+                          </div>
+                          <Button variant="outline" className="h-10 px-4 py-2 bg-white">
+                            Upload Custom Template
+                          </Button>
+                        </div>
+                      )}
                     </div>
 
 

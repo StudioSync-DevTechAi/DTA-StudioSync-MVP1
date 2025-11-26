@@ -7,6 +7,13 @@
 -- Created: 2025-01-25
 -- Purpose: Fetch project and client details for Page 2 (Event Details)
 -- ============================================
+-- 
+-- INSTRUCTIONS:
+-- 1. Open Supabase Dashboard
+-- 2. Go to SQL Editor
+-- 3. Copy and paste this entire file
+-- 4. Click "Run" to execute
+-- ============================================
 
 -- Function to get project estimation details with client information
 CREATE OR REPLACE FUNCTION public.get_project_estimation_details(

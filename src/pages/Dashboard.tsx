@@ -53,7 +53,7 @@ function Dashboard() {
       title: "Estimates",
       description: "Create and manage project estimates",
       icon: FileText,
-      path: "/estimates",
+      path: "/estimates/projects",
       color: "bg-blue-500",
       showWIP: false
     },
