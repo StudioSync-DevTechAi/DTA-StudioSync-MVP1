@@ -30,38 +30,38 @@ export default function EstimatesPage() {
   return (
     <Layout>
       <div className="space-y-6">
-        <EstimatesHeader 
-          onNewEstimate={handleCreateNewEstimate}
-          canCreate={true} // Will be controlled by PermissionGuard
-        />
-        
-        <EstimatesTabs
-          currentTab={currentTab}
-          onTabChange={setCurrentTab}
-          filteredEstimates={filteredEstimates}
-          onEdit={handleEditEstimate}
-          onPreview={handleOpenPreview}
-          onStatusChange={handleQuickStatusChange}
-          onGoToScheduling={handleGoToScheduling}
-          onNewEstimate={handleCreateNewEstimate}
-        />
-
-        <PermissionGuard permission={PERMISSIONS.ESTIMATES_CREATE}>
-          <EstimateForm
-            open={showNewEstimateForm}
-            onClose={handleCloseForm}
-            editingEstimate={isEditing ? selectedEstimate : null}
+          <EstimatesHeader 
+            onNewEstimate={handleCreateNewEstimate}
+            canCreate={true}
           />
-        </PermissionGuard>
-
-        {selectedEstimate && (
-          <EstimatePreview
-            open={showPreview}
-            onClose={handleClosePreview}
-            estimate={selectedEstimate}
-            onStatusChange={handleStatusChange}
+          
+          <EstimatesTabs
+            currentTab={currentTab}
+            onTabChange={setCurrentTab}
+            filteredEstimates={filteredEstimates}
+            onEdit={handleEditEstimate}
+            onPreview={handleOpenPreview}
+            onStatusChange={handleQuickStatusChange}
+            onGoToScheduling={handleGoToScheduling}
+            onNewEstimate={handleCreateNewEstimate}
           />
-        )}
+
+          <PermissionGuard permission={PERMISSIONS.ESTIMATES_CREATE}>
+            <EstimateForm
+              open={showNewEstimateForm}
+              onClose={handleCloseForm}
+              editingEstimate={isEditing ? selectedEstimate : null}
+            />
+          </PermissionGuard>
+
+          {selectedEstimate && (
+            <EstimatePreview
+              open={showPreview}
+              onClose={handleClosePreview}
+              estimate={selectedEstimate}
+              onStatusChange={handleStatusChange}
+            />
+          )}
       </div>
     </Layout>
   );

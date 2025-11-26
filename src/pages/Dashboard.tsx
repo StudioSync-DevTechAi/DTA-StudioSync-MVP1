@@ -53,43 +53,49 @@ function Dashboard() {
       title: "Estimates",
       description: "Create and manage project estimates",
       icon: FileText,
-      path: "/estimates",
-      color: "bg-blue-500"
+      path: "/estimates/projects",
+      color: "bg-blue-500",
+      showWIP: false
     },
     {
       title: "Scheduling",
       description: "Schedule events and manage calendar",
       icon: Calendar,
       path: "/workflow",
-      color: "bg-green-500"
+      color: "bg-green-500",
+      showWIP: true
     },
     {
       title: "Finances",
       description: "Track income, expenses and reports",
       icon: DollarSign,
       path: "/finances",
-      color: "bg-yellow-500"
+      color: "bg-yellow-500",
+      showWIP: true
     },
     {
       title: "Invoices",
       description: "Generate and manage invoices",
       icon: Receipt,
       path: "/invoices",
-      color: "bg-purple-500"
+      color: "bg-purple-500",
+      showWIP: true
     },
     {
       title: "Portfolio",
       description: "Upload and showcase your work",
       icon: Camera,
       path: "/portfolio",
-      color: "bg-pink-500"
+      color: "bg-pink-500",
+      showWIP: false
     },
     {
       title: "Workflow",
       description: "Manage pre/production/post workflows",
       icon: BarChart3,
       path: "/workflow",
-      color: "bg-indigo-500"
+      color: "bg-indigo-500",
+      showWIP: true
     }
   ];
 
@@ -232,8 +238,13 @@ function Dashboard() {
                     <div className={`p-2 rounded-lg ${module.color}`}>
                       <module.icon className="h-6 w-6 text-white" />
                     </div>
-                    <div>
-                      <CardTitle className="text-lg">{module.title}</CardTitle>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-lg">{module.title}</CardTitle>
+                        {module.showWIP && (
+                          <WorkInProgress size="sm" />
+                        )}
+                      </div>
                       <CardDescription>{module.description}</CardDescription>
                     </div>
                   </div>
