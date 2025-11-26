@@ -56,16 +56,17 @@ interface EventPackage {
   startMinute?: string; // Maps to event_start_time
   photographyCoordinatorId?: string; // Maps to event_photo_coordinator_phno (needs conversion to phone)
   videographyCoordinatorId?: string; // Maps to event_video_coordinator_phno (needs conversion to phone)
+  pgType?: string; // PG-Type: EF or GH (maps to pg_type JSONB column)
+  vgType?: string; // VG-Type: AB or CD (maps to vg_type JSONB column)
   deliverablesNotes?: string; // Maps to event_deliverables_notes_json
   savedDeliverablesNotes?: string; // Saved version of notes
   isEditingDeliverablesNotes?: boolean; // Track if notes are being edited
   hasSavedDeliverablesNotes?: boolean; // Track if notes have been saved at least once
   prepChecklist?: ChecklistItem[]; // Maps to event_prep_checklist_json
   daysCount?: string; // Maps to event_days_count
-  photographyWorkdays?: string; // Maps to photography_workdays
-  videographyWorkdays?: string; // Maps to videography_workdays
   isSaved?: boolean; // Track if this event has been saved to database
   isEditingPackageName?: boolean; // Track if package name is being edited
+  savedState?: Partial<EventPackage>; // Snapshot of saved state to detect changes
 }
 
 // Removed mock data - will be fetched from database
@@ -76,6 +77,8 @@ export default function NewProjectPage() {
   
   // Get projectUuid from URL if editing existing project
   const projectUuidFromUrl = searchParams.get('projectUuid');
+  // Get projectName from URL if provided
+  const projectNameFromUrl = searchParams.get('projectName');
   
   // Initialize currentPage from URL query parameter, fallback to 1
   const pageFromUrl = searchParams.get('page');
@@ -113,6 +116,7 @@ export default function NewProjectPage() {
   });
   const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
   const [isPriceDetailsExpanded, setIsPriceDetailsExpanded] = useState(false);
+  const [isEditingPriceCard, setIsEditingPriceCard] = useState(false);
   const [editingPackageNameId, setEditingPackageNameId] = useState<string | null>(null);
   const [photographyOwner, setPhotographyOwner] = useState<{
     photography_owner_phno: string;
@@ -132,6 +136,7 @@ export default function NewProjectPage() {
       sessionStorage.setItem("newProjectEstimateUuid", projectUuidFromUrl);
     }
   }, [projectUuidFromUrl]);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [projectDetails, setProjectDetails] = useState<{
     project_name: string;
@@ -140,11 +145,440 @@ export default function NewProjectPage() {
     client_name: string;
   } | null>(null);
   const [loadingProjectDetails, setLoadingProjectDetails] = useState(false);
+
+  // Load project details when projectUuid is in URL (for editing existing projects)
+  // GET API: Direct table query - no POST calls
+  useEffect(() => {
+    const loadProjectFromUuid = async () => {
+      // Only load if we have projectUuid from URL
+      if (!projectUuidFromUrl) {
+        return;
+      }
+
+      // If we already have the details, don't fetch again
+      if (projectDetails && projectDetails.client_name) {
+        return;
+      }
+
+      setLoadingProjectDetails(true);
+      try {
+        console.log('=== GET API: Loading project details for UUID ===');
+        console.log('Project UUID:', projectUuidFromUrl);
+        
+        // Direct table query - GET call, not POST
+        const { data: projectRecord, error: fetchError } = await supabase
+          .from('project_estimation_table' as any)
+          .select(`
+            project_estimate_uuid,
+            project_name,
+            project_type,
+            clientid_phno,
+            photography_owner_phno,
+            start_date,
+            start_time,
+            startdatetime_confirmed,
+            end_date,
+            end_time,
+            enddatetime_confirmed,
+            project_status,
+            is_drafted,
+            drafted_json,
+            created_at,
+            updated_at
+          `)
+          .eq('project_estimate_uuid', projectUuidFromUrl)
+          .single();
+
+        if (fetchError) {
+          console.error('❌ Error fetching project_estimation_table record:', fetchError);
+          setLoadingProjectDetails(false);
+          return;
+        }
+
+        if (projectRecord) {
+          console.log('✅ Successfully loaded project_estimation_table record');
+          console.log('Full record data:', projectRecord);
+          
+          // Fetch client name separately
+          let clientName = '';
+          if (projectRecord.clientid_phno) {
+            const { data: clientData } = await supabase
+              .from('client_details_table' as any)
+              .select('client_name')
+              .eq('clientid_phno', projectRecord.clientid_phno)
+              .single();
+            
+            if (clientData) {
+              clientName = clientData.client_name || '';
+              console.log('Client Name:', clientName);
+            }
+          }
+          
+          // Set project details
+          setProjectDetails({
+            project_name: projectRecord.project_name || '',
+            project_type: projectRecord.project_type || '',
+            clientid_phno: projectRecord.clientid_phno || '',
+            client_name: clientName
+          });
+          
+          // Set the projectEstimateUuid
+          setProjectEstimateUuid(projectUuidFromUrl);
+          sessionStorage.setItem("newProjectEstimateUuid", projectUuidFromUrl);
+          
+          // Parse dates and times
+          const startDate = projectRecord.start_date ? new Date(projectRecord.start_date) : undefined;
+          const startTime = projectRecord.start_time ? projectRecord.start_time.split(':') : null;
+          const endDate = projectRecord.end_date ? new Date(projectRecord.end_date) : undefined;
+          const endTime = projectRecord.end_time ? projectRecord.end_time.split(':') : null;
+          
+          // Format phone number consistently
+          const formattedPhone = formatPhoneNumber(projectRecord.clientid_phno);
+          
+          // Populate form data with fetched project information
+          setFormData(prev => ({
+            ...prev,
+            projectName: projectRecord.project_name || prev.projectName,
+            eventType: projectRecord.project_type || prev.eventType,
+            clientFullName: clientName || prev.clientFullName,
+            clientPhone: formattedPhone || prev.clientPhone,
+            startDate: startDate || prev.startDate,
+            startHour: startTime ? startTime[0] : prev.startHour,
+            startMinute: startTime ? startTime[1] : prev.startMinute,
+            confirmationStatus: projectRecord.startdatetime_confirmed || prev.confirmationStatus,
+            endDate: endDate || prev.endDate,
+            endHour: endTime ? endTime[0] : prev.endHour,
+            endMinute: endTime ? endTime[1] : prev.endMinute,
+            endConfirmationStatus: projectRecord.enddatetime_confirmed || prev.endConfirmationStatus,
+          }));
+          
+          // Update sessionStorage with fetched data
+          try {
+            if (projectRecord.project_name) sessionStorage.setItem('newProjectName', projectRecord.project_name);
+            if (projectRecord.project_type) sessionStorage.setItem('newProjectType', projectRecord.project_type);
+            if (clientName) sessionStorage.setItem('newProjectClientName', clientName);
+            if (projectRecord.clientid_phno) sessionStorage.setItem('newProjectClientPhone', projectRecord.clientid_phno);
+            if (projectRecord.photography_owner_phno) sessionStorage.setItem('newProjectPhotographyOwnerPhno', projectRecord.photography_owner_phno);
+          } catch (e) {
+            console.warn('Failed to update sessionStorage:', e);
+          }
+
+          console.log('✅ Project details loaded successfully via GET call');
+        } else {
+          console.warn('⚠️ No project record found for UUID:', projectUuidFromUrl);
+        }
+      } catch (error) {
+        console.error('❌ Exception loading project details:', error);
+      } finally {
+        setLoadingProjectDetails(false);
+      }
+    };
+
+    loadProjectFromUuid();
+  }, [projectUuidFromUrl]); // Run when projectUuidFromUrl changes
+
+  // GET API: Load project_estimation_table record by project_name (finds UUID first, then fetches full record)
+  useEffect(() => {
+    const loadProjectByName = async () => {
+      // Only load if we're on page 1 and have a projectName (but no projectUuid)
+      if (currentPage !== 1 || !projectNameFromUrl || projectUuidFromUrl) {
+        return;
+      }
+
+      // Skip if we already loaded the details
+      if (projectDetails && projectDetails.project_name) {
+        console.log('Project details already loaded, skipping GET call');
+        return;
+      }
+
+      setLoadingProjectDetails(true);
+      try {
+        console.log('=== GET API: Finding project by name ===');
+        console.log('Project Name:', projectNameFromUrl);
+        console.log('Current Page:', currentPage);
+        
+        // Step 1: Find project_estimate_uuid by project_name
+        const { data: matchingProjects, error: searchError } = await supabase
+          .from('project_estimation_table' as any)
+          .select('project_estimate_uuid, project_name')
+          .eq('project_name', projectNameFromUrl)
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (searchError) {
+          console.error('❌ Error searching for project by name:', searchError);
+          setLoadingProjectDetails(false);
+          return;
+        }
+
+        if (!matchingProjects || matchingProjects.length === 0) {
+          console.warn(`⚠️ No project found with name: ${projectNameFromUrl}`);
+          setLoadingProjectDetails(false);
+          return;
+        }
+
+        const foundProject = matchingProjects[0];
+        const foundUuid = foundProject.project_estimate_uuid;
+        
+        console.log('✅ Found project UUID:', foundUuid);
+        console.log('Project Name Match:', foundProject.project_name);
+        
+        // Step 2: Use the found UUID to fetch the full record
+        console.log('=== GET API: Fetching full project_estimation_table record ===');
+        console.log('Using Project Estimate UUID:', foundUuid);
+        
+        const { data: projectRecord, error: fetchError } = await supabase
+          .from('project_estimation_table' as any)
+          .select(`
+            project_estimate_uuid,
+            project_name,
+            project_type,
+            clientid_phno,
+            photography_owner_phno,
+            start_date,
+            start_time,
+            startdatetime_confirmed,
+            end_date,
+            end_time,
+            enddatetime_confirmed,
+            project_status,
+            is_drafted,
+            drafted_json,
+            created_at,
+            updated_at
+          `)
+          .eq('project_estimate_uuid', foundUuid)
+          .single();
+
+        if (fetchError) {
+          console.error('❌ Error fetching project_estimation_table record:', fetchError);
+          setLoadingProjectDetails(false);
+          return;
+        }
+
+        if (projectRecord) {
+          console.log('✅ Successfully loaded project_estimation_table record');
+          console.log('Full record data:', projectRecord);
+          
+          // Fetch client name separately
+          let clientName = '';
+          if (projectRecord.clientid_phno) {
+            const { data: clientData } = await supabase
+              .from('client_details_table' as any)
+              .select('client_name')
+              .eq('clientid_phno', projectRecord.clientid_phno)
+              .single();
+            
+            if (clientData) {
+              clientName = clientData.client_name || '';
+            }
+          }
+          
+          // Update project details state
+          setProjectDetails({
+            project_name: projectRecord.project_name || '',
+            project_type: projectRecord.project_type || '',
+            clientid_phno: projectRecord.clientid_phno || '',
+            client_name: clientName
+          });
+
+          // Set the projectEstimateUuid
+          setProjectEstimateUuid(foundUuid);
+          sessionStorage.setItem("newProjectEstimateUuid", foundUuid);
+
+          // Parse dates and times
+          const startDate = projectRecord.start_date ? new Date(projectRecord.start_date) : undefined;
+          const startTime = projectRecord.start_time ? projectRecord.start_time.split(':') : null;
+          const endDate = projectRecord.end_date ? new Date(projectRecord.end_date) : undefined;
+          const endTime = projectRecord.end_time ? projectRecord.end_time.split(':') : null;
+
+          // Populate form data
+          setFormData(prev => ({
+            ...prev,
+            projectName: projectRecord.project_name || prev.projectName,
+            eventType: projectRecord.project_type || prev.eventType,
+            clientFullName: clientName || prev.clientFullName,
+            clientPhone: projectRecord.clientid_phno ? `+91 ${projectRecord.clientid_phno}` : prev.clientPhone,
+            startDate: startDate || prev.startDate,
+            startHour: startTime ? startTime[0] : prev.startHour,
+            startMinute: startTime ? startTime[1] : prev.startMinute,
+            confirmationStatus: projectRecord.startdatetime_confirmed || prev.confirmationStatus,
+            endDate: endDate || prev.endDate,
+            endHour: endTime ? endTime[0] : prev.endHour,
+            endMinute: endTime ? endTime[1] : prev.endMinute,
+            endConfirmationStatus: projectRecord.enddatetime_confirmed || prev.endConfirmationStatus,
+          }));
+
+          // Update sessionStorage
+          try {
+            if (projectRecord.project_name) sessionStorage.setItem('newProjectName', projectRecord.project_name);
+            if (projectRecord.project_type) sessionStorage.setItem('newProjectType', projectRecord.project_type);
+            if (clientName) sessionStorage.setItem('newProjectClientName', clientName);
+            if (projectRecord.clientid_phno) sessionStorage.setItem('newProjectClientPhone', projectRecord.clientid_phno);
+            if (projectRecord.photography_owner_phno) sessionStorage.setItem('newProjectPhotographyOwnerPhno', projectRecord.photography_owner_phno);
+          } catch (e) {
+            console.warn('Failed to update sessionStorage:', e);
+          }
+
+          console.log('✅ Project loaded successfully by name');
+        }
+      } catch (error) {
+        console.error('❌ Exception loading project by name:', error);
+      } finally {
+        setLoadingProjectDetails(false);
+      }
+    };
+
+    loadProjectByName();
+  }, [currentPage, projectNameFromUrl, projectUuidFromUrl, projectDetails]);
+
+  // Load project_estimation_table record by project_estimate_uuid when on page 1
+  useEffect(() => {
+    const loadProjectEstimationRecord = async () => {
+      // Only load if we're on page 1 and have a projectUuid (but no projectName)
+      if (currentPage !== 1 || !projectUuidFromUrl || projectNameFromUrl) {
+        return;
+      }
+
+      // Skip if we already loaded the details
+      if (projectDetails && projectDetails.project_name) {
+        console.log('Project details already loaded, skipping GET call');
+        return;
+      }
+
+      setLoadingProjectDetails(true);
+      try {
+        console.log('=== GET Call: Fetching project_estimation_table record ===');
+        console.log('Project Estimate UUID:', projectUuidFromUrl);
+        console.log('Current Page:', currentPage);
+        
+        // Direct GET call to project_estimation_table by project_estimate_uuid
+        const { data: projectRecord, error: fetchError } = await supabase
+          .from('project_estimation_table' as any)
+          .select(`
+            project_estimate_uuid,
+            project_name,
+            project_type,
+            clientid_phno,
+            photography_owner_phno,
+            start_date,
+            start_time,
+            startdatetime_confirmed,
+            end_date,
+            end_time,
+            enddatetime_confirmed,
+            project_status,
+            is_drafted,
+            drafted_json,
+            created_at,
+            updated_at
+          `)
+          .eq('project_estimate_uuid', projectUuidFromUrl)
+          .single();
+
+        if (fetchError) {
+          console.error('❌ Error fetching project_estimation_table record:', fetchError);
+          console.error('Error details:', {
+            message: fetchError.message,
+            details: fetchError.details,
+            hint: fetchError.hint,
+            code: fetchError.code
+          });
+          setLoadingProjectDetails(false);
+          return;
+        }
+
+        if (projectRecord) {
+          console.log('✅ Successfully loaded project_estimation_table record:');
+          console.log('Full record data:', projectRecord);
+          console.log('Project Name:', projectRecord.project_name);
+          console.log('Project Type:', projectRecord.project_type);
+          console.log('Client Phone:', projectRecord.clientid_phno);
+          console.log('Project Status:', projectRecord.project_status);
+          console.log('Is Drafted:', projectRecord.is_drafted);
+          
+          // Fetch client name separately if needed
+          let clientName = '';
+          if (projectRecord.clientid_phno) {
+            const { data: clientData } = await supabase
+              .from('client_details_table' as any)
+              .select('client_name')
+              .eq('clientid_phno', projectRecord.clientid_phno)
+              .single();
+            
+            if (clientData) {
+              clientName = clientData.client_name || '';
+              console.log('Client Name:', clientName);
+            }
+          }
+          
+          // Update project details state
+          setProjectDetails({
+            project_name: projectRecord.project_name || '',
+            project_type: projectRecord.project_type || '',
+            clientid_phno: projectRecord.clientid_phno || '',
+            client_name: clientName
+          });
+
+          // Parse dates and times
+          const startDate = projectRecord.start_date ? new Date(projectRecord.start_date) : undefined;
+          const startTime = projectRecord.start_time ? projectRecord.start_time.split(':') : null;
+          const endDate = projectRecord.end_date ? new Date(projectRecord.end_date) : undefined;
+          const endTime = projectRecord.end_time ? projectRecord.end_time.split(':') : null;
+
+          console.log('Parsed Start Date:', startDate);
+          console.log('Parsed Start Time:', startTime);
+          console.log('Parsed End Date:', endDate);
+          console.log('Parsed End Time:', endTime);
+
+          // Populate form data with fetched project information
+          setFormData(prev => ({
+            ...prev,
+            projectName: projectRecord.project_name || prev.projectName,
+            eventType: projectRecord.project_type || prev.eventType,
+            clientFullName: clientName || prev.clientFullName,
+            clientPhone: projectRecord.clientid_phno ? `+91 ${projectRecord.clientid_phno}` : prev.clientPhone,
+            startDate: startDate || prev.startDate,
+            startHour: startTime ? startTime[0] : prev.startHour,
+            startMinute: startTime ? startTime[1] : prev.startMinute,
+            confirmationStatus: projectRecord.startdatetime_confirmed || prev.confirmationStatus,
+            endDate: endDate || prev.endDate,
+            endHour: endTime ? endTime[0] : prev.endHour,
+            endMinute: endTime ? endTime[1] : prev.endMinute,
+            endConfirmationStatus: projectRecord.enddatetime_confirmed || prev.endConfirmationStatus,
+          }));
+
+          // Update sessionStorage
+          try {
+            if (projectRecord.project_name) sessionStorage.setItem('newProjectName', projectRecord.project_name);
+            if (projectRecord.project_type) sessionStorage.setItem('newProjectType', projectRecord.project_type);
+            if (clientName) sessionStorage.setItem('newProjectClientName', clientName);
+            if (projectRecord.clientid_phno) sessionStorage.setItem('newProjectClientPhone', projectRecord.clientid_phno);
+            if (projectRecord.photography_owner_phno) sessionStorage.setItem('newProjectPhotographyOwnerPhno', projectRecord.photography_owner_phno);
+          } catch (e) {
+            console.warn('Failed to update sessionStorage:', e);
+          }
+
+          console.log('✅ Project_estimation_table record loaded and form populated successfully');
+        } else {
+          console.warn('⚠️ No project_estimation_table record found for UUID:', projectUuidFromUrl);
+        }
+      } catch (error) {
+        console.error('❌ Exception loading project_estimation_table record:', error);
+      } finally {
+        setLoadingProjectDetails(false);
+      }
+    };
+
+    loadProjectEstimationRecord();
+  }, [currentPage, projectUuidFromUrl, projectDetails]); // Run when currentPage or projectUuidFromUrl changes
+
   const [photographers, setPhotographers] = useState<Photographer[]>([]);
   const [videographers, setVideographers] = useState<Videographer[]>([]);
   const [loadingPhotographers, setLoadingPhotographers] = useState(false);
   const [loadingVideographers, setLoadingVideographers] = useState(false);
   const [isSavingEvents, setIsSavingEvents] = useState(false);
+  const [eventsSaved, setEventsSaved] = useState(false); // Track if events have been saved on page 2
 
   // Load form data from sessionStorage on component mount
   // This runs FIRST and provides fallback data even if database query fails
@@ -206,6 +640,7 @@ export default function NewProjectPage() {
           photographersCount: "",
           videographersCount: "",
           prepChecklist: [],
+          daysCount: "1",
           isSaved: false,
         };
         setEventPackages([newPackage]);
@@ -320,26 +755,58 @@ export default function NewProjectPage() {
     };
   }, [formData, eventPackages, selectedFormat, currentPage, photographyOwner]);
 
-  // Update drafted_json in database when form data changes (debounced)
+  // Track if this is the initial load to prevent POST calls on page load
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  
+  // Mark initial load as complete after GET calls have time to complete
   useEffect(() => {
-    if (!projectEstimateUuid) return; // Only update if we have a UUID
+    const timer = setTimeout(() => {
+      setIsInitialLoad(false);
+      console.log('✅ Initial load complete - auto-save enabled');
+    }, 2000); // Wait 2 seconds after mount to allow GET calls to complete
+    
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Update drafted_json in database when form data changes (debounced)
+  // BUT: Only if it's NOT the initial page load (to prevent POST calls during GET operations)
+  useEffect(() => {
+    // Skip auto-save on initial load - we should only GET data, not POST
+    if (isInitialLoad) {
+      console.log('⏸️ Skipping auto-save: Initial page load - using GET calls only');
+      return;
+    }
+
+    // Don't auto-save if we don't have a UUID (page is empty/new)
+    if (!projectEstimateUuid) {
+      console.log('⏸️ Skipping auto-save: No project UUID - page is empty');
+      return;
+    }
+
+    // Don't auto-save if form is empty (no project name)
+    if (!formData.projectName || formData.projectName.trim() === '') {
+      console.log('⏸️ Skipping auto-save: Form is empty - no project name');
+      return;
+    }
 
     // Debounce: wait 2 seconds after last change before updating
     const timeoutId = setTimeout(async () => {
       try {
+        console.log('💾 Auto-saving draft status...');
         const draftedJson = buildDraftedJson();
         await supabase.rpc('update_project_draft_status', {
           p_project_estimate_uuid: projectEstimateUuid,
           p_is_drafted: true,
           p_drafted_json: draftedJson as any,
         });
+        console.log('✅ Draft status auto-saved successfully');
       } catch (error) {
         console.warn('Failed to auto-update draft status:', error);
       }
     }, 2000);
 
     return () => clearTimeout(timeoutId);
-  }, [formData, eventPackages, selectedFormat, currentPage, projectEstimateUuid, buildDraftedJson]);
+  }, [formData, eventPackages, selectedFormat, currentPage, projectEstimateUuid, buildDraftedJson, isInitialLoad]);
 
   // Save selectedFormat to sessionStorage whenever it changes
   useEffect(() => {
@@ -555,7 +1022,7 @@ export default function NewProjectPage() {
     loadDraftFromDatabase();
   }, [projectEstimateUuid]); // Only run when projectEstimateUuid changes (on mount or when set)
 
-  // Fetch project and client details for Page 2 - using RPC function
+  // Fetch project and client details for Page 2 - GET API: Direct table query
   useEffect(() => {
     const fetchProjectDetailsForPage2 = async () => {
       // Only fetch if we have UUID and we're on page 2
@@ -570,13 +1037,35 @@ export default function NewProjectPage() {
 
       setLoadingProjectDetails(true);
       try {
-        // Use RPC function to get project estimation details
-        const { data: rpcData, error: rpcError } = await supabase.rpc('get_project_estimation_details', {
-          p_project_estimate_uuid: projectEstimateUuid
-        });
+        console.log('=== GET API: Fetching project details for Page 2 ===');
+        console.log('Project Estimate UUID:', projectEstimateUuid);
+        
+        // Direct table query - GET call, not POST
+        const { data: projectRecord, error: fetchError } = await supabase
+          .from('project_estimation_table' as any)
+          .select(`
+            project_estimate_uuid,
+            project_name,
+            project_type,
+            clientid_phno,
+            photography_owner_phno,
+            start_date,
+            start_time,
+            startdatetime_confirmed,
+            end_date,
+            end_time,
+            enddatetime_confirmed,
+            project_status,
+            is_drafted,
+            drafted_json,
+            created_at,
+            updated_at
+          `)
+          .eq('project_estimate_uuid', projectEstimateUuid)
+          .single();
 
-        if (rpcError) {
-          console.error('Error fetching project details via RPC:', rpcError);
+        if (fetchError) {
+          console.error('❌ Error fetching project_estimation_table record:', fetchError);
           // Fallback to sessionStorage
           const savedProjectName = sessionStorage.getItem('newProjectName');
           const savedProjectType = sessionStorage.getItem('newProjectType');
@@ -591,31 +1080,48 @@ export default function NewProjectPage() {
               client_name: savedClientName || formData.clientFullName || ''
             });
           }
+          setLoadingProjectDetails(false);
           return;
         }
 
-        if (rpcData && typeof rpcData === 'object' && 'project_name' in rpcData) {
-          // RPC function returned data successfully
+        if (projectRecord) {
+          console.log('✅ Successfully loaded project_estimation_table record for Page 2');
+          
+          // Fetch client name separately
+          let clientName = '';
+          if (projectRecord.clientid_phno) {
+            const { data: clientData } = await supabase
+              .from('client_details_table' as any)
+              .select('client_name')
+              .eq('clientid_phno', projectRecord.clientid_phno)
+              .single();
+            
+            if (clientData) {
+              clientName = clientData.client_name || '';
+            }
+          }
+          
+          // Set project details
           setProjectDetails({
-            project_name: rpcData.project_name || '',
-            project_type: rpcData.project_type || '',
-            clientid_phno: rpcData.clientid_phno || '',
-            client_name: rpcData.client_name || ''
+            project_name: projectRecord.project_name || '',
+            project_type: projectRecord.project_type || '',
+            clientid_phno: projectRecord.clientid_phno || '',
+            client_name: clientName
           });
           
           // Also update sessionStorage with fetched data for consistency
           try {
-            if (rpcData.project_name) sessionStorage.setItem('newProjectName', rpcData.project_name);
-            if (rpcData.project_type) sessionStorage.setItem('newProjectType', rpcData.project_type);
-            if (rpcData.client_name) sessionStorage.setItem('newProjectClientName', rpcData.client_name);
-            if (rpcData.clientid_phno) sessionStorage.setItem('newProjectClientPhone', rpcData.clientid_phno);
-            if (rpcData.photography_owner_phno) sessionStorage.setItem('newProjectPhotographyOwnerPhno', rpcData.photography_owner_phno);
+            if (projectRecord.project_name) sessionStorage.setItem('newProjectName', projectRecord.project_name);
+            if (projectRecord.project_type) sessionStorage.setItem('newProjectType', projectRecord.project_type);
+            if (clientName) sessionStorage.setItem('newProjectClientName', clientName);
+            if (projectRecord.clientid_phno) sessionStorage.setItem('newProjectClientPhone', projectRecord.clientid_phno);
+            if (projectRecord.photography_owner_phno) sessionStorage.setItem('newProjectPhotographyOwnerPhno', projectRecord.photography_owner_phno);
           } catch (e) {
             console.warn('Failed to update sessionStorage:', e);
           }
         } else {
-          // RPC returned empty or invalid data - use sessionStorage as fallback
-          console.warn('RPC returned empty data, using sessionStorage');
+          // No record found - use sessionStorage as fallback
+          console.warn('⚠️ No project record found, using sessionStorage');
           const savedProjectName = sessionStorage.getItem('newProjectName');
           const savedProjectType = sessionStorage.getItem('newProjectType');
           const savedClientName = sessionStorage.getItem('newProjectClientName');
@@ -631,7 +1137,7 @@ export default function NewProjectPage() {
           }
         }
       } catch (error) {
-        console.error('Exception fetching project details:', error);
+        console.error('❌ Exception fetching project details:', error);
         // Use sessionStorage data as fallback
         const savedProjectName = sessionStorage.getItem('newProjectName');
         const savedProjectType = sessionStorage.getItem('newProjectType');
@@ -699,8 +1205,8 @@ export default function NewProjectPage() {
             event_deliverables_notes_json,
             event_prep_checklist_json,
             event_days_count,
-            photography_workdays,
-            videography_workdays,
+            pg_type,
+            vg_type,
             event_photographers_days_count,
             event_videographers_days_count
           `)
@@ -731,6 +1237,30 @@ export default function NewProjectPage() {
               }));
             }
 
+            // Parse pg_type and vg_type from JSON
+            let pgType: string | undefined = undefined;
+            let vgType: string | undefined = undefined;
+            
+            if (event.pg_type) {
+              try {
+                // Handle JSONB: could be {"type": "EF"} or already parsed
+                const pgTypeObj = typeof event.pg_type === 'string' ? JSON.parse(event.pg_type) : event.pg_type;
+                pgType = pgTypeObj?.type || pgTypeObj;
+              } catch (e) {
+                console.warn('Error parsing pg_type:', e);
+              }
+            }
+            
+            if (event.vg_type) {
+              try {
+                // Handle JSONB: could be {"type": "AB"} or already parsed
+                const vgTypeObj = typeof event.vg_type === 'string' ? JSON.parse(event.vg_type) : event.vg_type;
+                vgType = vgTypeObj?.type || vgTypeObj;
+              } catch (e) {
+                console.warn('Error parsing vg_type:', e);
+              }
+            }
+
             return {
               id: Date.now().toString() + Math.random(), // Generate unique ID
               event_uuid: event.event_uuid,
@@ -747,9 +1277,9 @@ export default function NewProjectPage() {
               savedDeliverablesNotes: event.event_deliverables_notes_json || "",
               hasSavedDeliverablesNotes: !!event.event_deliverables_notes_json,
               prepChecklist: prepChecklist,
-              daysCount: event.event_days_count?.toString() || "",
-              photographyWorkdays: event.photography_workdays?.toString() || "",
-              videographyWorkdays: event.videography_workdays?.toString() || "",
+              daysCount: event.event_days_count?.toString() || "1",
+              pgType: pgType,
+              vgType: vgType,
               isSaved: true, // These are already saved
             };
           });
@@ -866,17 +1396,48 @@ export default function NewProjectPage() {
     return emailRegex.test(email);
   };
 
+  // Helper function to format phone number consistently: "+91 " + 10 digits
+  const formatPhoneNumber = (phone: string | null | undefined): string => {
+    if (!phone) return "+91 ";
+    // Extract just the digits (remove any existing +91, spaces, or other characters)
+    const digitsOnly = phone.replace(/[^0-9]/g, '').slice(-10); // Take last 10 digits
+    return digitsOnly.length === 10 ? `+91 ${digitsOnly}` : "+91 ";
+  };
+
   const isPage1Valid = () => {
-    // Client phone should be "+91 " followed by exactly 10 digits
-    const phoneValid = /^\+91 \d{10}$/.test(formData.clientPhone);
-    // Email validation
+    // Required fields: Project Name and Event Type
+    const projectNameValid = formData.projectName.trim() !== "";
+    const eventTypeValid = formData.eventType !== "";
+    
+    // Phone validation: If provided, must be valid format (+91 followed by 10 digits)
+    // Phone is optional - if empty or just "+91 ", it's considered valid
+    const phoneNumber = formData.clientPhone.replace(/^\+91\s*/, ''); // Extract digits after +91
+    const phoneEmpty = !formData.clientPhone || formData.clientPhone.trim() === "+91" || formData.clientPhone.trim() === "+91 ";
+    const phoneValid = phoneEmpty || (/^\d{10}$/.test(phoneNumber) && formData.clientPhone.startsWith('+91'));
+    
+    // Email validation: If provided, must be valid format (email is optional)
     const emailValid = !formData.clientEmail || isValidEmail(formData.clientEmail);
-    return (
-      formData.projectName.trim() !== "" &&
-      formData.eventType !== "" &&
+    
+    const isValid = (
+      projectNameValid &&
+      eventTypeValid &&
       phoneValid &&
       emailValid
     );
+    
+    // Debug logging to help identify validation issues (only log when validation fails)
+    if (!isValid && process.env.NODE_ENV === 'development') {
+      console.log('🔍 Page 1 Validation Status:', {
+        projectName: projectNameValid ? '✓' : `✗ (empty: "${formData.projectName}")`,
+        eventType: eventTypeValid ? '✓' : `✗ (not selected: "${formData.eventType}")`,
+        phoneValid: phoneValid ? '✓' : `✗ (phone: "${formData.clientPhone}", extracted: "${phoneNumber}", need: 10 digits or empty, got: ${phoneNumber.length})`,
+        emailValid: emailValid ? '✓' : `✗ (email: "${formData.clientEmail}")`,
+        isButtonDisabled: !isValid || isSubmitting,
+        isSubmitting: isSubmitting
+      });
+    }
+    
+    return isValid;
   };
 
   const handleClientPhoneChange = (value: string) => {
@@ -1107,10 +1668,10 @@ export default function NewProjectPage() {
         p_event_client_phno: clientPhno,
         p_event_uuid: eventPackage.event_uuid || null, // If exists, update; otherwise create new
         p_event_days_count: eventPackage.daysCount ? parseFloat(eventPackage.daysCount) : null,
-        p_photography_workdays: eventPackage.photographyWorkdays ? parseFloat(eventPackage.photographyWorkdays) : null,
-        p_videography_workdays: eventPackage.videographyWorkdays ? parseFloat(eventPackage.videographyWorkdays) : null,
-        p_event_photographers_days_count: eventPackage.photographyWorkdays ? parseFloat(eventPackage.photographyWorkdays) : null, // PGDays -> event_photographers_days_count
-        p_event_videographers_days_count: eventPackage.videographyWorkdays ? parseFloat(eventPackage.videographyWorkdays) : null, // VGDays -> event_videographers_days_count
+        p_pg_type: eventPackage.pgType ? { type: eventPackage.pgType } : null, // PG-Type JSON: {"type": "EF"} or {"type": "GH"}
+        p_vg_type: eventPackage.vgType ? { type: eventPackage.vgType } : null, // VG-Type JSON: {"type": "AB"} or {"type": "CD"}
+        p_event_photographers_days_count: null, // Deprecated - using pg_type instead
+        p_event_videographers_days_count: null, // Deprecated - using vg_type instead
       };
 
       // Log the request data for debugging
@@ -1217,6 +1778,7 @@ export default function NewProjectPage() {
       photographersCount: "",
       videographersCount: "",
       prepChecklist: [],
+      daysCount: "1",
       isSaved: false,
     };
     setEventPackages([...eventPackages, newPackage]);
@@ -1227,6 +1789,36 @@ export default function NewProjectPage() {
   };
 
   // Save individual event card
+  // Check if event card has unsaved changes
+  const hasUnsavedChanges = (pkg: EventPackage): boolean => {
+    if (!pkg.isSaved || !pkg.savedState) {
+      // Not saved yet, so check if required fields are filled
+      return !!(pkg.eventType && pkg.startDate);
+    }
+
+    // Compare current state with saved state
+    const saved = pkg.savedState;
+    return (
+      pkg.eventType !== saved.eventType ||
+      pkg.customEventTypeName !== saved.customEventTypeName ||
+      pkg.photographersCount !== saved.photographersCount ||
+      pkg.videographersCount !== saved.videographersCount ||
+      pkg.pgType !== saved.pgType ||
+      pkg.vgType !== saved.vgType ||
+      pkg.daysCount !== saved.daysCount ||
+      pkg.startHour !== saved.startHour ||
+      pkg.startMinute !== saved.startMinute ||
+      pkg.photographyCoordinatorId !== saved.photographyCoordinatorId ||
+      pkg.videographyCoordinatorId !== saved.videographyCoordinatorId ||
+      pkg.pgType !== saved.pgType ||
+      pkg.vgType !== saved.vgType ||
+      pkg.packageName !== saved.packageName ||
+      JSON.stringify(pkg.prepChecklist) !== JSON.stringify(saved.prepChecklist) ||
+      pkg.deliverablesNotes !== saved.deliverablesNotes ||
+      (pkg.startDate?.getTime() !== saved.startDate?.getTime())
+    );
+  };
+
   const handleSaveEventCard = async (eventId: string) => {
     const eventIndex = eventPackages.findIndex((pkg) => pkg.id === eventId);
     if (eventIndex === -1) return;
@@ -1241,14 +1833,39 @@ export default function NewProjectPage() {
 
     const eventUuid = await saveEventToDatabase(eventPackage, eventIndex);
     if (eventUuid) {
-      // Update the event package with the UUID and mark as saved
+      // Create a snapshot of the current state for comparison
+      const savedState: Partial<EventPackage> = {
+        eventType: eventPackage.eventType,
+        customEventTypeName: eventPackage.customEventTypeName,
+        photographersCount: eventPackage.photographersCount,
+        videographersCount: eventPackage.videographersCount,
+        pgType: eventPackage.pgType,
+        vgType: eventPackage.vgType,
+        daysCount: eventPackage.daysCount,
+        startHour: eventPackage.startHour,
+        startMinute: eventPackage.startMinute,
+        photographyCoordinatorId: eventPackage.photographyCoordinatorId,
+        videographyCoordinatorId: eventPackage.videographyCoordinatorId,
+        packageName: eventPackage.packageName,
+        prepChecklist: eventPackage.prepChecklist ? JSON.parse(JSON.stringify(eventPackage.prepChecklist)) : undefined,
+        deliverablesNotes: eventPackage.deliverablesNotes,
+        startDate: eventPackage.startDate ? new Date(eventPackage.startDate) : undefined,
+      };
+
+      // Update the event package with the UUID, mark as saved, and store saved state
       const updatedPackages = [...eventPackages];
       updatedPackages[eventIndex] = {
         ...eventPackage,
         event_uuid: eventUuid,
         isSaved: true,
+        savedState: savedState,
       };
       setEventPackages(updatedPackages);
+
+      // Collapse the event card after saving
+      if (expandedEventId === eventId) {
+        setExpandedEventId(null);
+      }
     }
   };
 
@@ -1269,9 +1886,9 @@ export default function NewProjectPage() {
         eventType: eventPackage.eventType,
         customEventTypeName: eventPackage.customEventTypeName,
         photographersCount: eventPackage.photographersCount,
-        photographyWorkdays: eventPackage.photographyWorkdays,
+        pgType: eventPackage.pgType,
         videographersCount: eventPackage.videographersCount,
-        videographyWorkdays: eventPackage.videographyWorkdays,
+        vgType: eventPackage.vgType,
         startDate: eventPackage.startDate?.toISOString(),
         startHour: eventPackage.startHour,
         startMinute: eventPackage.startMinute,
@@ -1299,15 +1916,16 @@ export default function NewProjectPage() {
     const fieldsThatRequireResave = ['eventType', 'startDate', 'startHour', 'startMinute', 
       'photographyCoordinatorId', 'videographyCoordinatorId', 'photographersCount', 
       'videographersCount', 'deliverablesNotes', 'prepChecklist', 'daysCount', 
-      'photographyWorkdays', 'videographyWorkdays'];
+      'pgType', 'vgType'];
     
     setEventPackages(
       eventPackages.map((pkg) => {
         if (pkg.id === id) {
           const updated = { ...pkg, [field]: value };
-          // Mark as unsaved if a significant field changed
+          // Mark as unsaved if a significant field changed (but keep savedState for comparison)
           if (fieldsThatRequireResave.includes(field)) {
-            updated.isSaved = false;
+            // Don't clear isSaved flag, but keep savedState to detect changes
+            // This allows the Save button to be disabled when no changes exist
           }
           // Auto-save to sessionStorage
           saveEventCardToSessionStorage(updated);
@@ -1975,11 +2593,15 @@ export default function NewProjectPage() {
         } else {
           alert(`${savedCount} event(s) saved successfully!`);
         }
+        // Mark events as saved to enable Next button
+        setEventsSaved(true);
       } else {
         alert('Failed to save events. Please check the console for errors.');
+        setEventsSaved(false);
       }
     } catch (error: any) {
       console.error('Exception saving events:', error);
+      setEventsSaved(false);
       alert(`Error: ${error.message || 'Failed to save events'}`);
     } finally {
       setIsSavingEvents(false);
@@ -2328,7 +2950,7 @@ export default function NewProjectPage() {
               </div>
 
               {/* Next Button */}
-              <div className="flex justify-center pt-4">
+              <div className="flex flex-col items-center pt-4 gap-2">
                 <Button
                   onClick={handleNext}
                   disabled={!isPage1Valid() || isSubmitting}
@@ -2337,6 +2959,13 @@ export default function NewProjectPage() {
                   {isSubmitting ? 'Creating Project...' : 'Next'}
                   {!isSubmitting && <ArrowRight className="ml-2 h-4 w-4" />}
                 </Button>
+                {/* Debug info - shows why button might be disabled */}
+                {process.env.NODE_ENV === 'development' && (
+                  <div className="text-xs text-gray-500 text-center">
+                    <div>Valid: {isPage1Valid() ? '✓' : '✗'} | Submitting: {isSubmitting ? 'Yes' : 'No'}</div>
+                    <div>Disabled: {(!isPage1Valid() || isSubmitting) ? 'Yes' : 'No'}</div>
+                  </div>
+                )}
               </div>
                   </div>
                 </>
@@ -2440,7 +3069,7 @@ export default function NewProjectPage() {
                                    title="Event saved to database" />
                             )}
                             <div className="space-y-4">
-                              <div className="flex items-center justify-between">
+                              <div className="flex items-center relative">
                                 {editingPackageNameId === pkg.id ? (
                                   <Input
                                     defaultValue={pkg.packageName || `Event Package ${index + 1}`}
@@ -2463,7 +3092,12 @@ export default function NewProjectPage() {
                                     {pkg.packageName || `Event Package ${index + 1}`}
                                   </h3>
                                 )}
-                                <div className="flex items-center gap-2">
+                                {!isExpanded && pkg.daysCount && (
+                                  <span className="text-sm text-muted-foreground absolute left-1/2 transform -translate-x-1/2">
+                                    Days {pkg.daysCount || "1"}
+                                  </span>
+                                )}
+                                <div className="flex items-center gap-2 ml-auto">
                                   {!isActiveEvent && (
                                     <button
                                       onClick={() => toggleEventDetails(pkg.id)}
@@ -2483,11 +3117,6 @@ export default function NewProjectPage() {
                                       }`} />
                                     </button>
                                   )}
-                                  {!isExpanded && pkg.daysCount && (
-                                    <span className="text-sm text-muted-foreground">
-                                      Days {pkg.daysCount}
-                                    </span>
-                                  )}
                                   <Button
                                     variant="outline"
                                     size="sm"
@@ -2506,16 +3135,18 @@ export default function NewProjectPage() {
                                     size="sm"
                                     onClick={() => handleSaveEventCard(pkg.id)}
                                     className={`${
-                                      isExpanded && pkg.eventType && pkg.startDate
+                                      isExpanded && pkg.eventType && pkg.startDate && hasUnsavedChanges(pkg)
                                         ? 'text-green-600 hover:text-green-700 hover:bg-green-50'
                                         : 'text-muted-foreground opacity-50'
                                     }`}
-                                    disabled={!isExpanded || !pkg.eventType || !pkg.startDate}
+                                    disabled={!isExpanded || !pkg.eventType || !pkg.startDate || !hasUnsavedChanges(pkg)}
                                     title={
                                       !isExpanded 
                                         ? "Expand event card to save" 
                                         : (!pkg.eventType || !pkg.startDate)
                                         ? "Fill required fields to save"
+                                        : !hasUnsavedChanges(pkg) && pkg.isSaved
+                                        ? "No changes to save"
                                         : "Save event card"
                                     }
                                   >
@@ -2538,9 +3169,9 @@ export default function NewProjectPage() {
                               {isActiveEvent ? (
                                 // Active event - show input boxes
                                 <div className="space-y-4">
-                                  {/* First row: Event Type */}
+                                  {/* First row: Event Type and Days No. */}
                                   <div className="flex items-center gap-4 w-full">
-                                    <div className="w-1/2">
+                                    <div className={pkg.eventType === "other" ? "w-[35%]" : "w-1/2"}>
                                       <Select
                                         value={pkg.eventType}
                                         onValueChange={(value) =>
@@ -2575,6 +3206,19 @@ export default function NewProjectPage() {
                                         />
                                       </div>
                                     )}
+                                    <div className="flex-shrink-0 flex items-center gap-2 ml-4">
+                                      <Label htmlFor={`daysCount-${pkg.id}`} className="text-sm font-medium leading-none whitespace-nowrap">Days No.</Label>
+                                      <Input
+                                        id={`daysCount-${pkg.id}`}
+                                        type="number"
+                                        step="0.1"
+                                        min="0"
+                                        placeholder="Days No."
+                                        value={pkg.daysCount || "1"}
+                                        onChange={(e) => handleEventPackageChange(pkg.id, "daysCount", e.target.value)}
+                                        className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm w-20"
+                                      />
+                                    </div>
                                   </div>
 
                                   {/* Second row: PGs No, PGDays, VGs No, VGDays */}
@@ -2598,17 +3242,21 @@ export default function NewProjectPage() {
                                       />
                                     </div>
                                     <div className="space-y-2">
-                                      <Label htmlFor={`photographyWorkdays-${pkg.id}`} className="text-sm font-medium leading-none">PGDays</Label>
-                                      <Input
-                                        id={`photographyWorkdays-${pkg.id}`}
-                                        type="number"
-                                        step="0.1"
-                                        min="0"
-                                        placeholder="PGDays"
-                                        value={pkg.photographyWorkdays || ""}
-                                        onChange={(e) => handleEventPackageChange(pkg.id, "photographyWorkdays", e.target.value)}
-                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                                      />
+                                      <Label htmlFor={`pgType-${pkg.id}`} className="text-sm font-medium leading-none">PG-Type</Label>
+                                      <Select
+                                        value={pkg.pgType || ""}
+                                        onValueChange={(value) =>
+                                          handleEventPackageChange(pkg.id, "pgType", value)
+                                        }
+                                      >
+                                        <SelectTrigger id={`pgType-${pkg.id}`} className="w-16">
+                                          <SelectValue placeholder="--" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="EF">EF</SelectItem>
+                                          <SelectItem value="GH">GH</SelectItem>
+                                        </SelectContent>
+                                      </Select>
                                     </div>
                                     <div className="space-y-2">
                                       <Label htmlFor={`videographers-${pkg.id}`} className="text-sm font-medium leading-none">VGs No</Label>
@@ -2629,17 +3277,21 @@ export default function NewProjectPage() {
                                       />
                                     </div>
                                     <div className="space-y-2">
-                                      <Label htmlFor={`videographyWorkdays-${pkg.id}`} className="text-sm font-medium leading-none">VGDays</Label>
-                                      <Input
-                                        id={`videographyWorkdays-${pkg.id}`}
-                                        type="number"
-                                        step="0.1"
-                                        min="0"
-                                        placeholder="VGDays"
-                                        value={pkg.videographyWorkdays || ""}
-                                        onChange={(e) => handleEventPackageChange(pkg.id, "videographyWorkdays", e.target.value)}
-                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                                      />
+                                      <Label htmlFor={`vgType-${pkg.id}`} className="text-sm font-medium leading-none">VG-Type</Label>
+                                      <Select
+                                        value={pkg.vgType || ""}
+                                        onValueChange={(value) =>
+                                          handleEventPackageChange(pkg.id, "vgType", value)
+                                        }
+                                      >
+                                        <SelectTrigger id={`vgType-${pkg.id}`} className="w-16">
+                                          <SelectValue placeholder="--" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="AB">AB</SelectItem>
+                                          <SelectItem value="CD">CD</SelectItem>
+                                        </SelectContent>
+                                      </Select>
                                     </div>
                                   </div>
                                 </div>
@@ -2649,9 +3301,9 @@ export default function NewProjectPage() {
                                   {isExpanded ? (
                                     // Expanded (edit mode) - show editable input fields
                                     <>
-                                      {/* First row: Event Type */}
+                                      {/* First row: Event Type and Days No. */}
                                       <div className="flex items-center gap-4 w-full">
-                                        <div className="w-1/2">
+                                        <div className={pkg.eventType === "other" ? "w-[35%]" : "w-1/2"}>
                                           <Select
                                             value={pkg.eventType}
                                             onValueChange={(value) =>
@@ -2686,6 +3338,19 @@ export default function NewProjectPage() {
                                             />
                                           </div>
                                         )}
+                                        <div className="flex-shrink-0 flex items-center gap-2 ml-4">
+                                          <Label htmlFor={`daysCount-${pkg.id}`} className="text-sm font-medium leading-none whitespace-nowrap">Days No.</Label>
+                                          <Input
+                                            id={`daysCount-${pkg.id}`}
+                                            type="number"
+                                            step="0.1"
+                                            min="0"
+                                            placeholder="Days No."
+                                            value={pkg.daysCount || "1"}
+                                            onChange={(e) => handleEventPackageChange(pkg.id, "daysCount", e.target.value)}
+                                            className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm w-20"
+                                          />
+                                        </div>
                                       </div>
 
                                       {/* Second row: PGs No, PGDays, VGs No, VGDays */}
@@ -2709,17 +3374,21 @@ export default function NewProjectPage() {
                                           />
                                         </div>
                                         <div className="space-y-2">
-                                          <Label htmlFor={`photographyWorkdays-${pkg.id}`} className="text-sm font-medium leading-none">PGDays</Label>
-                                          <Input
-                                            id={`photographyWorkdays-${pkg.id}`}
-                                            type="number"
-                                            step="0.1"
-                                            min="0"
-                                            placeholder="PGDays"
-                                            value={pkg.photographyWorkdays || ""}
-                                            onChange={(e) => handleEventPackageChange(pkg.id, "photographyWorkdays", e.target.value)}
-                                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                                          />
+                                          <Label htmlFor={`pgType-${pkg.id}`} className="text-sm font-medium leading-none">PG-Type</Label>
+                                          <Select
+                                            value={pkg.pgType || ""}
+                                            onValueChange={(value) =>
+                                              handleEventPackageChange(pkg.id, "pgType", value)
+                                            }
+                                          >
+                                            <SelectTrigger id={`pgType-${pkg.id}`} className="w-16">
+                                              <SelectValue placeholder="--" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                              <SelectItem value="EF">EF</SelectItem>
+                                              <SelectItem value="GH">GH</SelectItem>
+                                            </SelectContent>
+                                          </Select>
                                         </div>
                                         <div className="space-y-2">
                                           <Label htmlFor={`videographers-${pkg.id}`} className="text-sm font-medium leading-none">VGs No</Label>
@@ -2740,17 +3409,21 @@ export default function NewProjectPage() {
                                           />
                                         </div>
                                         <div className="space-y-2">
-                                          <Label htmlFor={`videographyWorkdays-${pkg.id}`} className="text-sm font-medium leading-none">VGDays</Label>
-                                          <Input
-                                            id={`videographyWorkdays-${pkg.id}`}
-                                            type="number"
-                                            step="0.1"
-                                            min="0"
-                                            placeholder="VGDays"
-                                            value={pkg.videographyWorkdays || ""}
-                                            onChange={(e) => handleEventPackageChange(pkg.id, "videographyWorkdays", e.target.value)}
-                                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                                          />
+                                          <Label htmlFor={`vgType-${pkg.id}`} className="text-sm font-medium leading-none">VG-Type</Label>
+                                          <Select
+                                            value={pkg.vgType || ""}
+                                            onValueChange={(value) =>
+                                              handleEventPackageChange(pkg.id, "vgType", value)
+                                            }
+                                          >
+                                            <SelectTrigger id={`vgType-${pkg.id}`} className="w-16">
+                                              <SelectValue placeholder="--" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                              <SelectItem value="AB">AB</SelectItem>
+                                              <SelectItem value="CD">CD</SelectItem>
+                                            </SelectContent>
+                                          </Select>
                                         </div>
                                       </div>
                                     </>
@@ -2811,16 +3484,16 @@ export default function NewProjectPage() {
                                           <span className="font-medium">{pkg.photographersCount || "0"}</span>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                          <span className="text-muted-foreground">PGDays:</span>
-                                          <span className="font-medium">{pkg.photographyWorkdays || "0"}</span>
+                                          <span className="text-muted-foreground">PG-Type:</span>
+                                          <span className="font-medium">{pkg.pgType || "--"}</span>
                                         </div>
                                         <div className="flex items-center gap-2">
                                           <span className="text-muted-foreground">VGs No:</span>
                                           <span className="font-medium">{pkg.videographersCount || "0"}</span>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                          <span className="text-muted-foreground">VGDays:</span>
-                                          <span className="font-medium">{pkg.videographyWorkdays || "0"}</span>
+                                          <span className="text-muted-foreground">VG-Type:</span>
+                                          <span className="font-medium">{pkg.vgType || "--"}</span>
                                         </div>
                                       </div>
                                     </>
@@ -2833,7 +3506,7 @@ export default function NewProjectPage() {
                               <div className="mt-4 pt-4 border-t space-y-4">
                                 {/* Start Date & Time */}
                                 <div className="space-y-2">
-                                  <Label className="text-sm font-medium leading-none max-w-fit">Event StartDate & Time</Label>
+                                  <Label className="text-sm font-medium leading-none">Event StartDate & Time</Label>
                                   <div className="flex items-end gap-4">
                                     {/* Date Selection */}
                                     <div className="flex-shrink-0">
@@ -2873,21 +3546,44 @@ export default function NewProjectPage() {
                                         onMinuteChange={(m) => handleEventPackageChange(pkg.id, "startMinute", m)}
                                       />
                                     </div>
+                                  </div>
+                                </div>
 
-                                    {/* Days Count Input */}
-                                    <div className="flex-shrink-0 space-y-2">
-                                      <Label htmlFor={`daysCount-${pkg.id}`} className="text-sm font-medium leading-none">Days No.</Label>
-                                      <Input
-                                        id={`daysCount-${pkg.id}`}
-                                        type="number"
-                                        step="0.1"
-                                        min="0"
-                                        placeholder="Days No."
-                                        value={pkg.daysCount || ""}
-                                        onChange={(e) => handleEventPackageChange(pkg.id, "daysCount", e.target.value)}
-                                        className="w-24"
-                                      />
-                                    </div>
+                                {/* PG-Type & VG-Type */}
+                                <div className="grid grid-cols-2 gap-4 items-start">
+                                  <div className="space-y-2">
+                                    <Label htmlFor={`pgType-${pkg.id}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-nowrap max-w-fit">PG-Type</Label>
+                                    <Select
+                                      value={pkg.pgType || ""}
+                                      onValueChange={(value) =>
+                                        handleEventPackageChange(pkg.id, "pgType", value)
+                                      }
+                                    >
+                                      <SelectTrigger id={`pgType-${pkg.id}`} className="w-16">
+                                        <SelectValue placeholder="--" />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="EF">EF</SelectItem>
+                                        <SelectItem value="GH">GH</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label htmlFor={`vgType-${pkg.id}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-nowrap max-w-fit">VG-Type</Label>
+                                    <Select
+                                      value={pkg.vgType || ""}
+                                      onValueChange={(value) =>
+                                        handleEventPackageChange(pkg.id, "vgType", value)
+                                      }
+                                    >
+                                      <SelectTrigger id={`vgType-${pkg.id}`} className="w-16">
+                                        <SelectValue placeholder="--" />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="AB">AB</SelectItem>
+                                        <SelectItem value="CD">CD</SelectItem>
+                                      </SelectContent>
+                                    </Select>
                                   </div>
                                 </div>
 
@@ -3007,35 +3703,9 @@ export default function NewProjectPage() {
 
                                 {/* Event Deliverables Notes */}
                                 <div className="space-y-2">
-                                  <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                      <Label htmlFor={`deliverablesNotes-${pkg.id}`}>Event Deliverables Notes</Label>
-                                      <Pencil className="h-4 w-4 text-muted-foreground" />
-                                    </div>
-                                    {pkg.isEditingDeliverablesNotes !== false ? (
-                                      <Button
-                                        type="button"
-                                        size="sm"
-                                        onClick={() => handleSaveDeliverablesNotes(pkg.id)}
-                                        disabled={
-                                          !pkg.hasSavedDeliverablesNotes && 
-                                          (!pkg.deliverablesNotes || pkg.deliverablesNotes.trim() === "")
-                                        }
-                                        className="h-8"
-                                      >
-                                        Save
-                                      </Button>
-                                    ) : (
-                                      <Button
-                                        type="button"
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => handleEditDeliverablesNotes(pkg.id)}
-                                        className="h-8"
-                                      >
-                                        Edit
-                                      </Button>
-                                    )}
+                                  <div className="flex items-center gap-2">
+                                    <Label htmlFor={`deliverablesNotes-${pkg.id}`}>Event Deliverables Notes</Label>
+                                    <Pencil className="h-4 w-4 text-muted-foreground" />
                                   </div>
                                   <Textarea
                                     id={`deliverablesNotes-${pkg.id}`}
@@ -3134,41 +3804,146 @@ export default function NewProjectPage() {
                     <Card className="rounded-lg border bg-card text-card-foreground shadow-sm p-4 w-[45%]">
                       <div className="flex justify-between items-center mb-4">
                         <h3 className="font-semibold">Price</h3>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setIsPriceDetailsExpanded(!isPriceDetailsExpanded)}
-                          className="h-8 px-2"
-                        >
-                          Details
-                          {isPriceDetailsExpanded ? (
-                            <ChevronUp className="ml-1 h-4 w-4" />
+                        <div className="flex items-center gap-2">
+                          {!isEditingPriceCard ? (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setIsEditingPriceCard(true);
+                                // Initialize editable prices with current calculated values
+                                setEditablePrices({
+                                  actualPrice: actualPrice.toLocaleString(),
+                                  subtotal: subtotal.toLocaleString(),
+                                  gst: gst.toLocaleString(),
+                                  total: total.toLocaleString(),
+                                });
+                              }}
+                              className="h-8 px-2"
+                              title="Edit price values"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
                           ) : (
-                            <ChevronDown className="ml-1 h-4 w-4" />
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setIsEditingPriceCard(false)}
+                              className="h-8 px-2 text-green-600 hover:text-green-700"
+                              title="Save price values"
+                            >
+                              <Save className="h-4 w-4" />
+                            </Button>
                           )}
-                        </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setIsPriceDetailsExpanded(!isPriceDetailsExpanded)}
+                            className="h-8 px-2"
+                          >
+                            Details
+                            {isPriceDetailsExpanded ? (
+                              <ChevronUp className="ml-1 h-4 w-4" />
+                            ) : (
+                              <ChevronDown className="ml-1 h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
                       </div>
                       <div className="space-y-3">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Actual price:</span>
-                          <span>₹{actualPrice.toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Sub total:</span>
-                          <span>₹{subtotal.toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">GST (18%):</span>
-                          <span>₹{gst.toLocaleString()}</span>
-                        </div>
-                        <div className="border-t pt-3 mt-3">
-                          <div className="flex justify-between">
-                            <span className="font-semibold">Total price:</span>
-                            <span className="font-bold text-blue-600 text-lg">
-                              ₹{total.toLocaleString()}
-                            </span>
-                          </div>
-                        </div>
+                        {isEditingPriceCard ? (
+                          <>
+                            <div className="flex justify-between items-center text-sm">
+                              <span className="text-muted-foreground">Actual price:</span>
+                              <div className="flex items-center gap-2">
+                                <span>₹</span>
+                                <Input
+                                  type="text"
+                                  value={editablePrices.actualPrice}
+                                  onChange={(e) => {
+                                    const value = e.target.value.replace(/[^0-9,]/g, '');
+                                    setEditablePrices(prev => ({ ...prev, actualPrice: value }));
+                                  }}
+                                  className="w-24 h-8 text-right"
+                                  placeholder="0"
+                                />
+                              </div>
+                            </div>
+                            <div className="flex justify-between items-center text-sm">
+                              <span className="text-muted-foreground">Sub total:</span>
+                              <div className="flex items-center gap-2">
+                                <span>₹</span>
+                                <Input
+                                  type="text"
+                                  value={editablePrices.subtotal}
+                                  onChange={(e) => {
+                                    const value = e.target.value.replace(/[^0-9,]/g, '');
+                                    setEditablePrices(prev => ({ ...prev, subtotal: value }));
+                                  }}
+                                  className="w-24 h-8 text-right"
+                                  placeholder="0"
+                                />
+                              </div>
+                            </div>
+                            <div className="flex justify-between items-center text-sm">
+                              <span className="text-muted-foreground">GST (18%):</span>
+                              <div className="flex items-center gap-2">
+                                <span>₹</span>
+                                <Input
+                                  type="text"
+                                  value={editablePrices.gst}
+                                  onChange={(e) => {
+                                    const value = e.target.value.replace(/[^0-9,]/g, '');
+                                    setEditablePrices(prev => ({ ...prev, gst: value }));
+                                  }}
+                                  className="w-24 h-8 text-right"
+                                  placeholder="0"
+                                />
+                              </div>
+                            </div>
+                            <div className="border-t pt-3 mt-3">
+                              <div className="flex justify-between items-center">
+                                <span className="font-semibold">Total price:</span>
+                                <div className="flex items-center gap-2">
+                                  <span>₹</span>
+                                  <Input
+                                    type="text"
+                                    value={editablePrices.total}
+                                    onChange={(e) => {
+                                      const value = e.target.value.replace(/[^0-9,]/g, '');
+                                      setEditablePrices(prev => ({ ...prev, total: value }));
+                                    }}
+                                    className="w-32 h-8 text-right font-bold text-blue-600"
+                                    placeholder="0"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground">Actual price:</span>
+                              <span>₹{editablePrices.actualPrice || actualPrice.toLocaleString()}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground">Sub total:</span>
+                              <span>₹{editablePrices.subtotal || subtotal.toLocaleString()}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground">GST (18%):</span>
+                              <span>₹{editablePrices.gst || gst.toLocaleString()}</span>
+                            </div>
+                            <div className="border-t pt-3 mt-3">
+                              <div className="flex justify-between">
+                                <span className="font-semibold">Total price:</span>
+                                <span className="font-bold text-blue-600 text-lg">
+                                  ₹{editablePrices.total || total.toLocaleString()}
+                                </span>
+                              </div>
+                            </div>
+                          </>
+                        )}
                       </div>
 
                       {/* Event-wise Cost Breakdown */}
@@ -3223,7 +3998,8 @@ export default function NewProjectPage() {
                     </Button>
                     <Button
                       onClick={handleNext}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-8"
+                      disabled={!eventsSaved}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-8 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Next
                       <ArrowRight className="ml-2 h-4 w-4" />

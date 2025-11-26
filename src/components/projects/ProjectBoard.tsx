@@ -154,6 +154,35 @@ export function ProjectBoard({ onNewProject }: ProjectBoardProps) {
           }));
 
           console.log(`Transformed ${transformedProjects.length} projects for display`);
+          
+          // Print UUIDs of all project cards on project_dashboard
+          console.log('');
+          console.log('═══════════════════════════════════════════════════════════');
+          console.log('📋 PROJECT DASHBOARD - ALL PROJECT CARDS UUIDs');
+          console.log('═══════════════════════════════════════════════════════════');
+          console.log(`Total Projects: ${transformedProjects.length}`);
+          console.log('');
+          
+          transformedProjects.forEach((project, index) => {
+            console.log(`┌─ Project ${index + 1} ──────────────────────────────────────────────`);
+            console.log(`│ Title:      ${project.title || 'Untitled'}`);
+            console.log(`│ UUID:       ${project.projectUuid || 'N/A'}`);
+            console.log(`│ Status:     ${project.status || 'N/A'}`);
+            console.log(`│ Client:     ${project.clientName || 'N/A'}`);
+            console.log(`│ Event Type: ${project.eventType || 'N/A'}`);
+            console.log(`│ Start Date: ${project.startDate ? new Date(project.startDate).toLocaleDateString() : 'N/A'}`);
+            console.log(`└────────────────────────────────────────────────────────`);
+            console.log('');
+          });
+          
+          // Also print a simple list of just UUIDs for easy copying
+          console.log('📝 UUID List (for easy copying):');
+          const uuidList = transformedProjects.map((p, idx) => `${idx + 1}. ${p.projectUuid || 'N/A'}`);
+          uuidList.forEach(uuid => console.log(`   ${uuid}`));
+          console.log('');
+          console.log('═══════════════════════════════════════════════════════════');
+          console.log('');
+          
           setProjects(transformedProjects);
         } else {
           // No projects found
