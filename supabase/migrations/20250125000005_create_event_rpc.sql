@@ -20,7 +20,10 @@ CREATE OR REPLACE FUNCTION public.create_event(
   p_project_uuid UUID,
   p_photography_eventowner_phno TEXT,
   p_event_client_phno TEXT,
-  p_event_uuid UUID DEFAULT NULL -- If provided, update existing event; otherwise create new
+  p_event_uuid UUID DEFAULT NULL, -- If provided, update existing event; otherwise create new
+  p_event_days_count DECIMAL(5,2) DEFAULT NULL,
+  p_photography_workdays DECIMAL(5,2) DEFAULT NULL,
+  p_videography_workdays DECIMAL(5,2) DEFAULT NULL
 )
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -55,6 +58,9 @@ BEGIN
     photography_eventowner_phno,
     event_photographers_count,
     event_videographers_count,
+    event_days_count,
+    photography_workdays,
+    videography_workdays,
     created_at,
     updated_at
   ) VALUES (
@@ -71,6 +77,9 @@ BEGIN
     p_photography_eventowner_phno,
     COALESCE(p_event_photographers_count, 0),
     COALESCE(p_event_videographers_count, 0),
+    p_event_days_count,
+    p_photography_workdays,
+    p_videography_workdays,
     CASE WHEN p_event_uuid IS NULL THEN now() ELSE (SELECT created_at FROM public.events_details_table WHERE event_uuid = p_event_uuid) END,
     now()
   )
@@ -88,6 +97,9 @@ BEGIN
     photography_eventowner_phno = EXCLUDED.photography_eventowner_phno,
     event_photographers_count = EXCLUDED.event_photographers_count,
     event_videographers_count = EXCLUDED.event_videographers_count,
+    event_days_count = EXCLUDED.event_days_count,
+    photography_workdays = EXCLUDED.photography_workdays,
+    videography_workdays = EXCLUDED.videography_workdays,
     updated_at = now();
   
   -- Return success with event UUID

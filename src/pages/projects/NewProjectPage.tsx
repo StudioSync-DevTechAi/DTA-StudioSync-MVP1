@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/Layout";
 import { EstimatesHeader } from "@/components/estimates/list/EstimatesHeader";
@@ -20,7 +20,7 @@ import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { TimePickerClock } from "@/components/ui/time-picker-clock";
-import { CalendarIcon, ArrowRight, Plus, Trash2, Pencil, Eye, Download, Share2, ChevronDown, ChevronUp, Phone, X } from "lucide-react";
+import { CalendarIcon, ArrowRight, Plus, Trash2, Pencil, Eye, Download, Share2, ChevronDown, ChevronUp, Phone, X, Save } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -31,15 +31,15 @@ interface ChecklistItem {
 }
 
 interface Photographer {
-  id: string;
-  name: string;
-  contactNumber: string;
+  photographer_phno: string;
+  photographer_name: string;
+  payperday?: number | null;
 }
 
 interface Videographer {
-  id: string;
-  name: string;
-  contactNumber: string;
+  videographer_phno: string;
+  videographer_name: string;
+  payperday?: number | null;
 }
 
 interface EventPackage {
@@ -47,6 +47,7 @@ interface EventPackage {
   event_uuid?: string; // Database UUID (set after saving)
   packageName?: string; // Custom name for the event package (e.g., "Package 1", "Wedding Event")
   eventType: string; // Maps to event_name
+  customEventTypeName?: string; // Custom event type name when "other" is selected
   photographersCount: string; // Maps to event_photographers_count
   videographersCount: string; // Maps to event_videographers_count
   startDate?: Date; // Maps to event_start_date
@@ -59,31 +60,23 @@ interface EventPackage {
   isEditingDeliverablesNotes?: boolean; // Track if notes are being edited
   hasSavedDeliverablesNotes?: boolean; // Track if notes have been saved at least once
   prepChecklist?: ChecklistItem[]; // Maps to event_prep_checklist_json
+  daysCount?: string; // Maps to event_days_count
+  photographyWorkdays?: string; // Maps to photography_workdays
+  videographyWorkdays?: string; // Maps to videography_workdays
   isSaved?: boolean; // Track if this event has been saved to database
   isEditingPackageName?: boolean; // Track if package name is being edited
 }
 
-// Mock data for photographers
-const mockPhotographers: Photographer[] = [
-  { id: "photo-1", name: "Rajesh Kumar", contactNumber: "+91 98765 43210" },
-  { id: "photo-2", name: "Priya Sharma", contactNumber: "+91 98765 43211" },
-  { id: "photo-3", name: "Amit Patel", contactNumber: "+91 98765 43212" },
-  { id: "photo-4", name: "Sneha Reddy", contactNumber: "+91 98765 43213" },
-  { id: "photo-5", name: "Vikram Singh", contactNumber: "+91 98765 43214" },
-];
-
-// Mock data for videographers
-const mockVideographers: Videographer[] = [
-  { id: "video-1", name: "Anil Mehta", contactNumber: "+91 98765 43220" },
-  { id: "video-2", name: "Deepa Nair", contactNumber: "+91 98765 43221" },
-  { id: "video-3", name: "Rohit Desai", contactNumber: "+91 98765 43222" },
-  { id: "video-4", name: "Kavita Joshi", contactNumber: "+91 98765 43223" },
-  { id: "video-5", name: "Manoj Iyer", contactNumber: "+91 98765 43224" },
-];
+// Removed mock data - will be fetched from database
 
 export default function NewProjectPage() {
   const navigate = useNavigate();
-  const [currentPage, setCurrentPage] = useState(1);
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Initialize currentPage from URL query parameter, fallback to 1
+  const pageFromUrl = searchParams.get('page');
+  const initialPage = pageFromUrl ? parseInt(pageFromUrl, 10) : 1;
+  const [currentPage, setCurrentPage] = useState(initialPage >= 1 && initialPage <= 3 ? initialPage : 1);
   const [formData, setFormData] = useState({
     projectName: "",
     eventType: "",
@@ -123,6 +116,10 @@ export default function NewProjectPage() {
     client_name: string;
   } | null>(null);
   const [loadingProjectDetails, setLoadingProjectDetails] = useState(false);
+  const [photographers, setPhotographers] = useState<Photographer[]>([]);
+  const [videographers, setVideographers] = useState<Videographer[]>([]);
+  const [loadingPhotographers, setLoadingPhotographers] = useState(false);
+  const [loadingVideographers, setLoadingVideographers] = useState(false);
 
   // Load form data from sessionStorage on component mount
   // This runs FIRST and provides fallback data even if database query fails
@@ -137,11 +134,19 @@ export default function NewProjectPage() {
       const savedProjectName = sessionStorage.getItem("newProjectName");
       const savedProjectType = sessionStorage.getItem("newProjectType");
 
-      // Restore currentPage FIRST - this is critical for staying on the correct page after refresh
-      if (savedCurrentPage) {
+      // Restore currentPage from URL first (takes precedence), then fallback to sessionStorage
+      const pageFromUrl = searchParams.get('page');
+      if (pageFromUrl) {
+        const page = parseInt(pageFromUrl, 10);
+        if (page >= 1 && page <= 3) {
+          setCurrentPage(page);
+        }
+      } else if (savedCurrentPage) {
         const page = parseInt(savedCurrentPage, 10);
         if (page >= 1 && page <= 3) {
           setCurrentPage(page);
+          // Update URL to reflect the page from sessionStorage
+          setSearchParams({ page: page.toString() }, { replace: true });
         }
       }
 
@@ -202,15 +207,19 @@ export default function NewProjectPage() {
     }
   }, [formData]);
 
-  // Save currentPage to sessionStorage whenever it changes
+  // Update URL query parameter and sessionStorage whenever currentPage changes
   useEffect(() => {
     try {
+      // Update URL query parameter
+      setSearchParams({ page: currentPage.toString() }, { replace: true });
+      
+      // Also save to sessionStorage as backup
       sessionStorage.setItem("newProjectCurrentPage", currentPage.toString());
       sessionStorage.setItem("newProjectLastModified", new Date().toISOString());
     } catch (error) {
-      console.error("Error saving currentPage to sessionStorage:", error);
+      console.error("Error saving currentPage:", error);
     }
-  }, [currentPage]);
+  }, [currentPage, setSearchParams]);
 
   // Save eventPackages to sessionStorage whenever it changes
   useEffect(() => {
@@ -594,6 +603,56 @@ export default function NewProjectPage() {
     fetchProjectDetailsForPage2();
   }, [projectEstimateUuid, currentPage, projectDetails, formData]);
 
+  // Fetch photographers and videographers when Page 2 loads
+  useEffect(() => {
+    const fetchPhotographersAndVideographers = async () => {
+      // Only fetch when on Page 2 (Event Details)
+      if (currentPage !== 2) {
+        return;
+      }
+
+      // Fetch photographers
+      setLoadingPhotographers(true);
+      try {
+        const { data: photographersData, error: photographersError } = await supabase
+          .from('photographers_details_table' as any)
+          .select('photographer_phno, photographer_name, payperday')
+          .order('photographer_name', { ascending: true });
+
+        if (photographersError) {
+          console.error('Error fetching photographers:', photographersError);
+        } else {
+          setPhotographers((photographersData as unknown as Photographer[]) || []);
+        }
+      } catch (error) {
+        console.error('Exception fetching photographers:', error);
+      } finally {
+        setLoadingPhotographers(false);
+      }
+
+      // Fetch videographers
+      setLoadingVideographers(true);
+      try {
+        const { data: videographersData, error: videographersError } = await supabase
+          .from('videographers_details_table' as any)
+          .select('videographer_phno, videographer_name, payperday')
+          .order('videographer_name', { ascending: true });
+
+        if (videographersError) {
+          console.error('Error fetching videographers:', videographersError);
+        } else {
+          setVideographers((videographersData as unknown as Videographer[]) || []);
+        }
+      } catch (error) {
+        console.error('Exception fetching videographers:', error);
+      } finally {
+        setLoadingVideographers(false);
+      }
+    };
+
+    fetchPhotographersAndVideographers();
+  }, [currentPage]);
+
   const handleInputChange = (field: string, value: string | Date | undefined | boolean) => {
     // Validate end date is not before start date
     if (field === "endDate" && value instanceof Date && formData.startDate) {
@@ -777,17 +836,11 @@ export default function NewProjectPage() {
     }
   };
 
-  // Convert coordinator ID to phone number
+  // Convert coordinator ID (phone number) to phone number (already stored as phone number)
   const getCoordinatorPhone = (coordinatorId: string | undefined, type: 'photo' | 'video'): string | null => {
     if (!coordinatorId) return null;
-    
-    if (type === 'photo') {
-      const photographer = mockPhotographers.find(p => p.id === coordinatorId);
-      return photographer ? photographer.contactNumber.replace(/\s/g, '') : null; // Remove spaces
-    } else {
-      const videographer = mockVideographers.find(v => v.id === coordinatorId);
-      return videographer ? videographer.contactNumber.replace(/\s/g, '') : null; // Remove spaces
-    }
+    // Coordinator ID is now the phone number directly, just remove spaces
+    return coordinatorId.replace(/\s/g, '');
   };
 
   // Convert EventPackage to database format and save to events_details_table
@@ -821,8 +874,13 @@ export default function NewProjectPage() {
         : [];
 
       // Prepare request data
+      // Use customEventTypeName if eventType is "other", otherwise use eventType
+      const eventName = eventPackage.eventType === "other" && eventPackage.customEventTypeName
+        ? eventPackage.customEventTypeName
+        : eventPackage.eventType;
+      
       const requestData = {
-        p_event_name: eventPackage.eventType,
+        p_event_name: eventName,
         p_event_start_date: format(eventPackage.startDate, 'yyyy-MM-dd'),
         p_event_start_time: (eventPackage.startHour && eventPackage.startMinute)
           ? formatTime(eventPackage.startHour, eventPackage.startMinute)
@@ -837,6 +895,9 @@ export default function NewProjectPage() {
         p_photography_eventowner_phno: photographyOwner.photography_owner_phno,
         p_event_client_phno: formData.clientPhone.replace(/\s/g, ''), // Remove spaces
         p_event_uuid: eventPackage.event_uuid || null, // If exists, update; otherwise create new
+        p_event_days_count: eventPackage.daysCount ? parseFloat(eventPackage.daysCount) : null,
+        p_photography_workdays: eventPackage.photographyWorkdays ? parseFloat(eventPackage.photographyWorkdays) : null,
+        p_videography_workdays: eventPackage.videographyWorkdays ? parseFloat(eventPackage.videographyWorkdays) : null,
       };
 
       // Call Supabase RPC function
@@ -917,6 +978,32 @@ export default function NewProjectPage() {
     setEventPackages(eventPackages.filter((pkg) => pkg.id !== id));
   };
 
+  // Save individual event card
+  const handleSaveEventCard = async (eventId: string) => {
+    const eventIndex = eventPackages.findIndex((pkg) => pkg.id === eventId);
+    if (eventIndex === -1) return;
+
+    const eventPackage = eventPackages[eventIndex];
+    
+    // Validate required fields
+    if (!eventPackage.eventType || !eventPackage.startDate) {
+      console.warn('Cannot save event: missing eventType or startDate');
+      return;
+    }
+
+    const eventUuid = await saveEventToDatabase(eventPackage, eventIndex);
+    if (eventUuid) {
+      // Update the event package with the UUID and mark as saved
+      const updatedPackages = [...eventPackages];
+      updatedPackages[eventIndex] = {
+        ...eventPackage,
+        event_uuid: eventUuid,
+        isSaved: true,
+      };
+      setEventPackages(updatedPackages);
+    }
+  };
+
   const handleEditPackageName = (id: string) => {
     setEditingPackageNameId(id);
   };
@@ -930,7 +1017,8 @@ export default function NewProjectPage() {
     // When certain fields change, mark the event as unsaved so it gets saved again
     const fieldsThatRequireResave = ['eventType', 'startDate', 'startHour', 'startMinute', 
       'photographyCoordinatorId', 'videographyCoordinatorId', 'photographersCount', 
-      'videographersCount', 'deliverablesNotes', 'prepChecklist'];
+      'videographersCount', 'deliverablesNotes', 'prepChecklist', 'daysCount', 
+      'photographyWorkdays', 'videographyWorkdays'];
     
     setEventPackages(
       eventPackages.map((pkg) => {
@@ -1547,6 +1635,9 @@ export default function NewProjectPage() {
                           <span className="font-medium">Project:</span>
                           <span className="text-muted-foreground">{formData.projectName || "Not set"}</span>
                           <span className="text-muted-foreground">|</span>
+                          <span className="font-medium">Project Type:</span>
+                          <span className="text-muted-foreground">{projectDetails?.project_type || formData.eventType || "Not set"}</span>
+                          <span className="text-muted-foreground">|</span>
                           <span className="font-medium">StartDate:</span>
                           <span className="text-muted-foreground">
                             {formData.startDate ? format(formData.startDate, "MM/dd/yyyy") : "Not set"}
@@ -1613,11 +1704,26 @@ export default function NewProjectPage() {
                                   {!isActiveEvent && (
                                     <button
                                       onClick={() => toggleEventDetails(pkg.id)}
-                                      className="p-1 hover:bg-accent rounded transition-colors"
+                                      disabled={isExpanded}
+                                      className={`p-1 rounded transition-colors ${
+                                        isExpanded 
+                                          ? 'opacity-50 cursor-not-allowed' 
+                                          : 'hover:bg-accent'
+                                      }`}
                                       aria-label="Edit event"
+                                      title={isExpanded ? "Save changes first" : "Edit event"}
                                     >
-                                      <Pencil className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                                      <Pencil className={`h-4 w-4 ${
+                                        isExpanded 
+                                          ? 'text-muted-foreground' 
+                                          : 'text-muted-foreground hover:text-foreground'
+                                      }`} />
                                     </button>
+                                  )}
+                                  {!isExpanded && pkg.daysCount && (
+                                    <span className="text-sm text-muted-foreground">
+                                      Days {pkg.daysCount}
+                                    </span>
                                   )}
                                   <Button
                                     variant="outline"
@@ -1631,6 +1737,26 @@ export default function NewProjectPage() {
                                     ) : (
                                       <ChevronDown className="ml-2 h-4 w-4" />
                                     )}
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleSaveEventCard(pkg.id)}
+                                    className={`${
+                                      isExpanded && pkg.eventType && pkg.startDate
+                                        ? 'text-green-600 hover:text-green-700 hover:bg-green-50'
+                                        : 'text-muted-foreground opacity-50'
+                                    }`}
+                                    disabled={!isExpanded || !pkg.eventType || !pkg.startDate}
+                                    title={
+                                      !isExpanded 
+                                        ? "Expand event card to save" 
+                                        : (!pkg.eventType || !pkg.startDate)
+                                        ? "Fill required fields to save"
+                                        : "Save event card"
+                                    }
+                                  >
+                                    <Save className="h-4 w-4" />
                                   </Button>
                                   {eventPackages.length > 1 && (
                                     <Button
@@ -1648,37 +1774,53 @@ export default function NewProjectPage() {
                               {/* Show input boxes for active event, or collapsed view for completed events */}
                               {isActiveEvent ? (
                                 // Active event - show input boxes
-                                <div className="grid grid-cols-3 gap-4">
-                                  <div className="space-y-2">
-                                    <Label htmlFor={`eventType-${pkg.id}`}>Project Type</Label>
-                                    <Select
-                                      value={pkg.eventType}
-                                      onValueChange={(value) =>
-                                        handleEventPackageChange(pkg.id, "eventType", value)
-                                      }
-                                    >
-                                      <SelectTrigger id={`eventType-${pkg.id}`}>
-                                        <SelectValue placeholder="Select an event type" />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        <SelectItem value="wedding">Wedding</SelectItem>
-                                        <SelectItem value="engagement">Engagement</SelectItem>
-                                        <SelectItem value="corporate">Corporate</SelectItem>
-                                        <SelectItem value="portrait">Portrait</SelectItem>
-                                        <SelectItem value="event">Event</SelectItem>
-                                        <SelectItem value="commercial">Commercial</SelectItem>
-                                        <SelectItem value="other">Other</SelectItem>
-                                      </SelectContent>
-                                    </Select>
+                                <div className="space-y-4">
+                                  {/* First row: Event Type */}
+                                  <div className="flex items-center gap-4 w-full">
+                                    <div className="w-1/2">
+                                      <Select
+                                        value={pkg.eventType}
+                                        onValueChange={(value) =>
+                                          handleEventPackageChange(pkg.id, "eventType", value)
+                                        }
+                                      >
+                                        <SelectTrigger id={`eventType-${pkg.id}`}>
+                                          <SelectValue placeholder="Select an event type" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="wedding">Wedding</SelectItem>
+                                          <SelectItem value="engagement">Engagement</SelectItem>
+                                          <SelectItem value="corporate">Corporate</SelectItem>
+                                          <SelectItem value="portrait">Portrait</SelectItem>
+                                          <SelectItem value="event">Event</SelectItem>
+                                          <SelectItem value="commercial">Commercial</SelectItem>
+                                          <SelectItem value="other">Other</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+                                    {pkg.eventType === "other" && (
+                                      <div className="flex-1">
+                                        <Input
+                                          id={`customEventType-${pkg.id}`}
+                                          type="text"
+                                          placeholder="Enter event type name"
+                                          value={pkg.customEventTypeName || ""}
+                                          onChange={(e) =>
+                                            handleEventPackageChange(pkg.id, "customEventTypeName", e.target.value)
+                                          }
+                                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                        />
+                                      </div>
+                                    )}
                                   </div>
 
-                                  <div className="space-y-2">
-                                    <Label htmlFor={`photographers-${pkg.id}`}>Photographers</Label>
+                                  {/* Second row: PGs No, PGDays, VGs No, VGDays */}
+                                  <div className="grid grid-cols-4 gap-4">
                                     <Input
                                       id={`photographers-${pkg.id}`}
                                       type="number"
                                       min="0"
-                                      placeholder="e.g., 2"
+                                      placeholder="PGs No"
                                       value={pkg.photographersCount}
                                       onChange={(e) =>
                                         handleEventPackageChange(
@@ -1687,16 +1829,23 @@ export default function NewProjectPage() {
                                           e.target.value
                                         )
                                       }
+                                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                                     />
-                                  </div>
-
-                                  <div className="space-y-2">
-                                    <Label htmlFor={`videographers-${pkg.id}`}>Videographers</Label>
+                                    <Input
+                                      id={`photographyWorkdays-${pkg.id}`}
+                                      type="number"
+                                      step="0.1"
+                                      min="0"
+                                      placeholder="PGDays"
+                                      value={pkg.photographyWorkdays || ""}
+                                      onChange={(e) => handleEventPackageChange(pkg.id, "photographyWorkdays", e.target.value)}
+                                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                    />
                                     <Input
                                       id={`videographers-${pkg.id}`}
                                       type="number"
                                       min="0"
-                                      placeholder="e.g., 1"
+                                      placeholder="VGs No"
                                       value={pkg.videographersCount}
                                       onChange={(e) =>
                                         handleEventPackageChange(
@@ -1705,24 +1854,190 @@ export default function NewProjectPage() {
                                           e.target.value
                                         )
                                       }
+                                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                    />
+                                    <Input
+                                      id={`videographyWorkdays-${pkg.id}`}
+                                      type="number"
+                                      step="0.1"
+                                      min="0"
+                                      placeholder="VGDays"
+                                      value={pkg.videographyWorkdays || ""}
+                                      onChange={(e) => handleEventPackageChange(pkg.id, "videographyWorkdays", e.target.value)}
+                                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                                     />
                                   </div>
                                 </div>
                               ) : (
-                                // Completed event - show collapsed view with values side-by-side
-                                <div className="grid grid-cols-3 gap-4 text-sm">
-                                  <div className="flex flex-col">
-                                    <span className="text-muted-foreground text-xs mb-1">Project Type</span>
-                                    <span className="font-medium">{pkg.eventType || "Not set"}</span>
-                                  </div>
-                                  <div>
-                                    <span className="text-muted-foreground">Photographers: </span>
-                                    <span className="font-medium">{pkg.photographersCount || "0"}</span>
-                                  </div>
-                                  <div>
-                                    <span className="text-muted-foreground">Videographers: </span>
-                                    <span className="font-medium">{pkg.videographersCount || "0"}</span>
-                                  </div>
+                                // Completed event - show editable fields when expanded, read-only when collapsed
+                                <div className="space-y-4">
+                                  {isExpanded ? (
+                                    // Expanded (edit mode) - show editable input fields
+                                    <>
+                                      {/* First row: Event Type */}
+                                      <div className="flex items-center gap-4 w-full">
+                                        <div className="w-1/2">
+                                          <Select
+                                            value={pkg.eventType}
+                                            onValueChange={(value) =>
+                                              handleEventPackageChange(pkg.id, "eventType", value)
+                                            }
+                                          >
+                                            <SelectTrigger id={`eventType-${pkg.id}`}>
+                                              <SelectValue placeholder="Select an event type" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                              <SelectItem value="wedding">Wedding</SelectItem>
+                                              <SelectItem value="engagement">Engagement</SelectItem>
+                                              <SelectItem value="corporate">Corporate</SelectItem>
+                                              <SelectItem value="portrait">Portrait</SelectItem>
+                                              <SelectItem value="event">Event</SelectItem>
+                                              <SelectItem value="commercial">Commercial</SelectItem>
+                                              <SelectItem value="other">Other</SelectItem>
+                                            </SelectContent>
+                                          </Select>
+                                        </div>
+                                        {pkg.eventType === "other" && (
+                                          <div className="flex-1">
+                                            <Input
+                                              id={`customEventType-${pkg.id}`}
+                                              type="text"
+                                              placeholder="Enter event type name"
+                                              value={pkg.customEventTypeName || ""}
+                                              onChange={(e) =>
+                                                handleEventPackageChange(pkg.id, "customEventTypeName", e.target.value)
+                                              }
+                                              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                            />
+                                          </div>
+                                        )}
+                                      </div>
+
+                                      {/* Second row: PGs No, PGDays, VGs No, VGDays */}
+                                      <div className="grid grid-cols-4 gap-4">
+                                        <Input
+                                          id={`photographers-${pkg.id}`}
+                                          type="number"
+                                          min="0"
+                                          placeholder="PGs No"
+                                          value={pkg.photographersCount}
+                                          onChange={(e) =>
+                                            handleEventPackageChange(
+                                              pkg.id,
+                                              "photographersCount",
+                                              e.target.value
+                                            )
+                                          }
+                                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                        />
+                                        <Input
+                                          id={`photographyWorkdays-${pkg.id}`}
+                                          type="number"
+                                          step="0.1"
+                                          min="0"
+                                          placeholder="PGDays"
+                                          value={pkg.photographyWorkdays || ""}
+                                          onChange={(e) => handleEventPackageChange(pkg.id, "photographyWorkdays", e.target.value)}
+                                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                        />
+                                        <Input
+                                          id={`videographers-${pkg.id}`}
+                                          type="number"
+                                          min="0"
+                                          placeholder="VGs No"
+                                          value={pkg.videographersCount}
+                                          onChange={(e) =>
+                                            handleEventPackageChange(
+                                              pkg.id,
+                                              "videographersCount",
+                                              e.target.value
+                                            )
+                                          }
+                                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                        />
+                                        <Input
+                                          id={`videographyWorkdays-${pkg.id}`}
+                                          type="number"
+                                          step="0.1"
+                                          min="0"
+                                          placeholder="VGDays"
+                                          value={pkg.videographyWorkdays || ""}
+                                          onChange={(e) => handleEventPackageChange(pkg.id, "videographyWorkdays", e.target.value)}
+                                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                        />
+                                      </div>
+                                    </>
+                                  ) : (
+                                    // Collapsed view - show read-only values
+                                    <>
+                                      {/* First row: Event Type with Date and Cost */}
+                                      <div className="w-full">
+                                        <div className="flex items-center gap-4 text-sm flex-wrap">
+                                          <div className="flex items-center gap-2">
+                                            <span className="text-muted-foreground">Event Type:</span>
+                                            <span className="font-medium capitalize">
+                                              {pkg.eventType === "other" && pkg.customEventTypeName
+                                                ? pkg.customEventTypeName
+                                                : pkg.eventType || "Not set"}
+                                            </span>
+                                          </div>
+                                          {pkg.startDate && (
+                                            <div className="flex items-center gap-2">
+                                              <span className="text-muted-foreground">On:</span>
+                                              <span className="font-medium">{format(pkg.startDate, "MMM dd, yyyy")}</span>
+                                            </div>
+                                          )}
+                                          <div className="flex items-center gap-2">
+                                            <span className="text-muted-foreground">Cost:</span>
+                                            <span className="font-medium">₹{(() => {
+                                              // Calculate cost for this event package using same logic as calculateEventWiseCosts
+                                              const basePricePerPhotographer = 10000;
+                                              const basePricePerVideographer = 15000;
+                                              const eventTypeMultiplier: { [key: string]: number } = {
+                                                wedding: 1.2,
+                                                engagement: 1.0,
+                                                corporate: 1.1,
+                                                portrait: 0.8,
+                                                event: 1.0,
+                                                commercial: 1.3,
+                                                other: 1.0,
+                                              };
+                                              
+                                              if (pkg.eventType && pkg.photographersCount && pkg.videographersCount) {
+                                                const photographers = parseInt(pkg.photographersCount, 10) || 0;
+                                                const videographers = parseInt(pkg.videographersCount, 10) || 0;
+                                                const multiplier = eventTypeMultiplier[pkg.eventType] || 1.0;
+                                                const packagePrice =
+                                                  (photographers * basePricePerPhotographer + videographers * basePricePerVideographer) *
+                                                  multiplier;
+                                                return packagePrice.toLocaleString("en-IN");
+                                              }
+                                              return "0";
+                                            })()}</span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      {/* Second row: PGs No, PGDays, VGs No, VGDays */}
+                                      <div className="grid grid-cols-4 gap-4 text-sm">
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-muted-foreground">PGs No:</span>
+                                          <span className="font-medium">{pkg.photographersCount || "0"}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-muted-foreground">PGDays:</span>
+                                          <span className="font-medium">{pkg.photographyWorkdays || "0"}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-muted-foreground">VGs No:</span>
+                                          <span className="font-medium">{pkg.videographersCount || "0"}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-muted-foreground">VGDays:</span>
+                                          <span className="font-medium">{pkg.videographyWorkdays || "0"}</span>
+                                        </div>
+                                      </div>
+                                    </>
+                                  )}
                                 </div>
                               )}
 
@@ -1731,7 +2046,7 @@ export default function NewProjectPage() {
                               <div className="mt-4 pt-4 border-t space-y-4">
                                 {/* Start Date & Time */}
                                 <div className="space-y-2">
-                                  <Label className="text-sm font-medium leading-none max-w-fit">Event Start Date & Time</Label>
+                                  <Label className="text-sm font-medium leading-none max-w-fit">Event StartDate & Time</Label>
                                   <div className="flex items-end gap-4">
                                     {/* Date Selection */}
                                     <div className="flex-shrink-0">
@@ -1771,94 +2086,114 @@ export default function NewProjectPage() {
                                         onMinuteChange={(m) => handleEventPackageChange(pkg.id, "startMinute", m)}
                                       />
                                     </div>
+
+                                    {/* Days Count Input */}
+                                    <div className="flex-shrink-0">
+                                      <Input
+                                        id={`daysCount-${pkg.id}`}
+                                        type="number"
+                                        step="0.1"
+                                        min="0"
+                                        placeholder="Days No."
+                                        value={pkg.daysCount || ""}
+                                        onChange={(e) => handleEventPackageChange(pkg.id, "daysCount", e.target.value)}
+                                        className="w-24"
+                                      />
+                                    </div>
                                   </div>
                                 </div>
 
-                                {/* Photo & Video Coordinators */}
+                                {/* PhotoPOC & VideoPOC */}
                                 <div className="grid grid-cols-2 gap-4 items-start">
                                   <div className="space-y-2">
-                                    <Label htmlFor={`photoCoordinator-${pkg.id}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-nowrap max-w-fit">Photo Coordinator</Label>
-                                    {pkg.photographyCoordinatorId ? (
-                                      <div className="flex items-center justify-between p-3 border rounded-md bg-muted/50">
-                                        <div className="flex-1">
-                                          <div className="font-medium text-sm">
-                                            {mockPhotographers.find(p => p.id === pkg.photographyCoordinatorId)?.name}
+                                    <Label htmlFor={`photoCoordinator-${pkg.id}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-nowrap max-w-fit">PhotoPOC</Label>
+                                    <div className="flex items-end gap-2">
+                                      {pkg.photographyCoordinatorId ? (
+                                        <div className="flex items-center justify-between p-3 border rounded-md bg-muted/50 flex-1 w-[60%]">
+                                          <div className="flex-1">
+                                            <div className="font-medium text-sm">
+                                              {photographers.find(p => p.photographer_phno === pkg.photographyCoordinatorId)?.photographer_name || 'Photographer'}
+                                            </div>
+                                            <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                                              <Phone className="h-3 w-3" />
+                                              {pkg.photographyCoordinatorId}
+                                            </div>
                                           </div>
-                                          <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                                            <Phone className="h-3 w-3" />
-                                            {mockPhotographers.find(p => p.id === pkg.photographyCoordinatorId)?.contactNumber}
-                                          </div>
+                                          <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => handleEventPackageChange(pkg.id, "photographyCoordinatorId", undefined)}
+                                            className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+                                          >
+                                            <X className="h-4 w-4" />
+                                          </Button>
                                         </div>
-                                        <Button
-                                          variant="ghost"
-                                          size="sm"
-                                          onClick={() => handleEventPackageChange(pkg.id, "photographyCoordinatorId", undefined)}
-                                          className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+                                      ) : (
+                                        <Select
+                                          value={pkg.photographyCoordinatorId || ""}
+                                          onValueChange={(value) =>
+                                            handleEventPackageChange(pkg.id, "photographyCoordinatorId", value)
+                                          }
+                                          disabled={loadingPhotographers}
                                         >
-                                          <X className="h-4 w-4" />
-                                        </Button>
-                                      </div>
-                                    ) : (
-                                      <Select
-                                        value={pkg.photographyCoordinatorId || ""}
-                                        onValueChange={(value) =>
-                                          handleEventPackageChange(pkg.id, "photographyCoordinatorId", value)
-                                        }
-                                      >
-                                        <SelectTrigger id={`photoCoordinator-${pkg.id}`} className="w-full">
-                                          <SelectValue placeholder="photo coordinator" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          {mockPhotographers.map((photographer) => (
-                                            <SelectItem key={photographer.id} value={photographer.id}>
-                                              Photographer
-                                            </SelectItem>
-                                          ))}
-                                        </SelectContent>
-                                      </Select>
-                                    )}
+                                          <SelectTrigger id={`photoCoordinator-${pkg.id}`} className="w-[60%]">
+                                            <SelectValue placeholder={loadingPhotographers ? "Loading..." : "select POC"} />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            {photographers.map((photographer) => (
+                                              <SelectItem key={photographer.photographer_phno} value={photographer.photographer_phno}>
+                                                {photographer.photographer_name}
+                                              </SelectItem>
+                                            ))}
+                                          </SelectContent>
+                                        </Select>
+                                      )}
+                                    </div>
                                   </div>
                                   <div className="space-y-2">
-                                    <Label htmlFor={`videoCoordinator-${pkg.id}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-nowrap max-w-fit">Video Coordinator</Label>
-                                    {pkg.videographyCoordinatorId ? (
-                                      <div className="flex items-center justify-between p-3 border rounded-md bg-muted/50">
-                                        <div className="flex-1">
-                                          <div className="font-medium text-sm">
-                                            {mockVideographers.find(v => v.id === pkg.videographyCoordinatorId)?.name}
+                                    <Label htmlFor={`videoCoordinator-${pkg.id}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-nowrap max-w-fit">VideoPOC</Label>
+                                    <div className="flex items-end gap-2">
+                                      {pkg.videographyCoordinatorId ? (
+                                        <div className="flex items-center justify-between p-3 border rounded-md bg-muted/50 flex-1 w-[60%]">
+                                          <div className="flex-1">
+                                            <div className="font-medium text-sm">
+                                              {videographers.find(v => v.videographer_phno === pkg.videographyCoordinatorId)?.videographer_name || 'Videographer'}
+                                            </div>
+                                            <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                                              <Phone className="h-3 w-3" />
+                                              {pkg.videographyCoordinatorId}
+                                            </div>
                                           </div>
-                                          <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                                            <Phone className="h-3 w-3" />
-                                            {mockVideographers.find(v => v.id === pkg.videographyCoordinatorId)?.contactNumber}
-                                          </div>
+                                          <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => handleEventPackageChange(pkg.id, "videographyCoordinatorId", undefined)}
+                                            className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+                                          >
+                                            <X className="h-4 w-4" />
+                                          </Button>
                                         </div>
-                                        <Button
-                                          variant="ghost"
-                                          size="sm"
-                                          onClick={() => handleEventPackageChange(pkg.id, "videographyCoordinatorId", undefined)}
-                                          className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+                                      ) : (
+                                        <Select
+                                          value={pkg.videographyCoordinatorId || ""}
+                                          onValueChange={(value) =>
+                                            handleEventPackageChange(pkg.id, "videographyCoordinatorId", value)
+                                          }
+                                          disabled={loadingVideographers}
                                         >
-                                          <X className="h-4 w-4" />
-                                        </Button>
-                                      </div>
-                                    ) : (
-                                      <Select
-                                        value={pkg.videographyCoordinatorId || ""}
-                                        onValueChange={(value) =>
-                                          handleEventPackageChange(pkg.id, "videographyCoordinatorId", value)
-                                        }
-                                      >
-                                        <SelectTrigger id={`videoCoordinator-${pkg.id}`} className="w-full">
-                                          <SelectValue placeholder="video coordinator" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          {mockVideographers.map((videographer) => (
-                                            <SelectItem key={videographer.id} value={videographer.id}>
-                                              Videographer
-                                            </SelectItem>
-                                          ))}
-                                        </SelectContent>
-                                      </Select>
-                                    )}
+                                          <SelectTrigger id={`videoCoordinator-${pkg.id}`} className="w-[60%]">
+                                            <SelectValue placeholder={loadingVideographers ? "Loading..." : "select POC"} />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            {videographers.map((videographer) => (
+                                              <SelectItem key={videographer.videographer_phno} value={videographer.videographer_phno}>
+                                                {videographer.videographer_name}
+                                              </SelectItem>
+                                            ))}
+                                          </SelectContent>
+                                        </Select>
+                                      )}
+                                    </div>
                                   </div>
                                 </div>
 
