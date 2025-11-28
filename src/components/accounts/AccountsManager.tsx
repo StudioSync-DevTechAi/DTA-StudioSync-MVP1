@@ -338,48 +338,52 @@ function AccountForm({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="client_name">Client Name</Label>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-2 min-w-0">
+          <Label htmlFor="client_name" className="text-sm sm:text-base">Client Name</Label>
           <Input
             id="client_name"
             value={formData.client_name || ''}
             onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
             placeholder="Enter client name"
+            className="w-full"
           />
         </div>
         
-        <div className="space-y-2">
-          <Label htmlFor="client_email">Client Email</Label>
+        <div className="space-y-2 min-w-0">
+          <Label htmlFor="client_email" className="text-sm sm:text-base">Client Email</Label>
           <Input
             id="client_email"
             type="email"
             value={formData.client_email || ''}
             onChange={(e) => setFormData({ ...formData, client_email: e.target.value })}
             placeholder="Enter client email"
+            className="w-full"
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="payment_terms">Payment Terms (days)</Label>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-2 min-w-0">
+          <Label htmlFor="payment_terms" className="text-sm sm:text-base">Payment Terms (days)</Label>
           <Input
             id="payment_terms"
             type="number"
             value={formData.payment_terms}
             onChange={(e) => setFormData({ ...formData, payment_terms: parseInt(e.target.value) })}
+            className="w-full"
           />
         </div>
         
-        <div className="space-y-2">
-          <Label htmlFor="credit_limit">Credit Limit</Label>
+        <div className="space-y-2 min-w-0">
+          <Label htmlFor="credit_limit" className="text-sm sm:text-base">Credit Limit</Label>
           <Input
             id="credit_limit"
             type="number"
             step="0.01"
             value={formData.credit_limit}
             onChange={(e) => setFormData({ ...formData, credit_limit: parseFloat(e.target.value) })}
+            className="w-full"
           />
         </div>
       </div>

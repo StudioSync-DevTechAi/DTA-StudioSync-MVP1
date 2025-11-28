@@ -29,7 +29,7 @@ export default function EstimatesPage() {
 
   return (
     <Layout>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6 p-3 sm:p-4 md:p-6">
           <EstimatesHeader 
             onNewEstimate={handleCreateNewEstimate}
             canCreate={true}

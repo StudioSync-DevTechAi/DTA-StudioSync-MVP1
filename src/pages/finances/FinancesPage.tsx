@@ -36,7 +36,7 @@ export default function FinancesPage() {
 
   return (
     <Layout>
-      <div className="space-y-8 animate-in">
+      <div className="space-y-4 sm:space-y-6 lg:space-y-8 p-3 sm:p-4 md:p-6 animate-in">
         <FinancesHeader 
           selectedYear={selectedYear}
           setSelectedYear={setSelectedYear}
@@ -49,7 +49,7 @@ export default function FinancesPage() {
           onValueChange={setActiveTab}
           className="w-full"
         >
-          <TabsList className="grid w-full grid-cols-3 mb-8">
+          <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 mb-4 sm:mb-8 gap-2 sm:gap-0">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <PermissionGuard permission={PERMISSIONS.FINANCES_MANAGE} fallback={<></>}>
               <TabsTrigger value="transactions">Transactions</TabsTrigger>

@@ -151,8 +151,8 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 flex items-center justify-center p-3 sm:p-4">
+      <Card className="w-full max-w-md mx-auto">
         <CardHeader className="text-center">
           <div 
             className="mx-auto mb-4 p-3 bg-primary/10 rounded-full w-fit cursor-pointer"
@@ -164,10 +164,10 @@ export default function Auth() {
               className="h-8 w-8 object-contain"
             />
           </div>
-          <CardTitle className="text-2xl font-bold">
+          <CardTitle className="text-xl sm:text-2xl font-bold">
             Welcome to StudioSyncWork
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-sm">
             Sign in to manage your photography business
           </CardDescription>
           
@@ -196,15 +196,15 @@ export default function Auth() {
           
           {/* Bypass Auth Section (Hidden by default) */}
           {showBypassOptions && (
-            <div className="p-4 border border-yellow-300 bg-yellow-50 rounded-md mb-4">
+            <div className="p-3 sm:p-4 border border-yellow-300 bg-yellow-50 rounded-md mb-4">
               <div className="flex items-center gap-2 mb-2">
-                <ShieldCheck className="h-5 w-5 text-yellow-600" />
-                <h3 className="font-medium text-yellow-800">Development Bypass</h3>
+                <ShieldCheck className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-600" />
+                <h3 className="font-medium text-sm sm:text-base text-yellow-800">Development Bypass</h3>
               </div>
-              <p className="text-sm text-yellow-700 mb-3">
+              <p className="text-xs sm:text-sm text-yellow-700 mb-3">
                 Select a role to bypass authentication for development purposes:
               </p>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <Select value={bypassRole} onValueChange={setBypassRole}>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select role" />
@@ -218,7 +218,7 @@ export default function Auth() {
                     <SelectItem value="editor">Editor</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button onClick={handleBypassAuth} variant="outline" className="bg-yellow-100 border-yellow-300 text-yellow-800">
+                <Button onClick={handleBypassAuth} variant="outline" className="bg-yellow-100 border-yellow-300 text-yellow-800 w-full sm:w-auto">
                   Bypass
                 </Button>
               </div>

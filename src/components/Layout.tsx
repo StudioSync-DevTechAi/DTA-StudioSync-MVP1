@@ -18,7 +18,7 @@ import {
   FolderKanban,
 } from "lucide-react";
 import { Button } from "./ui/button";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { WorkInProgress } from "./ui/WorkInProgress";
 import { useUser } from "@/contexts/UserContext";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
@@ -38,17 +38,85 @@ const navItems = [
   { path: "/portfolio", label: "Portfolio", icon: Camera, permission: PERMISSIONS.PORTFOLIO_VIEW },
 ];
 
+const SIDEBAR_MIN_WIDTH = 200;
+const SIDEBAR_MAX_WIDTH = 500;
+const SIDEBAR_DEFAULT_WIDTH = 256; // w-64 = 256px
+
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [sidebarWidth, setSidebarWidth] = useState(() => {
+    // Load from localStorage or use default
+    const saved = localStorage.getItem('sidebarWidth');
+    return saved ? parseInt(saved, 10) : SIDEBAR_DEFAULT_WIDTH;
+  });
+  const [isResizing, setIsResizing] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth >= 1024;
+    }
+    return true;
+  });
+  const sidebarRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut, hasRole } = useAuth();
   const { hasPermission } = useRBAC();
   
+  // Save sidebar width to localStorage
+  useEffect(() => {
+    localStorage.setItem('sidebarWidth', sidebarWidth.toString());
+  }, [sidebarWidth]);
+  
   // Close mobile menu when route changes
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location]);
+  
+  // Handle window resize to update desktop state
+  useEffect(() => {
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth >= 1024);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
+  // Handle mouse move for resizing
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!isResizing) return;
+    
+    const newWidth = e.clientX;
+    const clampedWidth = Math.max(SIDEBAR_MIN_WIDTH, Math.min(SIDEBAR_MAX_WIDTH, newWidth));
+    setSidebarWidth(clampedWidth);
+  }, [isResizing]);
+  
+  // Handle mouse up to stop resizing
+  const handleMouseUp = useCallback(() => {
+    setIsResizing(false);
+  }, []);
+  
+  // Add event listeners for resizing
+  useEffect(() => {
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    } else {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    }
+    
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+  }, [isResizing, handleMouseMove, handleMouseUp]);
   
   // If user not authenticated, don't render the layout
   if (!user) {
@@ -71,10 +139,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-background flex">
       {/* Sidebar Navigation - Always on the left */}
       <aside
+        ref={sidebarRef}
         className={cn(
-          "fixed top-0 left-0 h-full w-64 bg-card border-r transition-transform duration-300 ease-in-out z-40",
-          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+          "fixed top-0 left-0 h-full bg-card border-r z-40",
+          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+          !isResizing && "transition-transform duration-300 ease-in-out"
         )}
+        style={{ 
+          width: `${sidebarWidth}px`,
+          transition: isResizing ? 'none' : 'width 0.2s ease-in-out, transform 0.3s ease-in-out'
+        }}
       >
         <nav className="flex flex-col h-full p-4">
           <div className="space-y-2 py-4">
@@ -158,6 +232,26 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </Button>
           </div>
         </nav>
+        
+        {/* Resize Handle */}
+        <div
+          className={cn(
+            "absolute top-0 right-0 w-1 h-full cursor-col-resize transition-colors z-50",
+            "lg:block hidden",
+            "hover:w-1.5 hover:bg-primary/30",
+            isResizing && "bg-primary w-1.5"
+          )}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            setIsResizing(true);
+          }}
+          style={{
+            touchAction: 'none'
+          }}
+          title="Drag to resize sidebar"
+        >
+          <div className="absolute inset-y-0 -right-1 w-3" />
+        </div>
       </aside>
 
       {/* Mobile Menu Button - Fixed position at top left */}
@@ -230,11 +324,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </header>
 
       {/* Main Content */}
-      <main className={cn(
-        "flex-1 min-h-screen transition-all duration-300 ease-in-out",
-        "lg:ml-64 p-4 lg:p-6", 
-        "lg:pt-6 pt-20" // Add top padding on mobile for the header
-      )}>
+      <main 
+        className={cn(
+          "flex-1 min-h-screen",
+          "p-4 lg:p-6", 
+          "lg:pt-6 pt-20" // Add top padding on mobile for the header
+        )}
+        style={{ 
+          marginLeft: isDesktop ? `${sidebarWidth}px` : '0',
+          transition: isResizing ? 'none' : 'margin-left 0.2s ease-in-out'
+        }}
+      >
         <div className="max-w-6xl mx-auto w-full">
           {children}
         </div>
