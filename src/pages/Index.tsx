@@ -18,30 +18,30 @@ export default function Index() {
 
   // AI Feature Card for different user roles
   const AIFeatureCard = () => (
-    <Card className="mt-6">
+    <Card className="mt-4 sm:mt-6">
       <CardHeader>
-        <CardTitle className="flex items-center">
-          <Bot className="mr-2 h-5 w-5" />
+        <CardTitle className="flex items-center text-lg sm:text-xl">
+          <Bot className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
           AI Assistant
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-sm">
           AI-powered tools to enhance your workflow
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {(currentUser?.role === "manager" || currentUser?.role === "accounts") && (
-          <div className="flex items-center justify-between p-2 border rounded-md">
-            <div className="flex items-center">
-              <Calendar className="h-5 w-5 mr-2 text-blue-500" />
-              <div>
-                <h4 className="font-medium">Intelligent Scheduling</h4>
-                <p className="text-sm text-muted-foreground">
+          <div className="flex items-start sm:items-center justify-between p-2 sm:p-3 border rounded-md gap-2">
+            <div className="flex items-start sm:items-center flex-1 min-w-0">
+              <Calendar className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-blue-500 shrink-0 mt-0.5 sm:mt-0" />
+              <div className="flex-1 min-w-0">
+                <h4 className="font-medium text-sm sm:text-base">Intelligent Scheduling</h4>
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   Let AI suggest optimal team assignments
                 </p>
               </div>
             </div>
-            <Button variant="ghost" size="sm" onClick={() => navigate('/workflow/pre-production')}>
-              <ChevronRight className="h-5 w-5" />
+            <Button variant="ghost" size="sm" onClick={() => navigate('/workflow/pre-production')} className="shrink-0">
+              <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
           </div>
         )}

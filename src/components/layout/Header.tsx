@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { UserCircle, LogOut, Menu } from "lucide-react";
+import { UserCircle, LogOut, Menu, Settings, User } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,33 +56,42 @@ export function Header() {
           {/* Work in Progress Indicator */}
           <WorkInProgress size="sm" showText={true} text="Dev-Work In Progress" className="text-xs" />
           
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
             {!isClientPortal && (
               <>
                 {user ? (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="flex items-center space-x-2">
-                        <UserCircle className="h-5 w-5" />
-                        <span className="hidden sm:inline">Account</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => navigate('/dashboard')}>
-                        Dashboard
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate('/profile')}>
-                        Profile
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate('/settings')}>
-                        Settings
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={handleLogout}>
-                        <LogOut className="h-4 w-4 mr-2" />
-                        Logout
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => navigate("/settings")}
+                      className="shrink-0"
+                    >
+                      <Settings className="h-5 w-5" />
+                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <User className="h-5 w-5" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => navigate('/dashboard')}>
+                          Dashboard
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate('/profile')}>
+                          Profile
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate('/settings')}>
+                          Settings
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleLogout}>
+                          <LogOut className="h-4 w-4 mr-2" />
+                          Logout
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </>
                 ) : (
                   <>
                     <Button 

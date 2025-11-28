@@ -16,11 +16,17 @@ export default function ProjectsPage() {
 
   return (
     <Layout>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6 p-3 sm:p-4 md:p-6">
         <EstimatesHeader 
           onNewEstimate={handleNewEstimate}
           canCreate={true}
           showActions={false}
+          title="Projects"
+          headerNavigationPath="/estimates/projects"
+          description="View and manage all projects"
+          showDashboardTitle={true}
+          dashboardTitle="Projects Dashboard"
+          dashboardDescription="Manage your photography projects"
         />
         <ProjectBoard onNewProject={handleNewProject} />
       </div>

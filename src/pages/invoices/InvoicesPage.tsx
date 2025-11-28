@@ -75,15 +75,15 @@ export default function InvoicesPage() {
 
   return (
     <Layout>
-      <div className="space-y-8 animate-in">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-semibold tracking-tight">Invoices</h1>
-            <p className="text-muted-foreground mt-2">
+      <div className="space-y-4 sm:space-y-6 lg:space-y-8 p-3 sm:p-4 md:p-6 animate-in">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold tracking-tight">Invoices</h1>
+            <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">
               Manage your client invoices and payments
             </p>
           </div>
-          <Button className="gap-2" onClick={() => setShowNewInvoice(true)}>
+          <Button className="gap-2 w-full sm:w-auto" onClick={() => setShowNewInvoice(true)}>
             <Plus className="h-4 w-4" />
             New Invoice
           </Button>

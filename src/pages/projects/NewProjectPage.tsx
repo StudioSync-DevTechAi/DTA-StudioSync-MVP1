@@ -2775,15 +2775,18 @@ export default function NewProjectPage() {
           onNewEstimate={handleNewEstimate}
           canCreate={true}
           showActions={false}
+          title="Projects"
+          headerNavigationPath="/estimates/projects"
+          description="Create and manage your photography projects"
         />
         
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-center px-2 sm:px-4">
           <Card className="w-full max-w-6xl shadow-lg">
-            <CardContent className="p-8">
+            <CardContent className="p-4 sm:p-6 md:p-8">
               {currentPage === 1 ? (
                 <>
                   {/* Project Owner Information */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-muted/50 rounded-lg mb-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-3 sm:p-4 bg-muted/50 rounded-lg mb-4 sm:mb-6">
                     <div className="space-y-2">
                       <Label className="text-left block">Project Owner</Label>
                       <Input
@@ -2809,13 +2812,13 @@ export default function NewProjectPage() {
                       />
                     </div>
                   </div>
-                  <h2 className="text-2xl font-semibold mb-6">Add New Client Booking</h2>
-                  <div className="space-y-6">
+                  <h2 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6">Add New Client Booking</h2>
+                  <div className="space-y-4 sm:space-y-6">
 
               {/* Project Name and Project Type Row */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="projectName">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2 min-w-0">
+                  <Label htmlFor="projectName" className="text-sm sm:text-base">
                     Project Name <span className="text-red-500">*</span>
                   </Label>
                   <Input
@@ -2824,11 +2827,11 @@ export default function NewProjectPage() {
                     value={formData.projectName}
                     onChange={(e) => handleInputChange("projectName", e.target.value)}
                     required
-                    className={formData.projectName.trim() === "" ? "border-red-300" : ""}
+                    className={`w-full ${formData.projectName.trim() === "" ? "border-red-300" : ""}`}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="eventType">
+                <div className="space-y-2 min-w-0">
+                  <Label htmlFor="eventType" className="text-sm sm:text-base">
                     Project Type <span className="text-red-500">*</span>
                   </Label>
                   <Select
@@ -2855,19 +2858,19 @@ export default function NewProjectPage() {
               </div>
 
               {/* Client Name, Email, and Phone Row */}
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="clientFullName">Client Name:</Label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="space-y-2 min-w-0">
+                  <Label htmlFor="clientFullName" className="text-sm sm:text-base">Client Name:</Label>
                   <Input
                     id="clientFullName"
                     placeholder="Enter client name"
                     value={formData.clientFullName}
                     onChange={(e) => handleInputChange("clientFullName", e.target.value)}
-                    className="w-full max-w-xs"
+                    className="w-full"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="clientEmail">Client Email:</Label>
+                <div className="space-y-2 min-w-0">
+                  <Label htmlFor="clientEmail" className="text-sm sm:text-base">Client Email:</Label>
                   <Input
                     id="clientEmail"
                     type="email"
@@ -2875,7 +2878,7 @@ export default function NewProjectPage() {
                     value={formData.clientEmail}
                     onChange={(e) => handleInputChange("clientEmail", e.target.value)}
                     className={cn(
-                      "w-full max-w-xs",
+                      "w-full",
                       formData.clientEmail && !isValidEmail(formData.clientEmail) ? "border-red-300" : ""
                     )}
                   />
@@ -2885,8 +2888,8 @@ export default function NewProjectPage() {
                     </p>
                   )}
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="clientPhone">
+                <div className="space-y-2 min-w-0">
+                  <Label htmlFor="clientPhone" className="text-sm sm:text-base">
                     Client Ph: <span className="text-red-500">*</span>
                   </Label>
                   <Input
@@ -2897,7 +2900,7 @@ export default function NewProjectPage() {
                     onChange={(e) => handleClientPhoneChange(e.target.value)}
                     required
                     className={cn(
-                      "w-full max-w-xs",
+                      "w-full",
                       !isPage1Valid() && formData.clientPhone.length < 14 ? "border-red-300" : ""
                     )}
                     maxLength={14}
@@ -2912,10 +2915,10 @@ export default function NewProjectPage() {
 
               {/* Start Date & Time */}
               <div className="space-y-2">
-                <Label>Project Start Date & Time <span className="text-red-500">*</span></Label>
-                <div className="grid grid-cols-12 gap-1 items-end">
+                <Label className="text-sm sm:text-base">Project Start Date & Time <span className="text-red-500">*</span></Label>
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-1 items-end">
                   {/* Date Selection - Narrower */}
-                  <div className="col-span-3 max-w-[70%]">
+                  <div className="col-span-1 sm:col-span-3 w-full sm:max-w-[70%]">
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
@@ -2945,7 +2948,7 @@ export default function NewProjectPage() {
                   </div>
 
                   {/* Time Picker Clock */}
-                  <div className="col-span-3 max-w-[70%]">
+                  <div className="col-span-1 sm:col-span-3 w-full sm:max-w-[70%]">
                     <TimePickerClock
                       hour={formData.startHour || "00"}
                       minute={formData.startMinute || "00"}
@@ -2981,10 +2984,10 @@ export default function NewProjectPage() {
 
               {/* End Date & Time */}
               <div className="space-y-2">
-                <Label>Project End Date & Time</Label>
-                <div className="grid grid-cols-12 gap-1 items-end">
+                <Label className="text-sm sm:text-base">Project End Date & Time</Label>
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-1 items-end">
                   {/* Date Selection - Narrower */}
-                  <div className="col-span-3 max-w-[70%]">
+                  <div className="col-span-1 sm:col-span-3 w-full sm:max-w-[70%]">
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
@@ -3045,7 +3048,7 @@ export default function NewProjectPage() {
                   </div>
 
                   {/* Time Picker Clock */}
-                  <div className="col-span-3 max-w-[70%]">
+                  <div className="col-span-1 sm:col-span-3 w-full sm:max-w-[70%]">
                     <TimePickerClock
                       hour={formData.endHour || "00"}
                       minute={formData.endMinute || "00"}
@@ -3177,7 +3180,7 @@ export default function NewProjectPage() {
                         return (
                           <Card 
                             key={pkg.id} 
-                            className="p-4 w-[45%] relative"
+                            className="p-3 sm:p-4 w-full sm:w-[45%] relative"
                             onClick={(e) => {
                               // Only save if clicking on the card itself (white space), not on interactive elements
                               const target = e.target as HTMLElement;
@@ -3300,8 +3303,8 @@ export default function NewProjectPage() {
                                 // Active event - show input boxes
                                 <div className="space-y-4">
                                   {/* First row: Event Type and Days No. */}
-                                  <div className="flex items-center gap-4 w-full">
-                                    <div className={pkg.eventType === "other" ? "w-[35%]" : "w-1/2"}>
+                                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full">
+                                    <div className={pkg.eventType === "other" ? "w-full sm:w-[35%]" : "w-full sm:w-1/2"}>
                                       <Select
                                         value={pkg.eventType}
                                         onValueChange={(value) =>
@@ -3352,9 +3355,9 @@ export default function NewProjectPage() {
                                   </div>
 
                                   {/* Second row: PGs No, PGDays, VGs No, VGDays */}
-                                  <div className="grid grid-cols-4 gap-4">
-                                    <div className="space-y-2">
-                                      <Label htmlFor={`photographers-${pkg.id}`} className="text-sm font-medium leading-none">PGs No</Label>
+                                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                                    <div className="space-y-2 min-w-0">
+                                      <Label htmlFor={`photographers-${pkg.id}`} className="text-xs sm:text-sm font-medium leading-none">PGs No</Label>
                                       <Input
                                         id={`photographers-${pkg.id}`}
                                         type="number"
@@ -3368,18 +3371,18 @@ export default function NewProjectPage() {
                                             e.target.value
                                           )
                                         }
-                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                        className="w-full text-sm"
                                       />
                                     </div>
-                                    <div className="space-y-2">
-                                      <Label htmlFor={`pgType-${pkg.id}`} className="text-sm font-medium leading-none">PG-Type</Label>
+                                    <div className="space-y-2 min-w-0">
+                                      <Label htmlFor={`pgType-${pkg.id}`} className="text-xs sm:text-sm font-medium leading-none">PG-Type</Label>
                                       <Select
                                         value={pkg.pgType || ""}
                                         onValueChange={(value) =>
                                           handleEventPackageChange(pkg.id, "pgType", value)
                                         }
                                       >
-                                        <SelectTrigger id={`pgType-${pkg.id}`} className="w-16">
+                                        <SelectTrigger id={`pgType-${pkg.id}`} className="w-full sm:w-16">
                                           <SelectValue placeholder="--" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -3388,8 +3391,8 @@ export default function NewProjectPage() {
                                         </SelectContent>
                                       </Select>
                                     </div>
-                                    <div className="space-y-2">
-                                      <Label htmlFor={`videographers-${pkg.id}`} className="text-sm font-medium leading-none">VGs No</Label>
+                                    <div className="space-y-2 min-w-0">
+                                      <Label htmlFor={`videographers-${pkg.id}`} className="text-xs sm:text-sm font-medium leading-none">VGs No</Label>
                                       <Input
                                         id={`videographers-${pkg.id}`}
                                         type="number"
@@ -3403,6 +3406,7 @@ export default function NewProjectPage() {
                                             e.target.value
                                           )
                                         }
+                                        className="w-full text-sm"
                                         className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                                       />
                                     </div>
@@ -3433,7 +3437,7 @@ export default function NewProjectPage() {
                                     <>
                                       {/* First row: Event Type and Days No. */}
                                       <div className="flex items-center gap-4 w-full">
-                                        <div className={pkg.eventType === "other" ? "w-[35%]" : "w-1/2"}>
+                                        <div className={pkg.eventType === "other" ? "w-full sm:w-[35%]" : "w-full sm:w-1/2"}>
                                           <Select
                                             value={pkg.eventType}
                                             onValueChange={(value) =>
@@ -3484,9 +3488,9 @@ export default function NewProjectPage() {
                                       </div>
 
                                       {/* Second row: PGs No, PGDays, VGs No, VGDays */}
-                                      <div className="grid grid-cols-4 gap-4">
-                                        <div className="space-y-2">
-                                          <Label htmlFor={`photographers-${pkg.id}`} className="text-sm font-medium leading-none">PGs No</Label>
+                                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                                        <div className="space-y-2 min-w-0">
+                                          <Label htmlFor={`photographers-${pkg.id}`} className="text-xs sm:text-sm font-medium leading-none">PGs No</Label>
                                           <Input
                                             id={`photographers-${pkg.id}`}
                                             type="number"
@@ -3500,18 +3504,18 @@ export default function NewProjectPage() {
                                                 e.target.value
                                               )
                                             }
-                                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                            className="w-full text-sm"
                                           />
                                         </div>
-                                        <div className="space-y-2">
-                                          <Label htmlFor={`pgType-${pkg.id}`} className="text-sm font-medium leading-none">PG-Type</Label>
+                                        <div className="space-y-2 min-w-0">
+                                          <Label htmlFor={`pgType-${pkg.id}`} className="text-xs sm:text-sm font-medium leading-none">PG-Type</Label>
                                           <Select
                                             value={pkg.pgType || ""}
                                             onValueChange={(value) =>
                                               handleEventPackageChange(pkg.id, "pgType", value)
                                             }
                                           >
-                                            <SelectTrigger id={`pgType-${pkg.id}`} className="w-16">
+                                            <SelectTrigger id={`pgType-${pkg.id}`} className="w-full sm:w-16">
                                               <SelectValue placeholder="--" />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -3520,8 +3524,8 @@ export default function NewProjectPage() {
                                             </SelectContent>
                                           </Select>
                                         </div>
-                                        <div className="space-y-2">
-                                          <Label htmlFor={`videographers-${pkg.id}`} className="text-sm font-medium leading-none">VGs No</Label>
+                                        <div className="space-y-2 min-w-0">
+                                          <Label htmlFor={`videographers-${pkg.id}`} className="text-xs sm:text-sm font-medium leading-none">VGs No</Label>
                                           <Input
                                             id={`videographers-${pkg.id}`}
                                             type="number"
@@ -3535,6 +3539,7 @@ export default function NewProjectPage() {
                                                 e.target.value
                                               )
                                             }
+                                            className="w-full text-sm"
                                             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                                           />
                                         </div>
@@ -3608,21 +3613,21 @@ export default function NewProjectPage() {
                                         </div>
                                       </div>
                                       {/* Second row: PGs No, PGDays, VGs No, VGDays */}
-                                      <div className="grid grid-cols-4 gap-4 text-sm">
-                                        <div className="flex items-center gap-2">
-                                          <span className="text-muted-foreground">PGs No:</span>
+                                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 text-xs sm:text-sm">
+                                        <div className="flex items-center gap-2 min-w-0">
+                                          <span className="text-muted-foreground truncate">PGs No:</span>
                                           <span className="font-medium">{pkg.photographersCount || "0"}</span>
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                          <span className="text-muted-foreground">PG-Type:</span>
+                                        <div className="flex items-center gap-2 min-w-0">
+                                          <span className="text-muted-foreground truncate">PG-Type:</span>
                                           <span className="font-medium">{pkg.pgType || "--"}</span>
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                          <span className="text-muted-foreground">VGs No:</span>
+                                        <div className="flex items-center gap-2 min-w-0">
+                                          <span className="text-muted-foreground truncate">VGs No:</span>
                                           <span className="font-medium">{pkg.videographersCount || "0"}</span>
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                          <span className="text-muted-foreground">VG-Type:</span>
+                                        <div className="flex items-center gap-2 min-w-0">
+                                          <span className="text-muted-foreground truncate">VG-Type:</span>
                                           <span className="font-medium">{pkg.vgType || "--"}</span>
                                         </div>
                                       </div>
@@ -3680,47 +3685,47 @@ export default function NewProjectPage() {
                                 </div>
 
                                 {/* PG-Type & VG-Type */}
-                                <div className="grid grid-cols-2 gap-4 items-start">
-                                  <div className="space-y-2">
-                                    <Label htmlFor={`pgType-${pkg.id}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-nowrap max-w-fit">PG-Type</Label>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+                                  <div className="space-y-2 min-w-0">
+                                    <Label htmlFor={`pgType-${pkg.id}`} className="text-xs sm:text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">PG-Type</Label>
                                     <Select
                                       value={pkg.pgType || ""}
                                       onValueChange={(value) =>
                                         handleEventPackageChange(pkg.id, "pgType", value)
                                       }
                                     >
-                                      <SelectTrigger id={`pgType-${pkg.id}`} className="w-16">
-                                        <SelectValue placeholder="--" />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        <SelectItem value="EF">EF</SelectItem>
-                                        <SelectItem value="GH">GH</SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                  </div>
-                                  <div className="space-y-2">
-                                    <Label htmlFor={`vgType-${pkg.id}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-nowrap max-w-fit">VG-Type</Label>
+                                    <SelectTrigger id={`pgType-${pkg.id}`} className="w-full sm:w-16">
+                                      <SelectValue placeholder="--" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="EF">EF</SelectItem>
+                                      <SelectItem value="GH">GH</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                <div className="space-y-2 min-w-0">
+                                  <Label htmlFor={`vgType-${pkg.id}`} className="text-xs sm:text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">VG-Type</Label>
                                     <Select
                                       value={pkg.vgType || ""}
                                       onValueChange={(value) =>
                                         handleEventPackageChange(pkg.id, "vgType", value)
                                       }
                                     >
-                                      <SelectTrigger id={`vgType-${pkg.id}`} className="w-16">
-                                        <SelectValue placeholder="--" />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        <SelectItem value="AB">AB</SelectItem>
-                                        <SelectItem value="CD">CD</SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                  </div>
+                                    <SelectTrigger id={`vgType-${pkg.id}`} className="w-full sm:w-16">
+                                      <SelectValue placeholder="--" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="AB">AB</SelectItem>
+                                      <SelectItem value="CD">CD</SelectItem>
+                                    </SelectContent>
+                                  </Select>
                                 </div>
+                              </div>
 
-                                {/* PhotoPOC & VideoPOC */}
-                                <div className="grid grid-cols-2 gap-4 items-start">
-                                  <div className="space-y-2">
-                                    <Label htmlFor={`photoCoordinator-${pkg.id}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-nowrap max-w-fit">PhotoPOC</Label>
+                              {/* PhotoPOC & VideoPOC */}
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+                                <div className="space-y-2 min-w-0">
+                                  <Label htmlFor={`photoCoordinator-${pkg.id}`} className="text-xs sm:text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">PhotoPOC</Label>
                                     <div className="flex items-end gap-2">
                                       {pkg.photographyCoordinatorId ? (
                                         <div className="flex items-center justify-between p-3 border rounded-md bg-muted/50 flex-1 w-[60%]">
@@ -3908,7 +3913,7 @@ export default function NewProjectPage() {
                         <Button
                           variant="outline"
                           onClick={handleAddEventPackage}
-                          className="w-[45%] h-fit self-start"
+                          className="w-full sm:w-[45%] h-fit self-start"
                         >
                           <Plus className="h-4 w-4 mr-2" />
                           Add New Event
@@ -3919,7 +3924,7 @@ export default function NewProjectPage() {
                           <Button
                             variant="outline"
                             onClick={handleAddEventPackage}
-                            className="w-[45%]"
+                            className="w-full sm:w-[45%]"
                           >
                             <Plus className="h-4 w-4 mr-2" />
                             Add New Event
@@ -3931,7 +3936,7 @@ export default function NewProjectPage() {
 
                   {/* Price Summary - Bottom left, same width as event cards */}
                   <div className="w-full mt-4">
-                    <Card className="rounded-lg border bg-card text-card-foreground shadow-sm p-4 w-[45%]">
+                    <Card className="rounded-lg border bg-card text-card-foreground shadow-sm p-3 sm:p-4 w-full sm:w-[45%]">
                       <div className="flex justify-between items-center mb-4">
                         <h3 className="font-semibold">Price</h3>
                         <div className="flex items-center gap-2">
