@@ -16,6 +16,7 @@ import {
   ArrowLeft,
   Shield,
   FolderKanban,
+  Settings,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { useEffect, useState, useRef, useCallback } from "react";
@@ -323,12 +324,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
+
       {/* Main Content */}
       <main 
         className={cn(
           "flex-1 min-h-screen",
           "p-4 lg:p-6", 
-          "lg:pt-6 pt-20" // Add top padding on mobile for the header
+          "lg:pt-6 pt-20" // Add top padding for mobile header
         )}
         style={{ 
           marginLeft: isDesktop ? `${sidebarWidth}px` : '0',

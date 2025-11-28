@@ -1,4 +1,4 @@
-import React, { Suspense, memo } from "react";
+import React, { Suspense, memo, useState } from "react";
 import Layout from "@/components/Layout";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,7 +14,6 @@ import {
   Users, 
   Receipt,
   BarChart3,
-  Settings,
   Image,
   Video,
   Edit,
@@ -26,6 +25,7 @@ import {
 import { StatCard } from "@/components/stats/StatCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { WorkInProgress } from "@/components/ui/WorkInProgress";
+import { EnrollPhotographerModal } from "@/components/dashboard/EnrollPhotographerModal";
 
 // Lazy-loaded components
 const MediaTagger = React.lazy(() => import("@/components/ai/MediaTagger").then(mod => ({ default: mod.MediaTagger })));
@@ -34,6 +34,7 @@ function Dashboard() {
   const { user, profile, loading } = useAuth();
   const { metrics, loading: dashboardLoading, error: dashboardError } = useDashboard();
   const navigate = useNavigate();
+  const [enrollModalOpen, setEnrollModalOpen] = useState(false);
 
   // Show loading if still checking auth
   if (loading) {
@@ -149,13 +150,12 @@ function Dashboard() {
               Manage your photography business with all tools in one place
             </p>
           </div>
-          <Button 
-            onClick={() => navigate("/settings")} 
+          <Button
+            onClick={() => setEnrollModalOpen(true)}
             variant="outline"
-            className="w-full sm:w-auto shrink-0"
+            className="w-full sm:w-auto shrink-0 border-amber-400 hover:border-amber-500 hover:bg-amber-50/50 hover:shadow-[0_0_15px_rgba(251,191,36,0.4)] transition-all duration-300"
           >
-            <Settings className="h-4 w-4 mr-2" />
-            Settings
+            Enroll VG or PG
           </Button>
         </div>
 
@@ -366,6 +366,10 @@ function Dashboard() {
           </CardContent>
         </Card>
       </div>
+      <EnrollPhotographerModal
+        open={enrollModalOpen}
+        onOpenChange={setEnrollModalOpen}
+      />
     </Layout>
   );
 }

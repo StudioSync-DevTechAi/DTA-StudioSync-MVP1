@@ -24,6 +24,9 @@ export default function ProjectsPage() {
           title="Projects"
           headerNavigationPath="/estimates/projects"
           description="View and manage all projects"
+          showDashboardTitle={true}
+          dashboardTitle="Projects Dashboard"
+          dashboardDescription="Manage your photography projects"
         />
         <ProjectBoard onNewProject={handleNewProject} />
       </div>

@@ -381,18 +381,6 @@ export function ProjectBoard({ onNewProject }: ProjectBoardProps) {
 
   return (
     <div className="flex-1 p-3 sm:p-4 md:p-6">
-      <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex-1 min-w-0">
-          <h1 className="text-xl sm:text-2xl font-semibold">Projects Dashboard</h1>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-            Manage your photography projects
-          </p>
-        </div>
-        <Button onClick={onNewProject} className="w-full sm:w-auto">
-          <Plus className="h-4 w-4 mr-2" />
-          New Project
-        </Button>
-      </div>
 
       {/* Loading State */}
       {loading && (

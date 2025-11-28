@@ -13,6 +13,9 @@ interface EstimatesHeaderProps {
   title?: string; // Optional title override
   headerNavigationPath?: string; // Optional navigation path for header click
   description?: string; // Optional description override
+  showDashboardTitle?: boolean; // Show "Projects Dashboard" text on the right
+  dashboardTitle?: string; // Custom dashboard title
+  dashboardDescription?: string; // Custom dashboard description
 }
 
 export function EstimatesHeader({ 
@@ -21,7 +24,10 @@ export function EstimatesHeader({
   showActions = true,
   title = "Estimates",
   headerNavigationPath = "/estimates",
-  description = "Create and manage your photography service estimates."
+  description = "Create and manage your photography service estimates.",
+  showDashboardTitle = false,
+  dashboardTitle = "Projects Dashboard",
+  dashboardDescription = "Manage your photography projects"
 }: EstimatesHeaderProps) {
   const navigate = useNavigate();
 
@@ -35,15 +41,27 @@ export function EstimatesHeader({
 
   return (
     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-      <div className="space-y-1 flex-1 min-w-0">
-        <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+      <div className="space-y-1 flex-1 min-w-0 w-full">
+        <div className="flex items-center gap-2 sm:gap-4 w-full">
           <h1 
-            className="text-xl sm:text-2xl font-semibold cursor-pointer hover:opacity-80 transition-opacity"
+            className="text-xl sm:text-2xl font-semibold cursor-pointer hover:opacity-80 transition-opacity shrink-0"
             onClick={handleHeaderClick}
           >
             {title}
           </h1>
           <DraftsBox />
+          {showDashboardTitle && (
+            <div className="flex-1 flex justify-center items-center">
+              <div className="text-center">
+                <h2 className="text-xl sm:text-2xl font-semibold">
+                  {dashboardTitle}
+                </h2>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                  {dashboardDescription}
+                </p>
+              </div>
+            </div>
+          )}
         </div>
         <p className="text-xs sm:text-sm text-muted-foreground">
           {description}
