@@ -20,7 +20,7 @@ import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { TimePickerClock } from "@/components/ui/time-picker-clock";
-import { CalendarIcon, ArrowRight, Plus, Trash2, Pencil, Eye, Download, Share2, ChevronDown, ChevronUp, Phone, X, Save, Loader2 } from "lucide-react";
+import { CalendarIcon, ArrowRight, Plus, Trash2, Pencil, Eye, Download, Share2, ChevronDown, ChevronUp, Phone, X, Save, Loader2, ArrowLeft, RotateCcw } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
@@ -223,9 +223,31 @@ export default function NewProjectPage() {
             client_name: clientName
           });
           
+          // Populate formData with project details when loading from URL
+          setFormData(prev => ({
+            ...prev,
+            projectName: projectRecord.project_name || prev.projectName,
+            eventType: projectRecord.project_type || prev.eventType,
+            clientFullName: clientName || prev.clientFullName,
+            clientPhone: projectRecord.clientid_phno || prev.clientPhone,
+            startDate: projectRecord.start_date ? new Date(projectRecord.start_date) : prev.startDate,
+            startHour: projectRecord.start_time ? projectRecord.start_time.split(':')[0] : prev.startHour,
+            startMinute: projectRecord.start_time ? projectRecord.start_time.split(':')[1] : prev.startMinute,
+            confirmationStatus: projectRecord.startdatetime_confirmed || prev.confirmationStatus,
+            endDate: projectRecord.end_date ? new Date(projectRecord.end_date) : prev.endDate,
+            endHour: projectRecord.end_time ? projectRecord.end_time.split(':')[0] : prev.endHour,
+            endMinute: projectRecord.end_time ? projectRecord.end_time.split(':')[1] : prev.endMinute,
+            endConfirmationStatus: projectRecord.enddatetime_confirmed || prev.endConfirmationStatus,
+          }));
+          
           // Set the projectEstimateUuid
           setProjectEstimateUuid(projectUuidFromUrl);
           sessionStorage.setItem("newProjectEstimateUuid", projectUuidFromUrl);
+          
+          // If page=2 is in URL, ensure we stay on page 2
+          if (pageFromUrl === '2') {
+            setCurrentPage(2);
+          }
           
           // Parse dates and times
           const startDate = projectRecord.start_date ? new Date(projectRecord.start_date) : undefined;
@@ -596,22 +618,29 @@ export default function NewProjectPage() {
       const savedProjectType = sessionStorage.getItem("newProjectType");
 
       // Restore currentPage from URL first (takes precedence), then fallback to sessionStorage
-      const pageFromUrl = searchParams.get('page');
-      if (pageFromUrl) {
-        const page = parseInt(pageFromUrl, 10);
+      const pageFromUrlInEffect = searchParams.get('page');
+      let finalPage = currentPage; // Use current state as default
+      
+      // Prioritize page from URL if present (especially when navigating from project card)
+      if (pageFromUrlInEffect) {
+        const page = parseInt(pageFromUrlInEffect, 10);
         if (page >= 1 && page <= 3) {
+          finalPage = page;
           setCurrentPage(page);
         }
       } else if (savedCurrentPage) {
         const page = parseInt(savedCurrentPage, 10);
         if (page >= 1 && page <= 3) {
+          finalPage = page;
           setCurrentPage(page);
           // Update URL to reflect the page from sessionStorage
           setSearchParams({ page: page.toString() }, { replace: true });
         }
       }
 
-      if (savedFormData) {
+      // Load form data from sessionStorage (but don't override if loading from database)
+      // Only load if we don't have projectUuidFromUrl (which means we're loading from database)
+      if (savedFormData && !projectUuidFromUrl) {
         const parsed = JSON.parse(savedFormData);
         // Convert date strings back to Date objects
         if (parsed.startDate) parsed.startDate = new Date(parsed.startDate);
@@ -620,10 +649,13 @@ export default function NewProjectPage() {
       }
 
       // Only load event packages from sessionStorage if we're on Page 2 or 3
-      // For fresh navigation from Page 1, we'll initialize with empty event cards
-      const currentPageNum = pageFromUrl ? parseInt(pageFromUrl, 10) : (savedCurrentPage ? parseInt(savedCurrentPage, 10) : 1);
-      
-      if (savedEventPackages && (currentPageNum === 2 || currentPageNum === 3)) {
+      // BUT: If we have projectUuidFromUrl and page=2, skip sessionStorage events
+      // because loadExistingEvents will fetch from database
+      if (finalPage === 2 && projectUuidFromUrl) {
+        // Don't load from sessionStorage - events will be loaded from database
+        // The loadExistingEvents effect will handle this
+        console.log('Skipping sessionStorage event loading - will load from database');
+      } else if (savedEventPackages && (finalPage === 2 || finalPage === 3)) {
         const parsed = JSON.parse(savedEventPackages);
         // Convert date strings back to Date objects in event packages
         const packagesWithDates = parsed.map((pkg: any) => {
@@ -634,8 +666,8 @@ export default function NewProjectPage() {
         if (packagesWithDates.length > 0) {
           setEventPackages(packagesWithDates);
         }
-      } else if (currentPageNum === 2) {
-        // If on Page 2 and no saved event packages, initialize with one empty event card
+      } else if (finalPage === 2 && !projectUuidFromUrl) {
+        // If on Page 2 and no saved event packages and no projectUuid, initialize with one empty event card
         const newPackage: EventPackage = {
           id: Date.now().toString(),
           eventType: "",
@@ -1287,6 +1319,16 @@ export default function NewProjectPage() {
           });
 
           setEventPackages(loadedEvents);
+          
+          // Mark events as saved and create snapshot since they're loaded from database
+          setEventsSaved(true);
+          const snapshot = loadedEvents.map((pkg) => ({
+            ...pkg,
+            startDate: pkg.startDate ? new Date(pkg.startDate) : undefined,
+            prepChecklist: pkg.prepChecklist ? JSON.parse(JSON.stringify(pkg.prepChecklist)) : undefined,
+          }));
+          setSavedEventsSnapshot(snapshot);
+          console.log('Events loaded from database - marked as saved, Next button should be enabled');
         } else {
           // No existing events, initialize with one empty event card
           console.log('No existing events found, initializing with empty event card');
@@ -2629,8 +2671,9 @@ export default function NewProjectPage() {
     
     try {
       // Filter valid event cards (must have eventType and startDate)
+      // OR already saved events (have event_uuid) - these should be updatable
       const validEventCards = eventPackages.filter(
-        (pkg) => pkg.eventType && pkg.startDate
+        (pkg) => (pkg.eventType && pkg.startDate) || pkg.event_uuid
       );
 
       if (validEventCards.length === 0) {
@@ -3121,11 +3164,41 @@ export default function NewProjectPage() {
                   */}
                   <div className="mb-6">
                     <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
-                      <div>
-                        <h2 className="text-2xl font-semibold">Events Details</h2>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          {eventsSaved && hasAnyUnsavedChanges() && (
+                            <button
+                              onClick={() => {
+                                // Revert to saved snapshot
+                                setEventPackages(JSON.parse(JSON.stringify(savedEventsSnapshot)));
+                              }}
+                              className="p-2 hover:bg-accent rounded-md transition-colors"
+                              title="Revert changes"
+                            >
+                              <RotateCcw className="h-5 w-5 text-muted-foreground hover:text-foreground" />
+                            </button>
+                          )}
+                          {projectEstimateUuid && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setCurrentPage(1);
+                                setSearchParams({ projectUuid: projectEstimateUuid, page: '1' });
+                              }}
+                              className="flex items-center gap-2"
+                            >
+                              <ArrowLeft className="h-4 w-4" />
+                              Project Details
+                            </Button>
+                          )}
+                          <div className="flex-1 flex justify-center">
+                            <h2 className="text-2xl font-semibold">Events Details</h2>
+                          </div>
+                        </div>
                         <div className="flex flex-wrap items-center gap-2 text-sm mt-2">
                           <span className="font-medium">Project:</span>
-                          <span className="text-muted-foreground">{formData.projectName || "Not set"}</span>
+                          <span className="text-muted-foreground">{projectDetails?.project_name || formData.projectName || "Not set"}</span>
                           <span className="text-muted-foreground">|</span>
                           <span className="font-medium">Project Type:</span>
                           <span className="text-muted-foreground">{projectDetails?.project_type || formData.eventType || "Not set"}</span>
@@ -3141,10 +3214,7 @@ export default function NewProjectPage() {
                           </span>
                         </div>
                       </div>
-                      <div className="flex gap-2">
-                        <Button variant="outline" onClick={handleCancel}>
-                          Cancel
-                        </Button>
+                      <div className="flex items-center gap-2">
                         <Button 
                           onClick={() => handleSaveEvent(false)} 
                           className="bg-blue-600 hover:bg-blue-700 text-white"
@@ -3158,6 +3228,9 @@ export default function NewProjectPage() {
                           ) : (
                             'Save Events'
                           )}
+                        </Button>
+                        <Button variant="outline" onClick={handleCancel}>
+                          Cancel
                         </Button>
                       </div>
                     </div>
