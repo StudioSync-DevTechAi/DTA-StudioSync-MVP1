@@ -8,6 +8,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { UserProvider } from "./contexts/UserContext";
 import { AuthGuard } from "./components/auth/AuthGuard";
 import { Header } from "./components/layout/Header";
+import { Footer } from "./components/layout/Footer";
 import { BypassAuthToggle } from "./components/ui/bypass-auth-toggle";
 import { PermissionGuard } from "./components/rbac/PermissionGuard";
 import { LoadingSpinner } from "./components/ui/loading-spinner";
@@ -42,10 +43,11 @@ const RoleManager = React.lazy(() => import("./components/rbac/RoleManager").the
 
 function App() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header />
-      <Suspense fallback={<LoadingSpinner />}>
-        <Routes>
+      <div className="flex-1">
+        <Suspense fallback={<LoadingSpinner />}>
+          <Routes>
           {/* Public routes - these should be accessible without authentication */}
           <Route path="/" element={<Home />} />
           <Route path="/auth" element={<Auth />} />
@@ -190,8 +192,10 @@ function App() {
           
           {/* 404 catch-all */}
           <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Suspense>
+          </Routes>
+        </Suspense>
+      </div>
+      <Footer />
       {/* Bypass Auth Toggle */}
       <BypassAuthToggle />
       
