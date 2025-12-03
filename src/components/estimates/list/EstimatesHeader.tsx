@@ -8,6 +8,7 @@ import { DraftsBox } from "@/components/estimates/DraftsBox";
 
 interface EstimatesHeaderProps {
   onNewEstimate: () => void;
+  onNewProject?: () => void; // Optional handler for New Project button
   canCreate?: boolean;
   showActions?: boolean; // Control whether to show action buttons
   title?: string; // Optional title override
@@ -20,6 +21,7 @@ interface EstimatesHeaderProps {
 
 export function EstimatesHeader({ 
   onNewEstimate, 
+  onNewProject,
   canCreate = true, 
   showActions = true,
   title = "Estimates",
@@ -32,7 +34,11 @@ export function EstimatesHeader({
   const navigate = useNavigate();
 
   const handleNewProject = () => {
-    navigate("/estimates/projects/new");
+    if (onNewProject) {
+      onNewProject();
+    } else {
+      navigate("/estimates/projects/new");
+    }
   };
 
   const handleHeaderClick = () => {
@@ -51,16 +57,28 @@ export function EstimatesHeader({
           </h1>
           <DraftsBox />
           {showDashboardTitle && (
-            <div className="flex-1 flex justify-center items-center">
-              <div className="text-center">
-                <h2 className="text-xl sm:text-2xl font-semibold">
-                  {dashboardTitle}
-                </h2>
-                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                  {dashboardDescription}
-                </p>
+            <>
+              <div className="flex-1 flex justify-center items-center">
+                <div className="text-center">
+                  <h2 className="text-xl sm:text-2xl font-semibold">
+                    {dashboardTitle}
+                  </h2>
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                    {dashboardDescription}
+                  </p>
+                </div>
               </div>
-            </div>
+              {onNewProject && (
+                <Button 
+                  variant="outline" 
+                  onClick={handleNewProject}
+                  className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full sm:w-auto shrink-0"
+                >
+                  <Plus className="h-4 w-4" />
+                  New Project
+                </Button>
+              )}
+            </>
           )}
         </div>
         <p className="text-xs sm:text-sm text-muted-foreground">

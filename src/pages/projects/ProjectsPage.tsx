@@ -19,6 +19,7 @@ export default function ProjectsPage() {
       <div className="space-y-4 sm:space-y-6 p-3 sm:p-4 md:p-6">
         <EstimatesHeader 
           onNewEstimate={handleNewEstimate}
+          onNewProject={handleNewProject}
           canCreate={true}
           showActions={false}
           title="Projects"
