@@ -18,6 +18,7 @@ interface EstimateFormPagesProps {
   onPrevious: () => void;
   onNext: () => void;
   onSave: () => Promise<void>;
+  hideNavigation?: boolean; // Hide built-in navigation buttons
 }
 
 export function EstimateFormPages({
@@ -29,7 +30,8 @@ export function EstimateFormPages({
   onUpdateFormData,
   onPrevious,
   onNext,
-  onSave
+  onSave,
+  hideNavigation = false
 }: EstimateFormPagesProps) {
   const renderCurrentPage = () => {
     switch (currentPage) {
@@ -102,7 +104,7 @@ export function EstimateFormPages({
     <>
       {renderCurrentPage()}
       
-      {(currentPage < 5 || !previewEstimate) && (
+      {!hideNavigation && (currentPage < 5 || !previewEstimate) && (
         <FormNavigation
           currentPage={currentPage}
           isSubmitting={isSubmitting}

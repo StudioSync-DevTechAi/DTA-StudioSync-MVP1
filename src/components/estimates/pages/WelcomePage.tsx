@@ -2,6 +2,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+import { usePhotographyOwner } from "../form/hooks/usePhotographyOwner";
 
 interface WelcomePageProps {
   clientName: string;
@@ -19,6 +20,7 @@ export function WelcomePage({
   isReadOnly = false 
 }: WelcomePageProps) {
   const { toast } = useToast();
+  const { photographyOwner, loadingOwner } = usePhotographyOwner();
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const email = e.target.value;
@@ -30,9 +32,34 @@ export function WelcomePage({
     <div className="space-y-8">
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-light tracking-tight">STUDIOSYNC</h1>
-        <p className="text-2xl font-light text-muted-foreground">
-          {clientName ? `Hello ${clientName}!` : "Welcome"}
-        </p>
+      </div>
+      
+      {/* Project Owner Information */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-3 sm:p-4 bg-muted/50 rounded-lg mb-4 sm:mb-6">
+        <div className="space-y-2">
+          <Label className="text-left block">Project Owner</Label>
+          <Input
+            value={loadingOwner ? "Loading..." : (photographyOwner?.photography_owner_name || "Not available")}
+            disabled
+            className="bg-background"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label className="text-left block">Project Owner PhNo</Label>
+          <Input
+            value={loadingOwner ? "Loading..." : (photographyOwner?.photography_owner_phno || "Not available")}
+            disabled
+            className="bg-background"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label className="text-left block">Project Owner Email Id</Label>
+          <Input
+            value={loadingOwner ? "Loading..." : (photographyOwner?.photography_owner_email || "Not available")}
+            disabled
+            className="bg-background"
+          />
+        </div>
       </div>
       
       <div className="max-w-md mx-auto space-y-4">

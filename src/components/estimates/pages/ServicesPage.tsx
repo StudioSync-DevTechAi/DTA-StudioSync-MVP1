@@ -66,9 +66,9 @@ export function ServicesPage({ selectedServices, onServicesChange, isReadOnly = 
         )}
       </div>
       
-      <div className="grid md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {Object.entries(services).map(([key, service]) => (
-          <Card key={key} className="p-6 space-y-4 relative">
+          <Card key={key} className="p-4 sm:p-6 space-y-4 relative w-full max-w-sm mx-auto sm:mx-0">
             {!isReadOnly && (
               <div className="absolute right-4 top-4">
                 <Checkbox 
@@ -78,8 +78,8 @@ export function ServicesPage({ selectedServices, onServicesChange, isReadOnly = 
                 />
               </div>
             )}
-            <h3 className="text-xl font-medium">{service.title}</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
+            <h3 className="text-lg sm:text-xl font-medium pr-8">{service.title}</h3>
+            <ul className="space-y-2 text-xs sm:text-sm text-muted-foreground">
               {service.items.map((item) => (
                 <li key={item}>{item}</li>
               ))}

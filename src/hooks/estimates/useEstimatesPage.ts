@@ -98,9 +98,8 @@ export function useEstimatesPage() {
   };
 
   const handleCreateNewEstimate = () => {
-    setIsEditing(false);
-    setSelectedEstimate(null);
-    setShowNewEstimateForm(true);
+    // Navigate to the new estimate page instead of opening a dialog
+    navigate("/estimates/new");
   };
 
   const handleCloseForm = () => {
