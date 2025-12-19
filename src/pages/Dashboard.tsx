@@ -139,21 +139,102 @@ function Dashboard() {
 
   return (
     <Layout>
-      <div className="space-y-4 sm:space-y-6 lg:space-y-8 p-3 sm:p-4 md:p-6 max-w-7xl mx-auto">
+      <style>{`
+        @keyframes borderGlow {
+          0%, 100% {
+            box-shadow: 0 0 3px rgba(0, 191, 231, 0.25),
+                        0 0 6px rgba(0, 191, 231, 0.15),
+                        0 0 9px rgba(0, 191, 231, 0.1);
+          }
+          50% {
+            box-shadow: 0 0 5px rgba(0, 191, 231, 0.4),
+                        0 0 10px rgba(0, 191, 231, 0.3),
+                        0 0 15px rgba(0, 191, 231, 0.2);
+          }
+        }
+        @keyframes innerBoxGlow {
+          0%, 100% {
+            box-shadow: 0 0 2px rgba(0, 191, 231, 0.2),
+                        0 0 4px rgba(0, 191, 231, 0.12),
+                        0 0 6px rgba(0, 191, 231, 0.08);
+          }
+          50% {
+            box-shadow: 0 0 4px rgba(0, 191, 231, 0.35),
+                        0 0 8px rgba(0, 191, 231, 0.25),
+                        0 0 12px rgba(0, 191, 231, 0.15);
+          }
+        }
+        .animated-border:hover {
+          animation: borderGlow 2s ease-in-out infinite;
+        }
+        .animated-inner-box:hover {
+          animation: innerBoxGlow 2s ease-in-out infinite;
+        }
+      `}</style>
+      <div 
+        className="space-y-4 sm:space-y-6 lg:space-y-8 p-3 sm:p-4 md:p-6 max-w-7xl mx-auto" 
+        style={{ 
+          minHeight: '100vh', 
+          color: '#ffffff',
+          position: 'relative'
+        }}
+      >
+        {/* Exact hero background from theme-videograph */}
+        <div 
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: 'url(/theme-videograph/videograph-master/videograph-master/img/hero/hero-1.jpg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'top center',
+            backgroundRepeat: 'no-repeat',
+            backgroundAttachment: 'fixed',
+            zIndex: 0
+          }}
+        />
+        {/* Subtle dark overlay for better text readability */}
+        <div 
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(16, 0, 40, 0.65)',
+            zIndex: 1
+          }}
+        />
+        <div style={{ position: 'relative', zIndex: 3 }}>
         {/* Welcome Section */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex-1 min-w-0">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold truncate">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold truncate" style={{ color: '#ffffff' }}>
               Welcome back, {profile?.full_name || user?.email}!
             </h1>
-            <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">
+            <p className="text-sm sm:text-base mt-1 sm:mt-2" style={{ color: '#adadad' }}>
               Manage your photography business with all tools in one place
             </p>
           </div>
           <Button
             onClick={() => setEnrollModalOpen(true)}
             variant="outline"
-            className="w-full sm:w-auto shrink-0 border-amber-400 hover:border-amber-500 hover:bg-amber-50/50 hover:shadow-[0_0_15px_rgba(251,191,36,0.4)] transition-all duration-300"
+            className="animated-border w-full sm:w-auto shrink-0 transition-all duration-300"
+            style={{ 
+              backgroundColor: 'transparent',
+              color: '#ffffff',
+              borderColor: '#00bfe7'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(26, 8, 61, 0.3)';
+              e.currentTarget.style.borderColor = '#00bfe7';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.borderColor = '#00bfe7';
+            }}
           >
             Enroll VG or PG
           </Button>
@@ -165,14 +246,42 @@ function Dashboard() {
           <div className="flex flex-col sm:flex-row gap-2 ml-0 sm:ml-auto">
             <Button 
               onClick={() => navigate("/estimates/projects/new")} 
-              className="w-full sm:w-auto"
+              className="animated-border w-full sm:w-auto"
+              variant="outline"
+              style={{
+                backgroundColor: 'transparent',
+                color: '#ffffff',
+                borderColor: '#00bfe7'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(26, 8, 61, 0.3)';
+                e.currentTarget.style.borderColor = '#00bfe7';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.borderColor = '#00bfe7';
+              }}
             >
               <Plus className="h-4 w-4 mr-2" />
               New Project
             </Button>
             <Button 
               onClick={() => navigate("/estimates")} 
-              className="w-full sm:w-auto"
+              className="animated-border w-full sm:w-auto"
+              variant="outline"
+              style={{
+                backgroundColor: 'transparent',
+                color: '#ffffff',
+                borderColor: '#00bfe7'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(26, 8, 61, 0.3)';
+                e.currentTarget.style.borderColor = '#00bfe7';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.borderColor = '#00bfe7';
+              }}
             >
               <Plus className="h-4 w-4 mr-2" />
               New Estimate
@@ -182,9 +291,9 @@ function Dashboard() {
 
         {/* Stats Overview */}
         {dashboardError && (
-          <Card className="border-red-200 bg-red-50">
+          <Card style={{ backgroundColor: 'transparent', borderColor: '#ff4444' }}>
             <CardContent className="pt-4 sm:pt-6">
-              <div className="flex items-start sm:items-center space-x-2 text-red-600">
+              <div className="flex items-start sm:items-center space-x-2" style={{ color: '#ff6666' }}>
                 <FileText className="h-4 w-4 shrink-0 mt-0.5 sm:mt-0" />
                 <span className="text-xs sm:text-sm break-words">Error loading dashboard data: {dashboardError}</span>
               </div>
@@ -193,47 +302,116 @@ function Dashboard() {
         )}
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
-          <StatCard
-            title="Quote Enquiries"
-            value={dashboardLoading ? <Skeleton className="h-6 w-8" /> : metrics?.pendingEnquiries?.toString() || '0'}
-            icon={MessageSquare}
-            trend={{ value: 5, label: "vs last week" }}
-            onClick={() => navigate("/quote-enquiries")}
-          />
-          <StatCard
-            title="Monthly Revenue"
-            value={dashboardLoading ? <Skeleton className="h-6 w-16" /> : `₹${metrics?.monthlyRevenue?.toLocaleString() || '0'}`}
-            icon={DollarSign}
-            trend={{ value: 12, label: "vs last month" }}
-          />
-          <StatCard
-            title="Upcoming Events"
-            value={dashboardLoading ? <Skeleton className="h-6 w-8" /> : metrics?.upcomingEvents?.toString() || '0'}
-            icon={Calendar}
-            trend={{ value: 2, label: "vs last week" }}
-          />
-          <StatCard
-            title="Pending Invoices"
-            value={dashboardLoading ? <Skeleton className="h-6 w-8" /> : metrics?.pendingInvoices?.toString() || '0'}
-            icon={Receipt}
-            trend={{ value: -1, label: "vs last week" }}
-          />
-          <StatCard
-            title="Active Projects"
-            value={dashboardLoading ? <Skeleton className="h-6 w-8" /> : metrics?.activeProjects?.toString() || '0'}
-            icon={FileText}
-            trend={{ value: 3, label: "vs last month" }}
-          />
+          <div 
+            className="animated-border"
+            style={{ backgroundColor: 'transparent', borderRadius: '8px', border: '1px solid #00bfe7', color: '#ffffff', transition: 'background-color 0.3s ease' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(0, 191, 231, 0.15)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
+          >
+            <StatCard
+              title="Quote Enquiries"
+              value={dashboardLoading ? <Skeleton className="h-6 w-8" /> : metrics?.pendingEnquiries?.toString() || '0'}
+              icon={MessageSquare}
+              trend={{ value: 5, label: "vs last week" }}
+              onClick={() => navigate("/quote-enquiries")}
+              className="bg-transparent border-0 [&_p]:!text-[#adadad] [&_h3]:!text-[#ffffff]"
+            />
+          </div>
+          <div 
+            className="animated-border"
+            style={{ backgroundColor: 'transparent', borderRadius: '8px', border: '1px solid #00bfe7', color: '#ffffff', transition: 'background-color 0.3s ease' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(0, 191, 231, 0.15)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
+          >
+            <StatCard
+              title="Monthly Revenue"
+              value={dashboardLoading ? <Skeleton className="h-6 w-16" /> : `₹${metrics?.monthlyRevenue?.toLocaleString() || '0'}`}
+              icon={DollarSign}
+              trend={{ value: 12, label: "vs last month" }}
+              className="bg-transparent border-0 [&_p]:!text-[#adadad] [&_h3]:!text-[#ffffff]"
+            />
+          </div>
+          <div 
+            className="animated-border"
+            style={{ backgroundColor: 'transparent', borderRadius: '8px', border: '1px solid #00bfe7', color: '#ffffff', transition: 'background-color 0.3s ease' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(0, 191, 231, 0.15)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
+          >
+            <StatCard
+              title="Upcoming Events"
+              value={dashboardLoading ? <Skeleton className="h-6 w-8" /> : metrics?.upcomingEvents?.toString() || '0'}
+              icon={Calendar}
+              trend={{ value: 2, label: "vs last week" }}
+              className="bg-transparent border-0 [&_p]:!text-[#adadad] [&_h3]:!text-[#ffffff]"
+            />
+          </div>
+          <div 
+            className="animated-border"
+            style={{ backgroundColor: 'transparent', borderRadius: '8px', border: '1px solid #00bfe7', color: '#ffffff', transition: 'background-color 0.3s ease' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(0, 191, 231, 0.15)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
+          >
+            <StatCard
+              title="Pending Invoices"
+              value={dashboardLoading ? <Skeleton className="h-6 w-8" /> : metrics?.pendingInvoices?.toString() || '0'}
+              icon={Receipt}
+              trend={{ value: -1, label: "vs last week" }}
+              className="bg-transparent border-0 [&_p]:!text-[#adadad] [&_h3]:!text-[#ffffff]"
+            />
+          </div>
+          <div 
+            className="animated-border"
+            style={{ backgroundColor: 'transparent', borderRadius: '8px', border: '1px solid #00bfe7', color: '#ffffff', transition: 'background-color 0.3s ease' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(0, 191, 231, 0.15)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
+          >
+            <StatCard
+              title="Active Projects"
+              value={dashboardLoading ? <Skeleton className="h-6 w-8" /> : metrics?.activeProjects?.toString() || '0'}
+              icon={FileText}
+              trend={{ value: 3, label: "vs last month" }}
+              className="bg-transparent border-0 [&_p]:!text-[#adadad] [&_h3]:!text-[#ffffff]"
+            />
+          </div>
         </div>
 
         {/* Quick Upload Section */}
-        <Card>
+        <Card 
+          className="animated-border"
+          style={{ backgroundColor: 'transparent', borderColor: '#00bfe7', transition: 'background-color 0.3s ease' }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(0, 191, 231, 0.15)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+          }}
+        >
           <CardHeader>
-            <CardTitle className="flex items-center text-lg sm:text-xl">
+            <CardTitle className="flex items-center text-lg sm:text-xl" style={{ color: '#ffffff' }}>
               <Upload className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
               Quick Upload
             </CardTitle>
-            <CardDescription className="text-sm">
+            <CardDescription className="text-sm" style={{ color: '#adadad' }}>
               Upload content and data to get started quickly
             </CardDescription>
           </CardHeader>
@@ -243,13 +421,26 @@ function Dashboard() {
                 <Button
                   key={option.title}
                   variant="outline"
-                  className="h-auto p-3 sm:p-4 flex flex-col items-center space-y-2 hover:bg-accent transition-colors"
+                  className="animated-inner-box h-auto p-3 sm:p-4 flex flex-col items-center space-y-2 transition-colors"
+                  style={{ 
+                    backgroundColor: 'transparent',
+                    borderColor: '#00bfe7',
+                    color: '#ffffff'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'rgba(26, 8, 61, 0.3)';
+                    e.currentTarget.style.borderColor = '#00bfe7';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.borderColor = '#00bfe7';
+                  }}
                   onClick={option.action}
                 >
-                  <option.icon className="h-6 w-6 sm:h-8 sm:w-8" />
+                  <option.icon className="h-6 w-6 sm:h-8 sm:w-8" style={{ color: '#00bfe7' }} />
                   <div className="text-center">
-                    <div className="font-medium text-sm sm:text-base">{option.title}</div>
-                    <div className="text-xs text-muted-foreground mt-1">{option.description}</div>
+                    <div className="font-medium text-sm sm:text-base" style={{ color: '#ffffff' }}>{option.title}</div>
+                    <div className="text-xs mt-1" style={{ color: '#adadad' }}>{option.description}</div>
                   </div>
                 </Button>
               ))}
@@ -259,12 +450,19 @@ function Dashboard() {
 
         {/* All Modules */}
         <div>
-          <h2 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6">All Modules</h2>
+          <h2 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6" style={{ color: '#ffffff' }}>All Modules</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {modules.map((module) => (
               <Card 
                 key={module.title} 
-                className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-[1.02] flex flex-col"
+                className="animated-border cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-[1.02] flex flex-col"
+                style={{ backgroundColor: 'transparent', borderColor: '#00bfe7', transition: 'background-color 0.3s ease' }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(0, 191, 231, 0.15)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
                 onClick={() => handleModuleClick(module.path)}
               >
                 <CardHeader className="pb-3">
@@ -274,12 +472,12 @@ function Dashboard() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <CardTitle className="text-base sm:text-lg truncate">{module.title}</CardTitle>
+                        <CardTitle className="text-base sm:text-lg truncate" style={{ color: '#ffffff' }}>{module.title}</CardTitle>
                         {module.showWIP && (
                           <WorkInProgress size="sm" />
                         )}
                       </div>
-                      <CardDescription className="text-xs sm:text-sm mt-1 line-clamp-2">
+                      <CardDescription className="text-xs sm:text-sm mt-1 line-clamp-2" style={{ color: '#adadad' }}>
                         {module.description}
                       </CardDescription>
                     </div>
@@ -287,8 +485,21 @@ function Dashboard() {
                 </CardHeader>
                 <CardContent className="pt-0">
                   <Button 
-                    className="w-full text-sm" 
+                    className="animated-inner-box w-full text-sm" 
                     variant="outline"
+                    style={{
+                      backgroundColor: 'transparent',
+                      color: '#ffffff',
+                      borderColor: '#00bfe7'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = 'rgba(26, 8, 61, 0.3)';
+                      e.currentTarget.style.borderColor = '#00bfe7';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                      e.currentTarget.style.borderColor = '#00bfe7';
+                    }}
                     onClick={(e) => {
                       e.stopPropagation();
                       handleModuleClick(module.path);
@@ -303,54 +514,99 @@ function Dashboard() {
         </div>
 
         {/* Recent Activity */}
-        <Card>
+        <Card 
+          className="animated-border"
+          style={{ backgroundColor: 'transparent', borderColor: '#00bfe7', transition: 'background-color 0.3s ease' }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(0, 191, 231, 0.15)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+          }}
+        >
           <CardHeader>
-            <CardTitle className="text-lg sm:text-xl">Recent Activity</CardTitle>
-            <CardDescription className="text-sm">Your latest actions and updates</CardDescription>
+            <CardTitle className="text-lg sm:text-xl" style={{ color: '#ffffff' }}>Recent Activity</CardTitle>
+            <CardDescription className="text-sm" style={{ color: '#adadad' }}>Your latest actions and updates</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3 sm:space-y-4">
-              <div className="flex items-start sm:items-center space-x-2 sm:space-x-3 p-2 sm:p-3 border rounded-lg">
-                <div className="p-1.5 sm:p-2 bg-green-100 rounded-full shrink-0">
-                  <FileText className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
+              <div 
+                className="animated-inner-box flex items-start sm:items-center space-x-2 sm:space-x-3 p-2 sm:p-3 border rounded-lg transition-colors" 
+                style={{ borderColor: '#00bfe7', backgroundColor: 'transparent' }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(0, 191, 231, 0.15)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
+              >
+                <div className="p-1.5 sm:p-2 rounded-full shrink-0" style={{ backgroundColor: '#0a0119' }}>
+                  <FileText className="h-3 w-3 sm:h-4 sm:w-4" style={{ color: '#00bfe7' }} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm sm:text-base">New estimate created</p>
-                  <p className="text-xs sm:text-sm text-muted-foreground truncate">Wedding photography for Kumar family</p>
+                  <p className="font-medium text-sm sm:text-base" style={{ color: '#ffffff' }}>New estimate created</p>
+                  <p className="text-xs sm:text-sm truncate" style={{ color: '#adadad' }}>Wedding photography for Kumar family</p>
                 </div>
-                <span className="text-xs text-muted-foreground shrink-0 ml-2">2h ago</span>
+                <span className="text-xs shrink-0 ml-2" style={{ color: '#adadad' }}>2h ago</span>
               </div>
               
-              <div className="flex items-start sm:items-center space-x-2 sm:space-x-3 p-2 sm:p-3 border rounded-lg">
-                <div className="p-1.5 sm:p-2 bg-blue-100 rounded-full shrink-0">
-                  <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
+              <div 
+                className="animated-inner-box flex items-start sm:items-center space-x-2 sm:space-x-3 p-2 sm:p-3 border rounded-lg transition-colors" 
+                style={{ borderColor: '#00bfe7', backgroundColor: 'transparent' }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(0, 191, 231, 0.15)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
+              >
+                <div className="p-1.5 sm:p-2 rounded-full shrink-0" style={{ backgroundColor: '#0a0119' }}>
+                  <Calendar className="h-3 w-3 sm:h-4 sm:w-4" style={{ color: '#00bfe7' }} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm sm:text-base">Event scheduled</p>
-                  <p className="text-xs sm:text-sm text-muted-foreground truncate">Pre-wedding shoot on May 25th</p>
+                  <p className="font-medium text-sm sm:text-base" style={{ color: '#ffffff' }}>Event scheduled</p>
+                  <p className="text-xs sm:text-sm truncate" style={{ color: '#adadad' }}>Pre-wedding shoot on May 25th</p>
                 </div>
-                <span className="text-xs text-muted-foreground shrink-0 ml-2">1d ago</span>
+                <span className="text-xs shrink-0 ml-2" style={{ color: '#adadad' }}>1d ago</span>
               </div>
               
-              <div className="flex items-start sm:items-center space-x-2 sm:space-x-3 p-2 sm:p-3 border rounded-lg">
-                <div className="p-1.5 sm:p-2 bg-purple-100 rounded-full shrink-0">
-                  <Receipt className="h-3 w-3 sm:h-4 sm:w-4 text-purple-600" />
+              <div 
+                className="animated-inner-box flex items-start sm:items-center space-x-2 sm:space-x-3 p-2 sm:p-3 border rounded-lg transition-colors" 
+                style={{ borderColor: '#00bfe7', backgroundColor: 'transparent' }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(0, 191, 231, 0.15)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
+              >
+                <div className="p-1.5 sm:p-2 rounded-full shrink-0" style={{ backgroundColor: '#0a0119' }}>
+                  <Receipt className="h-3 w-3 sm:h-4 sm:w-4" style={{ color: '#00bfe7' }} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm sm:text-base">Invoice payment received</p>
-                  <p className="text-xs sm:text-sm text-muted-foreground truncate">₹50,000 from Sharma Wedding</p>
+                  <p className="font-medium text-sm sm:text-base" style={{ color: '#ffffff' }}>Invoice payment received</p>
+                  <p className="text-xs sm:text-sm truncate" style={{ color: '#adadad' }}>₹50,000 from Sharma Wedding</p>
                 </div>
-                <span className="text-xs text-muted-foreground shrink-0 ml-2">3d ago</span>
+                <span className="text-xs shrink-0 ml-2" style={{ color: '#adadad' }}>3d ago</span>
               </div>
             </div>
           </CardContent>
         </Card>
 
         {/* AI Feature Card */}
-        <Card>
+        <Card 
+          className="animated-border"
+          style={{ backgroundColor: 'transparent', borderColor: '#00bfe7', transition: 'background-color 0.3s ease' }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(0, 191, 231, 0.15)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+          }}
+        >
           <CardHeader>
-            <CardTitle className="text-lg sm:text-xl">AI Media Tagger</CardTitle>
-            <CardDescription className="text-sm">
+            <CardTitle className="text-lg sm:text-xl" style={{ color: '#ffffff' }}>AI Media Tagger</CardTitle>
+            <CardDescription className="text-sm" style={{ color: '#adadad' }}>
               Automatically tag and categorize your media with AI
             </CardDescription>
           </CardHeader>
@@ -365,6 +621,7 @@ function Dashboard() {
             </Suspense>
           </CardContent>
         </Card>
+        </div>
       </div>
       <EnrollPhotographerModal
         open={enrollModalOpen}
