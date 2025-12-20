@@ -142,8 +142,8 @@ function Dashboard() {
       <style>{`
         @keyframes borderGlow {
           0%, 100% {
-            box-shadow: 0 0 3px rgba(0, 191, 231, 0.25),
-                        0 0 6px rgba(0, 191, 231, 0.15),
+            box-shadow: 0 0 3px rgba(157, 234, 249, 0.25),
+                        0 0 6px rgba(255, 255, 255, 0.15),
                         0 0 9px rgba(0, 191, 231, 0.1);
           }
           50% {
@@ -161,7 +161,7 @@ function Dashboard() {
           50% {
             box-shadow: 0 0 4px rgba(0, 191, 231, 0.35),
                         0 0 8px rgba(0, 191, 231, 0.25),
-                        0 0 12px rgba(0, 191, 231, 0.15);
+                        0 0 12px rgba(255, 255, 255, 0.15);
           }
         }
         .animated-border:hover {
@@ -172,7 +172,7 @@ function Dashboard() {
         }
       `}</style>
       <div 
-        className="space-y-4 sm:space-y-6 lg:space-y-8 p-3 sm:p-4 md:p-6 max-w-7xl mx-auto" 
+        className="space-y-12 sm:space-y-16 lg:space-y-20 p-3 sm:p-4 md:p-6 max-w-7xl mx-auto" 
         style={{ 
           minHeight: '100vh', 
           color: '#ffffff',
@@ -187,9 +187,9 @@ function Dashboard() {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundImage: 'url(/theme-videograph/videograph-master/videograph-master/img/hero/hero-1.jpg)',
+            backgroundImage: 'url(/theme-videograph/videograph-master/videograph-master/img/hero/hero-4.jpg)',
             backgroundSize: 'cover',
-            backgroundPosition: 'top center',
+            backgroundPosition: 'right center',
             backgroundRepeat: 'no-repeat',
             backgroundAttachment: 'fixed',
             zIndex: 0
@@ -203,7 +203,7 @@ function Dashboard() {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: 'rgba(16, 0, 40, 0.65)',
+            backgroundColor: 'rgba(16, 0, 40, 0.70)',
             zIndex: 1
           }}
         />
@@ -214,7 +214,7 @@ function Dashboard() {
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold truncate" style={{ color: '#ffffff' }}>
               Welcome back, {profile?.full_name || user?.email}!
             </h1>
-            <p className="text-sm sm:text-base mt-1 sm:mt-2" style={{ color: '#adadad' }}>
+            <p className="text-sm sm:text-base mt-1 sm:mt-2" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
               Manage your photography business with all tools in one place
             </p>
           </div>
@@ -225,15 +225,15 @@ function Dashboard() {
             style={{ 
               backgroundColor: 'transparent',
               color: '#ffffff',
-              borderColor: '#00bfe7'
+              borderColor: '#ffffff'
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = 'rgba(26, 8, 61, 0.3)';
-              e.currentTarget.style.borderColor = '#00bfe7';
+              e.currentTarget.style.borderColor = '#ffffff';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.backgroundColor = 'transparent';
-              e.currentTarget.style.borderColor = '#00bfe7';
+              e.currentTarget.style.borderColor = '#ffffff';
             }}
           >
             Enroll VG or PG
@@ -251,15 +251,15 @@ function Dashboard() {
               style={{
                 backgroundColor: 'transparent',
                 color: '#ffffff',
-                borderColor: '#00bfe7'
+                borderColor: '#ffffff'
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = 'rgba(26, 8, 61, 0.3)';
-                e.currentTarget.style.borderColor = '#00bfe7';
+                e.currentTarget.style.borderColor = '#ffffff';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.borderColor = '#00bfe7';
+                e.currentTarget.style.borderColor = '#ffffff';
               }}
             >
               <Plus className="h-4 w-4 mr-2" />
@@ -272,15 +272,15 @@ function Dashboard() {
               style={{
                 backgroundColor: 'transparent',
                 color: '#ffffff',
-                borderColor: '#00bfe7'
+                borderColor: '#ffffff'
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = 'rgba(26, 8, 61, 0.3)';
-                e.currentTarget.style.borderColor = '#00bfe7';
+                e.currentTarget.style.borderColor = '#ffffff';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.borderColor = '#00bfe7';
+                e.currentTarget.style.borderColor = '#ffffff';
               }}
             >
               <Plus className="h-4 w-4 mr-2" />
@@ -301,10 +301,10 @@ function Dashboard() {
           </Card>
         )}
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6">
           <div 
             className="animated-border"
-            style={{ backgroundColor: 'transparent', borderRadius: '8px', border: '1px solid #00bfe7', color: '#ffffff', transition: 'background-color 0.3s ease' }}
+            style={{ backgroundColor: 'transparent', borderRadius: '8px', border: '1.5px solid #ffffff', color: '#ffffff', transition: 'background-color 0.3s ease' }}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = 'rgba(0, 191, 231, 0.15)';
             }}
@@ -318,14 +318,14 @@ function Dashboard() {
               icon={MessageSquare}
               trend={{ value: 5, label: "vs last week" }}
               onClick={() => navigate("/quote-enquiries")}
-              className="bg-transparent border-0 [&_p]:!text-[#adadad] [&_h3]:!text-[#ffffff]"
+              className="bg-transparent border-0 [&_p]:!text-white/90 [&_h3]:!text-[#ffffff]"
             />
           </div>
           <div 
             className="animated-border"
-            style={{ backgroundColor: 'transparent', borderRadius: '8px', border: '1px solid #00bfe7', color: '#ffffff', transition: 'background-color 0.3s ease' }}
+            style={{ backgroundColor: 'transparent', borderRadius: '8px', border: '1.5px solid #ffffff', color: '#ffffff', transition: 'background-color 0.3s ease' }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(0, 191, 231, 0.15)';
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.backgroundColor = 'transparent';
@@ -336,14 +336,14 @@ function Dashboard() {
               value={dashboardLoading ? <Skeleton className="h-6 w-16" /> : `₹${metrics?.monthlyRevenue?.toLocaleString() || '0'}`}
               icon={DollarSign}
               trend={{ value: 12, label: "vs last month" }}
-              className="bg-transparent border-0 [&_p]:!text-[#adadad] [&_h3]:!text-[#ffffff]"
+              className="bg-transparent border-0 [&_p]:!text-white/90 [&_h3]:!text-[#ffffff]"
             />
           </div>
           <div 
             className="animated-border"
-            style={{ backgroundColor: 'transparent', borderRadius: '8px', border: '1px solid #00bfe7', color: '#ffffff', transition: 'background-color 0.3s ease' }}
+            style={{ backgroundColor: 'transparent', borderRadius: '8px', border: '1.5px solid #ffffff', color: '#ffffff', transition: 'background-color 0.3s ease' }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(0, 191, 231, 0.15)';
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.backgroundColor = 'transparent';
@@ -354,14 +354,14 @@ function Dashboard() {
               value={dashboardLoading ? <Skeleton className="h-6 w-8" /> : metrics?.upcomingEvents?.toString() || '0'}
               icon={Calendar}
               trend={{ value: 2, label: "vs last week" }}
-              className="bg-transparent border-0 [&_p]:!text-[#adadad] [&_h3]:!text-[#ffffff]"
+              className="bg-transparent border-0 [&_p]:!text-white/90 [&_h3]:!text-[#ffffff]"
             />
           </div>
           <div 
             className="animated-border"
-            style={{ backgroundColor: 'transparent', borderRadius: '8px', border: '1px solid #00bfe7', color: '#ffffff', transition: 'background-color 0.3s ease' }}
+            style={{ backgroundColor: 'transparent', borderRadius: '8px', border: '1.5px solid #ffffff', color: '#ffffff', transition: 'background-color 0.3s ease' }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(0, 191, 231, 0.15)';
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.backgroundColor = 'transparent';
@@ -372,14 +372,14 @@ function Dashboard() {
               value={dashboardLoading ? <Skeleton className="h-6 w-8" /> : metrics?.pendingInvoices?.toString() || '0'}
               icon={Receipt}
               trend={{ value: -1, label: "vs last week" }}
-              className="bg-transparent border-0 [&_p]:!text-[#adadad] [&_h3]:!text-[#ffffff]"
+              className="bg-transparent border-0 [&_p]:!text-white/90 [&_h3]:!text-[#ffffff]"
             />
           </div>
           <div 
             className="animated-border"
-            style={{ backgroundColor: 'transparent', borderRadius: '8px', border: '1px solid #00bfe7', color: '#ffffff', transition: 'background-color 0.3s ease' }}
+            style={{ backgroundColor: 'transparent', borderRadius: '8px', border: '1.5px solid #ffffff', color: '#ffffff', transition: 'background-color 0.3s ease' }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(0, 191, 231, 0.15)';
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.backgroundColor = 'transparent';
@@ -390,7 +390,7 @@ function Dashboard() {
               value={dashboardLoading ? <Skeleton className="h-6 w-8" /> : metrics?.activeProjects?.toString() || '0'}
               icon={FileText}
               trend={{ value: 3, label: "vs last month" }}
-              className="bg-transparent border-0 [&_p]:!text-[#adadad] [&_h3]:!text-[#ffffff]"
+              className="bg-transparent border-0 [&_p]:!text-white/90 [&_h3]:!text-[#ffffff]"
             />
           </div>
         </div>
@@ -398,25 +398,25 @@ function Dashboard() {
         {/* Quick Upload Section */}
         <Card 
           className="animated-border"
-          style={{ backgroundColor: 'transparent', borderColor: '#00bfe7', transition: 'background-color 0.3s ease' }}
+          style={{ backgroundColor: 'transparent', borderColor: '#ffffff', borderWidth: '1.5px', transition: 'background-color 0.3s ease' }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(0, 191, 231, 0.15)';
+            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.backgroundColor = 'transparent';
           }}
         >
-          <CardHeader>
+          <CardHeader style={{ paddingTop: '1.5rem', paddingBottom: '1rem' }}>
             <CardTitle className="flex items-center text-lg sm:text-xl" style={{ color: '#ffffff' }}>
               <Upload className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
               Quick Upload
             </CardTitle>
-            <CardDescription className="text-sm" style={{ color: '#adadad' }}>
+            <CardDescription className="text-sm" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
               Upload content and data to get started quickly
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+          <CardContent style={{ paddingTop: '1rem', paddingBottom: '1.5rem' }}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {uploadOptions.map((option) => (
                 <Button
                   key={option.title}
@@ -424,23 +424,23 @@ function Dashboard() {
                   className="animated-inner-box h-auto p-3 sm:p-4 flex flex-col items-center space-y-2 transition-colors"
                   style={{ 
                     backgroundColor: 'transparent',
-                    borderColor: '#00bfe7',
+                    borderColor: '#ffffff',
                     color: '#ffffff'
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.backgroundColor = 'rgba(26, 8, 61, 0.3)';
-                    e.currentTarget.style.borderColor = '#00bfe7';
+                    e.currentTarget.style.borderColor = '#ffffff';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.backgroundColor = 'transparent';
-                    e.currentTarget.style.borderColor = '#00bfe7';
+                    e.currentTarget.style.borderColor = '#ffffff';
                   }}
                   onClick={option.action}
                 >
-                  <option.icon className="h-6 w-6 sm:h-8 sm:w-8" style={{ color: '#00bfe7' }} />
+                  <option.icon className="h-6 w-6 sm:h-8 sm:w-8" style={{ color: '#ffffff' }} />
                   <div className="text-center">
                     <div className="font-medium text-sm sm:text-base" style={{ color: '#ffffff' }}>{option.title}</div>
-                    <div className="text-xs mt-1" style={{ color: '#adadad' }}>{option.description}</div>
+                    <div className="text-xs mt-1" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>{option.description}</div>
                   </div>
                 </Button>
               ))}
@@ -451,21 +451,21 @@ function Dashboard() {
         {/* All Modules */}
         <div>
           <h2 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6" style={{ color: '#ffffff' }}>All Modules</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8">
             {modules.map((module) => (
               <Card 
                 key={module.title} 
                 className="animated-border cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-[1.02] flex flex-col"
-                style={{ backgroundColor: 'transparent', borderColor: '#00bfe7', transition: 'background-color 0.3s ease' }}
+                style={{ backgroundColor: 'transparent', borderColor: '#ffffff', borderWidth: '1.5px', transition: 'background-color 0.3s ease' }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(0, 191, 231, 0.15)';
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.backgroundColor = 'transparent';
                 }}
                 onClick={() => handleModuleClick(module.path)}
               >
-                <CardHeader className="pb-3">
+                <CardHeader className="pb-3" style={{ paddingTop: '1.5rem' }}>
                   <div className="flex items-start sm:items-center space-x-3">
                     <div className={`p-2 rounded-lg ${module.color} shrink-0`}>
                       <module.icon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
@@ -477,28 +477,28 @@ function Dashboard() {
                           <WorkInProgress size="sm" />
                         )}
                       </div>
-                      <CardDescription className="text-xs sm:text-sm mt-1 line-clamp-2" style={{ color: '#adadad' }}>
+                      <CardDescription className="text-xs sm:text-sm mt-1 line-clamp-2" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
                         {module.description}
                       </CardDescription>
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="pt-0">
+                <CardContent className="pt-0" style={{ paddingBottom: '1.5rem' }}>
                   <Button 
                     className="animated-inner-box w-full text-sm" 
                     variant="outline"
                     style={{
                       backgroundColor: 'transparent',
                       color: '#ffffff',
-                      borderColor: '#00bfe7'
+                      borderColor: '#ffffff'
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.backgroundColor = 'rgba(26, 8, 61, 0.3)';
-                      e.currentTarget.style.borderColor = '#00bfe7';
+                      e.currentTarget.style.borderColor = '#ffffff';
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.backgroundColor = 'transparent';
-                      e.currentTarget.style.borderColor = '#00bfe7';
+                      e.currentTarget.style.borderColor = '#ffffff';
                     }}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -516,78 +516,78 @@ function Dashboard() {
         {/* Recent Activity */}
         <Card 
           className="animated-border"
-          style={{ backgroundColor: 'transparent', borderColor: '#00bfe7', transition: 'background-color 0.3s ease' }}
+          style={{ backgroundColor: 'transparent', borderColor: '#ffffff', borderWidth: '1.5px', transition: 'background-color 0.3s ease' }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(0, 191, 231, 0.15)';
+            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.backgroundColor = 'transparent';
           }}
         >
-          <CardHeader>
+          <CardHeader style={{ paddingTop: '1.5rem', paddingBottom: '1rem' }}>
             <CardTitle className="text-lg sm:text-xl" style={{ color: '#ffffff' }}>Recent Activity</CardTitle>
-            <CardDescription className="text-sm" style={{ color: '#adadad' }}>Your latest actions and updates</CardDescription>
+            <CardDescription className="text-sm" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>Your latest actions and updates</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent style={{ paddingTop: '1rem', paddingBottom: '1.5rem' }}>
             <div className="space-y-3 sm:space-y-4">
               <div 
                 className="animated-inner-box flex items-start sm:items-center space-x-2 sm:space-x-3 p-2 sm:p-3 border rounded-lg transition-colors" 
-                style={{ borderColor: '#00bfe7', backgroundColor: 'transparent' }}
+                style={{ borderColor: '#ffffff', borderWidth: '1.5px', backgroundColor: 'transparent' }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(0, 191, 231, 0.15)';
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.backgroundColor = 'transparent';
                 }}
               >
                 <div className="p-1.5 sm:p-2 rounded-full shrink-0" style={{ backgroundColor: '#0a0119' }}>
-                  <FileText className="h-3 w-3 sm:h-4 sm:w-4" style={{ color: '#00bfe7' }} />
+                  <FileText className="h-3 w-3 sm:h-4 sm:w-4" style={{ color: '#ffffff' }} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm sm:text-base" style={{ color: '#ffffff' }}>New estimate created</p>
-                  <p className="text-xs sm:text-sm truncate" style={{ color: '#adadad' }}>Wedding photography for Kumar family</p>
+                  <p className="text-xs sm:text-sm truncate" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>Wedding photography for Kumar family</p>
                 </div>
-                <span className="text-xs shrink-0 ml-2" style={{ color: '#adadad' }}>2h ago</span>
+                <span className="text-xs shrink-0 ml-2" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>2h ago</span>
               </div>
               
               <div 
                 className="animated-inner-box flex items-start sm:items-center space-x-2 sm:space-x-3 p-2 sm:p-3 border rounded-lg transition-colors" 
-                style={{ borderColor: '#00bfe7', backgroundColor: 'transparent' }}
+                style={{ borderColor: '#ffffff', borderWidth: '1.5px', backgroundColor: 'transparent' }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(0, 191, 231, 0.15)';
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.backgroundColor = 'transparent';
                 }}
               >
                 <div className="p-1.5 sm:p-2 rounded-full shrink-0" style={{ backgroundColor: '#0a0119' }}>
-                  <Calendar className="h-3 w-3 sm:h-4 sm:w-4" style={{ color: '#00bfe7' }} />
+                  <Calendar className="h-3 w-3 sm:h-4 sm:w-4" style={{ color: '#ffffff' }} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm sm:text-base" style={{ color: '#ffffff' }}>Event scheduled</p>
-                  <p className="text-xs sm:text-sm truncate" style={{ color: '#adadad' }}>Pre-wedding shoot on May 25th</p>
+                  <p className="text-xs sm:text-sm truncate" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>Pre-wedding shoot on May 25th</p>
                 </div>
-                <span className="text-xs shrink-0 ml-2" style={{ color: '#adadad' }}>1d ago</span>
+                <span className="text-xs shrink-0 ml-2" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>1d ago</span>
               </div>
               
               <div 
                 className="animated-inner-box flex items-start sm:items-center space-x-2 sm:space-x-3 p-2 sm:p-3 border rounded-lg transition-colors" 
-                style={{ borderColor: '#00bfe7', backgroundColor: 'transparent' }}
+                style={{ borderColor: '#ffffff', borderWidth: '1.5px', backgroundColor: 'transparent' }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(0, 191, 231, 0.15)';
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.backgroundColor = 'transparent';
                 }}
               >
                 <div className="p-1.5 sm:p-2 rounded-full shrink-0" style={{ backgroundColor: '#0a0119' }}>
-                  <Receipt className="h-3 w-3 sm:h-4 sm:w-4" style={{ color: '#00bfe7' }} />
+                  <Receipt className="h-3 w-3 sm:h-4 sm:w-4" style={{ color: '#ffffff' }} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm sm:text-base" style={{ color: '#ffffff' }}>Invoice payment received</p>
-                  <p className="text-xs sm:text-sm truncate" style={{ color: '#adadad' }}>₹50,000 from Sharma Wedding</p>
+                  <p className="text-xs sm:text-sm truncate" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>₹50,000 from Sharma Wedding</p>
                 </div>
-                <span className="text-xs shrink-0 ml-2" style={{ color: '#adadad' }}>3d ago</span>
+                <span className="text-xs shrink-0 ml-2" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>3d ago</span>
               </div>
             </div>
           </CardContent>
@@ -596,9 +596,9 @@ function Dashboard() {
         {/* AI Feature Card */}
         <Card 
           className="animated-border"
-          style={{ backgroundColor: 'transparent', borderColor: '#00bfe7', transition: 'background-color 0.3s ease' }}
+          style={{ backgroundColor: 'transparent', borderColor: '#ffffff', borderWidth: '1.5px', transition: 'background-color 0.3s ease' }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(0, 191, 231, 0.15)';
+            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.backgroundColor = 'transparent';
@@ -606,7 +606,7 @@ function Dashboard() {
         >
           <CardHeader>
             <CardTitle className="text-lg sm:text-xl" style={{ color: '#ffffff' }}>AI Media Tagger</CardTitle>
-            <CardDescription className="text-sm" style={{ color: '#adadad' }}>
+            <CardDescription className="text-sm" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
               Automatically tag and categorize your media with AI
             </CardDescription>
           </CardHeader>
