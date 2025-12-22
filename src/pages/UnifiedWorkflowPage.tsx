@@ -69,8 +69,8 @@ export default function UnifiedWorkflowPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-semibold">Workflow Management</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-2xl font-semibold text-white">Workflow Management</h1>
+            <p className="text-white/80">
               Manage your entire workflow from planning to delivery
             </p>
           </div>

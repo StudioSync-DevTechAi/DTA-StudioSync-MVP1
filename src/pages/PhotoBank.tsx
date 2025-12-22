@@ -2664,13 +2664,27 @@ export default function PhotoBank() {
       >
         <div className="body-wrapper-inner" style={{ paddingTop: 0 }}>
           <div className="container-fluid" style={{ paddingTop: 0 }}>
-            <div className="min-h-screen bg-white">
+            <div 
+              className="min-h-screen"
+              style={{
+                background: `
+                  radial-gradient(ellipse at bottom left, rgba(255, 100, 50, 0.08) 0%, rgba(255, 150, 0, 0.04) 20%, transparent 50%),
+                  linear-gradient(to bottom,
+                    #2a1f4d 0%,
+                    #3d2a5f 25%,
+                    #4a3569 50%,
+                    #3d2a5f 75%,
+                    #2a1f4d 100%
+                  )
+                `
+              }}
+            >
       <div className="max-w-6xl mx-auto px-6 pt-4 pb-6">
         {/* Top Right Greeting with Avatar */}
         <div className="mb-4 flex items-center justify-end gap-3">
           {profile?.full_name && (
             <div className="flex items-center gap-3">
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-sm font-medium text-white">
                 Hi {profile.full_name}
               </span>
               <Avatar className="h-10 w-10">

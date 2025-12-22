@@ -203,7 +203,7 @@ function Dashboard() {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: 'rgba(16, 0, 40, 0.70)',
+            backgroundColor: 'rgba(30, 10, 60, 0.35)',
             zIndex: 1
           }}
         />
@@ -397,7 +397,7 @@ function Dashboard() {
 
         {/* Quick Upload Section */}
         <Card 
-          className="animated-border"
+          className="animated-border mt-6 sm:mt-8"
           style={{ backgroundColor: 'transparent', borderColor: '#ffffff', borderWidth: '1.5px', transition: 'background-color 0.3s ease' }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
@@ -449,8 +449,8 @@ function Dashboard() {
         </Card>
 
         {/* All Modules */}
-        <div>
-          <h2 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6" style={{ color: '#ffffff' }}>All Modules</h2>
+        <div className="mt-6 sm:mt-8">
+          <h2 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 text-center" style={{ color: '#ffffff' }}>All Modules</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8">
             {modules.map((module) => (
               <Card 
@@ -515,7 +515,7 @@ function Dashboard() {
 
         {/* Recent Activity */}
         <Card 
-          className="animated-border"
+          className="animated-border mt-6 sm:mt-8"
           style={{ backgroundColor: 'transparent', borderColor: '#ffffff', borderWidth: '1.5px', transition: 'background-color 0.3s ease' }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
@@ -595,7 +595,7 @@ function Dashboard() {
 
         {/* AI Feature Card */}
         <Card 
-          className="animated-border"
+          className="animated-border mt-6 sm:mt-8"
           style={{ backgroundColor: 'transparent', borderColor: '#ffffff', borderWidth: '1.5px', transition: 'background-color 0.3s ease' }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';

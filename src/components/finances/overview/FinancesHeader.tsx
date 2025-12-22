@@ -15,8 +15,8 @@ export function FinancesHeader({ selectedYear, setSelectedYear, handleNewTransac
   return (
     <div className="flex items-center justify-between">
       <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Finances</h1>
-        <p className="text-muted-foreground mt-2">
+        <h1 className="text-3xl font-semibold tracking-tight text-white">Finances</h1>
+        <p className="text-white/80 mt-2">
           Manage your business finances and track revenue
         </p>
       </div>

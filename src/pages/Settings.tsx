@@ -33,32 +33,32 @@ export default function Settings() {
     <Layout>
       <div className="space-y-4 sm:space-y-6 p-3 sm:p-4 md:p-6 max-w-2xl mx-auto">
         <div className="mb-4 sm:mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
+          <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2 text-white">
             <SettingsIcon className="h-6 w-6 sm:h-8 sm:w-8" />
             Settings
           </h1>
-          <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">
+          <p className="text-sm sm:text-base text-white/80 mt-1 sm:mt-2">
             Manage your account preferences and application settings
           </p>
         </div>
 
         <div className="space-y-4 sm:space-y-6">
           {/* Notifications */}
-          <Card>
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl text-white">
                 <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
                 Notifications
               </CardTitle>
-              <CardDescription className="text-sm">
+              <CardDescription className="text-sm text-white/70">
                 Configure how you receive notifications
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 sm:space-y-4">
               <div className="flex items-center justify-between gap-4">
                 <div className="space-y-0.5 flex-1 min-w-0">
-                  <Label htmlFor="notifications" className="text-sm sm:text-base">Push Notifications</Label>
-                  <p className="text-xs sm:text-sm text-muted-foreground">
+                  <Label htmlFor="notifications" className="text-sm sm:text-base text-white">Push Notifications</Label>
+                  <p className="text-xs sm:text-sm text-white/70">
                     Receive notifications for important updates
                   </p>
                 </div>
@@ -72,8 +72,8 @@ export default function Settings() {
               <Separator />
               <div className="flex items-center justify-between gap-4">
                 <div className="space-y-0.5 flex-1 min-w-0">
-                  <Label htmlFor="email-updates" className="text-sm sm:text-base">Email Updates</Label>
-                  <p className="text-xs sm:text-sm text-muted-foreground">
+                  <Label htmlFor="email-updates" className="text-sm sm:text-base text-white">Email Updates</Label>
+                  <p className="text-xs sm:text-sm text-white/70">
                     Receive email updates about your projects
                   </p>
                 </div>
@@ -88,21 +88,21 @@ export default function Settings() {
           </Card>
 
           {/* Appearance */}
-          <Card>
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl text-white">
                 <Palette className="h-4 w-4 sm:h-5 sm:w-5" />
                 Appearance
               </CardTitle>
-              <CardDescription className="text-sm">
+              <CardDescription className="text-sm text-white/70">
                 Customize the look and feel of the application
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 sm:space-y-4">
               <div className="flex items-center justify-between gap-4">
                 <div className="space-y-0.5 flex-1 min-w-0">
-                  <Label htmlFor="dark-mode" className="text-sm sm:text-base">Dark Mode</Label>
-                  <p className="text-xs sm:text-sm text-muted-foreground">
+                  <Label htmlFor="dark-mode" className="text-sm sm:text-base text-white">Dark Mode</Label>
+                  <p className="text-xs sm:text-sm text-white/70">
                     Enable dark theme for better viewing in low light
                   </p>
                 </div>
@@ -117,19 +117,19 @@ export default function Settings() {
           </Card>
 
           {/* Security */}
-          <Card>
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl text-white">
                 <Shield className="h-4 w-4 sm:h-5 sm:w-5" />
                 Security
               </CardTitle>
-              <CardDescription className="text-sm">
+              <CardDescription className="text-sm text-white/70">
                 Manage your account security settings
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 sm:space-y-4">
               <div className="space-y-2">
-                <Label className="text-sm sm:text-base">Account Actions</Label>
+                <Label className="text-sm sm:text-base text-white">Account Actions</Label>
                 <div className="flex flex-col sm:flex-row gap-2">
                   <Button 
                     variant="outline" 
@@ -145,9 +145,9 @@ export default function Settings() {
                   </Button>
                 </div>
               </div>
-              <Separator />
+              <Separator className="bg-white/20" />
               <div className="space-y-2">
-                <Label className="text-sm sm:text-base">Danger Zone</Label>
+                <Label className="text-sm sm:text-base text-white">Danger Zone</Label>
                 <Button 
                   variant="destructive" 
                   onClick={handleSignOut}
