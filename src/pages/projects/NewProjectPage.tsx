@@ -3417,7 +3417,7 @@ export default function NewProjectPage() {
                                       <Input
                                         id={`daysCount-${pkg.id}`}
                                         type="number"
-                                        step="0.1"
+                                        step="1"
                                         min="0"
                                         placeholder="Days No."
                                         value={pkg.daysCount || "1"}
@@ -3550,7 +3550,7 @@ export default function NewProjectPage() {
                                           <Input
                                             id={`daysCount-${pkg.id}`}
                                             type="number"
-                                            step="0.1"
+                                            step="1"
                                             min="0"
                                             placeholder="Days No."
                                             value={pkg.daysCount || "1"}
