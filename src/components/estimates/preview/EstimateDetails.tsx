@@ -178,16 +178,38 @@ export function EstimateDetails({ estimate }: EstimateDetailsProps) {
           <div className={styles.sectionClass}>
             <h3 className={`${styles.headingClass} mb-4`}>Selected Services</h3>
             <div className="grid md:grid-cols-2 gap-4">
-              {selectedServices.map(serviceKey => (
-                <div key={serviceKey} className={`${styles.cardClass} p-4 rounded-md`}>
-                  <h4 className="font-medium mb-2">{serviceOptions[serviceKey]?.title}</h4>
+              {/* Regular service packages */}
+              {selectedServices
+                .filter(serviceKey => !serviceKey.startsWith('addon:'))
+                .map(serviceKey => {
+                  const service = serviceOptions[serviceKey];
+                  if (!service) return null;
+                  return (
+                    <div key={serviceKey} className={`${styles.cardClass} p-4 rounded-md`}>
+                      <h4 className="font-medium mb-2">{service.title}</h4>
+                      <ul className="list-disc ml-5 space-y-1 text-sm text-muted-foreground">
+                        {service.items.map((item, index) => (
+                          <li key={index}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                })}
+              
+              {/* Individual selected addons */}
+              {selectedServices.some(key => key.startsWith('addon:')) && (
+                <div className={`${styles.cardClass} p-4 rounded-md`}>
+                  <h4 className="font-medium mb-2">{serviceOptions.addons?.title || "Optional Addons"}</h4>
                   <ul className="list-disc ml-5 space-y-1 text-sm text-muted-foreground">
-                    {serviceOptions[serviceKey]?.items.map((item, index) => (
-                      <li key={index}>{item}</li>
-                    ))}
+                    {selectedServices
+                      .filter(key => key.startsWith('addon:'))
+                      .map(key => {
+                        const addonItem = key.replace('addon:', '');
+                        return <li key={key}>{addonItem}</li>;
+                      })}
                   </ul>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         )}

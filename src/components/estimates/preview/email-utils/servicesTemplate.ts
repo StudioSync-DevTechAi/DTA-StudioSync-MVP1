@@ -43,19 +43,38 @@ export const generateServicesHtml = (selectedServices: string[] = [], templateId
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
   `;
   
-  selectedServices.forEach(serviceKey => {
-    const service = serviceOptions[serviceKey];
-    if (service) {
-      servicesHtml += `
-        <div style="${serviceCardStyle}">
-          <h3 style="${serviceTitleStyle}">${service.title}</h3>
-          <ul style="padding-left:0; list-style-position:inside;">
-            ${service.items.map(item => `<li style="${serviceItemStyle}">${item}</li>`).join('')}
-          </ul>
-        </div>
-      `;
-    }
-  });
+  // Regular service packages
+  selectedServices
+    .filter(serviceKey => !serviceKey.startsWith('addon:'))
+    .forEach(serviceKey => {
+      const service = serviceOptions[serviceKey];
+      if (service) {
+        servicesHtml += `
+          <div style="${serviceCardStyle}">
+            <h3 style="${serviceTitleStyle}">${service.title}</h3>
+            <ul style="padding-left:0; list-style-position:inside;">
+              ${service.items.map(item => `<li style="${serviceItemStyle}">${item}</li>`).join('')}
+            </ul>
+          </div>
+        `;
+      }
+    });
+  
+  // Individual selected addons
+  const selectedAddons = selectedServices.filter(key => key.startsWith('addon:'));
+  if (selectedAddons.length > 0) {
+    servicesHtml += `
+      <div style="${serviceCardStyle}">
+        <h3 style="${serviceTitleStyle}">${serviceOptions.addons?.title || "Optional Addons"}</h3>
+        <ul style="padding-left:0; list-style-position:inside;">
+          ${selectedAddons.map(key => {
+            const addonItem = key.replace('addon:', '');
+            return `<li style="${serviceItemStyle}">${addonItem}</li>`;
+          }).join('')}
+        </ul>
+      </div>
+    `;
+  }
   
   servicesHtml += `
       </div>

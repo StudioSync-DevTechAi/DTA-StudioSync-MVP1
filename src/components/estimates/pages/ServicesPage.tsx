@@ -55,6 +55,25 @@ export function ServicesPage({ selectedServices, onServicesChange, isReadOnly = 
     }
   };
 
+  // Handle individual addon selection
+  const handleToggleAddon = (addonItem: string) => {
+    const addonKey = `addon:${addonItem}`;
+    if (selectedServices.includes(addonKey)) {
+      onServicesChange(selectedServices.filter(s => s !== addonKey));
+    } else {
+      onServicesChange([...selectedServices, addonKey]);
+    }
+  };
+
+  // Check if an addon item is selected
+  const isAddonSelected = (addonItem: string) => {
+    return selectedServices.includes(`addon:${addonItem}`);
+  };
+
+  // Separate addons from other services
+  const serviceEntries = Object.entries(services).filter(([key]) => key !== 'addons');
+  const addonsService = services.addons;
+
   return (
     <div className="space-y-8">
       <div className="text-center">
@@ -67,7 +86,8 @@ export function ServicesPage({ selectedServices, onServicesChange, isReadOnly = 
       </div>
       
       <div className="grid md:grid-cols-2 gap-8">
-        {Object.entries(services).map(([key, service]) => (
+        {/* Render regular service packages */}
+        {serviceEntries.map(([key, service]) => (
           <Card key={key} className="p-6 space-y-4 relative">
             {!isReadOnly && (
               <div className="absolute right-4 top-4">
@@ -86,6 +106,29 @@ export function ServicesPage({ selectedServices, onServicesChange, isReadOnly = 
             </ul>
           </Card>
         ))}
+
+        {/* Render addons card with individual checkboxes */}
+        {addonsService && (
+          <Card className="p-6 space-y-4 relative">
+            <h3 className="text-xl font-medium">{addonsService.title}</h3>
+            <ul className="space-y-3 text-sm text-muted-foreground">
+              {addonsService.items.map((item, index) => (
+                <li key={item} className="flex items-start justify-between gap-3">
+                  <span className="flex-1">{item}</span>
+                  {!isReadOnly && (
+                    <div className="flex-shrink-0 mt-0.5">
+                      <Checkbox 
+                        checked={isAddonSelected(item)}
+                        onCheckedChange={() => handleToggleAddon(item)}
+                        id={`addon-${index}`}
+                      />
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </Card>
+        )}
       </div>
 
       <div className="text-center text-sm text-muted-foreground">
