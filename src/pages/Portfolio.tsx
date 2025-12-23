@@ -212,12 +212,26 @@ export default function Portfolio() {
       >
         <div className="body-wrapper-inner" style={{ paddingTop: 0 }}>
           <div className="container-fluid" style={{ paddingTop: 0 }}>
-            <div className="min-h-screen bg-gray-50">
+            <div 
+              className="min-h-screen"
+              style={{
+                background: `
+                  radial-gradient(ellipse at bottom left, rgba(255, 100, 50, 0.08) 0%, rgba(255, 150, 0, 0.04) 20%, transparent 50%),
+                  linear-gradient(to bottom,
+                    #2a1f4d 0%,
+                    #3d2a5f 25%,
+                    #4a3569 50%,
+                    #3d2a5f 75%,
+                    #2a1f4d 100%
+                  )
+                `
+              }}
+            >
               <div className="max-w-6xl mx-auto px-6 pt-4 pb-6">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold">Portfolio Manager</h1>
-            <p className="text-muted-foreground">Create and manage your photography showcase</p>
+            <h1 className="text-3xl font-bold text-white">Portfolio Manager</h1>
+            <p className="text-white/80">Create and manage your photography showcase</p>
             <WorkInProgress variant="banner" size="md" className="mt-4" />
             {currentTemplate && (
               <div className="mt-2 flex items-center gap-2">

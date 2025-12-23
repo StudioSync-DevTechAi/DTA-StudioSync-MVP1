@@ -44,7 +44,7 @@ export function EstimatesHeader({
       <div className="space-y-1 flex-1 min-w-0 w-full">
         <div className="flex items-center gap-2 sm:gap-4 w-full">
           <h1 
-            className="text-xl sm:text-2xl font-semibold cursor-pointer hover:opacity-80 transition-opacity shrink-0"
+            className="text-xl sm:text-2xl font-semibold cursor-pointer hover:opacity-80 transition-opacity shrink-0 text-white"
             onClick={handleHeaderClick}
           >
             {title}
@@ -53,17 +53,17 @@ export function EstimatesHeader({
           {showDashboardTitle && (
             <div className="flex-1 flex justify-center items-center">
               <div className="text-center">
-                <h2 className="text-xl sm:text-2xl font-semibold">
+                <h2 className="text-xl sm:text-2xl font-semibold text-white">
                   {dashboardTitle}
                 </h2>
-                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                <p className="text-xs sm:text-sm text-white/80 mt-1">
                   {dashboardDescription}
                 </p>
               </div>
             </div>
           )}
         </div>
-        <p className="text-xs sm:text-sm text-muted-foreground">
+        <p className="text-xs sm:text-sm text-white/80">
           {description}
         </p>
       </div>

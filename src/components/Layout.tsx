@@ -1,4 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import type { LinkProps } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
   FileText,
@@ -20,7 +21,6 @@ import {
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { useEffect, useState, useRef, useCallback } from "react";
-import { WorkInProgress } from "./ui/WorkInProgress";
 import { useUser } from "@/contexts/UserContext";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
@@ -42,6 +42,7 @@ const navItems = [
 const SIDEBAR_MIN_WIDTH = 200;
 const SIDEBAR_MAX_WIDTH = 500;
 const SIDEBAR_DEFAULT_WIDTH = 256; // w-64 = 256px
+const SIDEBAR_COLLAPSED_WIDTH = 64; // Icon-only width
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -51,6 +52,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     return saved ? parseInt(saved, 10) : SIDEBAR_DEFAULT_WIDTH;
   });
   const [isResizing, setIsResizing] = useState(false);
+  const [isSidebarHovered, setIsSidebarHovered] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true); // Default collapsed
   const [isDesktop, setIsDesktop] = useState(() => {
     if (typeof window !== 'undefined') {
       return window.innerWidth >= 1024;
@@ -58,6 +61,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     return true;
   });
   const sidebarRef = useRef<HTMLDivElement>(null);
+  const navRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const mainContentRef = useRef<HTMLElement>(null);
+  const [focusedNavIndex, setFocusedNavIndex] = useState<number | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut, hasRole } = useAuth();
@@ -135,6 +141,109 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   
   // Filter navigation items based on user permissions
   const filteredNavItems = navItems.filter(item => hasPermission(item.permission));
+  
+  // Get all navigation items including Role Management
+  const allNavItems = [
+    ...filteredNavItems.map(item => ({ ...item, path: item.path })),
+    ...(hasRole('manager') ? [{ path: '/admin/roles', label: 'Role Management', icon: Shield }] : [])
+  ];
+
+  // Keyboard navigation handler
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Check if sidebar is visible (not hidden on mobile)
+      const isSidebarVisible = isDesktop || isMobileMenuOpen;
+      if (!isSidebarVisible) return;
+
+      const totalItems = allNavItems.length;
+      if (totalItems === 0) return;
+
+      // Find which nav item is currently focused
+      const activeNavItem = navRefs.current.findIndex(ref => ref === document.activeElement);
+      const isNavFocused = activeNavItem !== -1;
+      const isInSidebar = sidebarRef.current?.contains(document.activeElement);
+      const isInMainContent = mainContentRef.current?.contains(document.activeElement);
+
+      // Handle Up/Down arrows - work when nav is focused or when in sidebar context
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        // Don't handle if user is typing in an input/textarea
+        const isInInput = document.activeElement?.tagName === 'INPUT' || 
+                         document.activeElement?.tagName === 'TEXTAREA' ||
+                         document.activeElement?.getAttribute('contenteditable') === 'true';
+        
+        if (isInInput) return;
+
+        // Allow navigation if:
+        // 1. A nav item is focused, OR
+        // 2. We're in sidebar context (but not in main content), OR  
+        // 3. Nothing is focused in main content (to allow starting navigation from anywhere)
+        const shouldHandle = isNavFocused || 
+                            (isInSidebar && !isInMainContent) || 
+                            (!isInMainContent);
+        
+        if (shouldHandle) {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          // Determine current index
+          let currentIndex: number;
+          if (activeNavItem !== -1) {
+            currentIndex = activeNavItem;
+          } else if (focusedNavIndex !== null && focusedNavIndex >= 0 && focusedNavIndex < totalItems) {
+            currentIndex = focusedNavIndex;
+          } else {
+            // Start from first item if nothing is focused
+            currentIndex = -1;
+          }
+
+          if (e.key === 'ArrowDown') {
+            const nextIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % totalItems;
+            setFocusedNavIndex(nextIndex);
+            requestAnimationFrame(() => {
+              const nextRef = navRefs.current[nextIndex];
+              if (nextRef) {
+                nextRef.focus({ preventScroll: true });
+              }
+            });
+          } else if (e.key === 'ArrowUp') {
+            const prevIndex = currentIndex === -1 
+              ? totalItems - 1 
+              : (currentIndex - 1 + totalItems) % totalItems;
+            setFocusedNavIndex(prevIndex);
+            requestAnimationFrame(() => {
+              const prevRef = navRefs.current[prevIndex];
+              if (prevRef) {
+                prevRef.focus({ preventScroll: true });
+              }
+            });
+          }
+        }
+        return;
+      }
+
+      // Handle Left/Right arrows - only when nav is focused
+      if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && isNavFocused) {
+        e.preventDefault();
+        e.stopPropagation();
+        // Move focus to main content area
+        const firstFocusable = mainContentRef.current?.querySelector(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        ) as HTMLElement;
+        if (firstFocusable) {
+          firstFocusable.focus();
+          setFocusedNavIndex(null);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown, true);
+    return () => window.removeEventListener('keydown', handleKeyDown, true);
+  }, [focusedNavIndex, allNavItems.length, hasRole, isDesktop, isMobileMenuOpen]);
+
+  // Reset focused index when route changes
+  useEffect(() => {
+    setFocusedNavIndex(null);
+  }, [location.pathname]);
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -144,115 +253,163 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         className={cn(
           "fixed top-0 left-0 h-full bg-card border-r z-40",
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
-          !isResizing && "transition-transform duration-300 ease-in-out"
+          !isResizing && "transition-all duration-300 ease-in-out"
         )}
         style={{ 
-          width: `${sidebarWidth}px`,
-          transition: isResizing ? 'none' : 'width 0.2s ease-in-out, transform 0.3s ease-in-out'
+          width: isDesktop && !isMobileMenuOpen 
+            ? (isSidebarHovered ? `${sidebarWidth}px` : `${SIDEBAR_COLLAPSED_WIDTH}px`)
+            : `${sidebarWidth}px`,
+          transition: isResizing ? 'none' : 'width 0.2s ease-in-out, transform 0.3s ease-in-out',
+          background: `
+            radial-gradient(ellipse at bottom left, rgba(255, 100, 50, 0.15) 0%, rgba(255, 150, 0, 0.08) 20%, transparent 50%),
+            linear-gradient(to bottom,
+              #1a0f3d 0%,
+              #2d1b4e 25%,
+              #3d2a5f 50%,
+              #2d1b4e 75%,
+              #1a0a2e 100%
+            )
+          `
+        }}
+        onMouseEnter={() => {
+          if (isDesktop && !isMobileMenuOpen) {
+            setIsSidebarHovered(true);
+            setIsSidebarCollapsed(false);
+          }
+        }}
+        onMouseLeave={() => {
+          if (isDesktop && !isMobileMenuOpen) {
+            setIsSidebarHovered(false);
+            setIsSidebarCollapsed(true);
+          }
         }}
       >
-        <nav className="flex flex-col h-full p-4">
-          <div className="space-y-2 py-4">
-            <div className="flex items-center space-x-3 px-2">
-              <img 
-                src="/photosyncwork-logo.svg" 
-                alt="StudioSyncWork Logo" 
-                className="h-8 w-8 object-contain flex-shrink-0"
-              />
-              <div className="flex-1 min-w-0">
-                <button
-                  onClick={() => navigate("/dashboard")}
-                  className="w-full text-left cursor-pointer hover:opacity-80 transition-opacity"
-                >
-                  <h1 className="text-xl font-semibold truncate">StudioSyncWork</h1>
-                </button>
-                <WorkInProgress size="sm" className="mt-1" />
-              </div>
-            </div>
-          </div>
-          
-          <div className="space-y-1 py-2 flex-1 overflow-y-auto">
-            {filteredNavItems.map((item) => {
+        <nav 
+          className={cn(
+            "flex flex-col h-full relative z-10 transition-all duration-200",
+            isSidebarCollapsed && isDesktop && !isMobileMenuOpen ? "p-2" : "p-4"
+          )}
+          onFocus={() => {
+            // When sidebar nav receives focus, start with first item if nothing is focused
+            if (focusedNavIndex === null && navRefs.current.length > 0) {
+              const firstAvailable = navRefs.current.findIndex(ref => ref !== null);
+              if (firstAvailable !== -1) {
+                setFocusedNavIndex(firstAvailable);
+              }
+            }
+          }}
+        >
+          <div className={cn(
+            "space-y-1 py-2 flex-1 overflow-y-auto",
+            isSidebarCollapsed && isDesktop && !isMobileMenuOpen ? "mt-4" : "mt-12"
+          )}>
+            {filteredNavItems.map((item, index) => {
               const Icon = item.icon;
               
               // Regular nav items
               return (
                 <PermissionGuard key={item.path} permission={item.permission}>
                   <Link
+                    ref={(el) => {
+                      navRefs.current[index] = el;
+                    }}
                     to={item.path}
+                    onFocus={() => setFocusedNavIndex(index)}
+                    onBlur={() => {
+                      // Only clear if focus is moving outside sidebar
+                      setTimeout(() => {
+                        if (!sidebarRef.current?.contains(document.activeElement)) {
+                          setFocusedNavIndex(null);
+                        }
+                      }, 0);
+                    }}
                     className={cn(
-                      "flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors",
+                      "flex items-center rounded-lg transition-colors outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-transparent",
+                      isSidebarCollapsed && isDesktop && !isMobileMenuOpen 
+                        ? "justify-center px-2 py-2" 
+                        : "gap-3 px-3 py-2 text-sm",
                       location.pathname === item.path || (item.path === "/estimates/projects" && location.pathname.startsWith("/estimates/projects"))
-                        ? "bg-accent text-accent-foreground"
-                        : "hover:bg-accent/50 text-muted-foreground"
+                        ? "bg-white/20 text-white font-medium"
+                        : "hover:bg-white/10 text-white/90 hover:text-white"
                     )}
+                    title={isSidebarCollapsed && isDesktop && !isMobileMenuOpen ? item.label : undefined}
                   >
-                    <Icon className="h-5 w-5 flex-shrink-0" />
-                    <span className="truncate">{item.label}</span>
+                    <Icon className="h-5 w-5 flex-shrink-0 text-current" />
+                    <span className={cn(
+                      "truncate transition-all duration-200",
+                      isSidebarCollapsed && isDesktop && !isMobileMenuOpen 
+                        ? "opacity-0 w-0 overflow-hidden" 
+                        : "opacity-100"
+                    )}>
+                      {item.label}
+                    </span>
                   </Link>
                 </PermissionGuard>
               );
             })}
             
             {/* Role Management - Only for managers */}
-            <PermissionGuard role="manager">
+            {hasRole('manager') && (
               <Link
+                ref={(el) => {
+                  const roleIndex = filteredNavItems.length;
+                  navRefs.current[roleIndex] = el;
+                }}
                 to="/admin/roles"
+                onFocus={() => setFocusedNavIndex(filteredNavItems.length)}
+                onBlur={() => {
+                  setTimeout(() => {
+                    if (!sidebarRef.current?.contains(document.activeElement)) {
+                      setFocusedNavIndex(null);
+                    }
+                  }, 0);
+                }}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors",
+                  "flex items-center rounded-lg transition-colors outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-transparent",
+                  isSidebarCollapsed && isDesktop && !isMobileMenuOpen 
+                    ? "justify-center px-2 py-2" 
+                    : "gap-3 px-3 py-2 text-sm",
                   location.pathname === "/admin/roles"
-                    ? "bg-accent text-accent-foreground"
-                    : "hover:bg-accent/50 text-muted-foreground"
+                    ? "bg-white/20 text-white font-medium"
+                    : "hover:bg-white/10 text-white/90 hover:text-white"
                 )}
+                title={isSidebarCollapsed && isDesktop && !isMobileMenuOpen ? "Role Management" : undefined}
               >
-                <Shield className="h-5 w-5 flex-shrink-0" />
-                <span className="truncate">Role Management</span>
+                <Shield className="h-5 w-5 flex-shrink-0 text-current" />
+                <span className={cn(
+                  "truncate transition-all duration-200",
+                  isSidebarCollapsed && isDesktop && !isMobileMenuOpen 
+                    ? "opacity-0 w-0 overflow-hidden" 
+                    : "opacity-100"
+                )}>
+                  Role Management
+                </span>
               </Link>
-            </PermissionGuard>
-          </div>
-          
-          <div className="mt-auto border-t pt-4">
-            <div className="px-2 py-2 mb-2">
-              <div className="font-medium truncate">{user.user_metadata?.full_name || user.email}</div>
-              <div className="text-xs text-muted-foreground">
-                {hasRole('manager') ? 'Manager' : 
-                 hasRole('photographer') ? 'Photographer' :
-                 hasRole('videographer') ? 'Videographer' :
-                 hasRole('editor') ? 'Editor' :
-                 hasRole('accounts') ? 'Accounts' :
-                 hasRole('crm') ? 'CRM' : 'User'}
-              </div>
-            </div>
-            <Button 
-              variant="ghost" 
-              className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50"
-              onClick={handleLogout}
-            >
-              <LogOut className="h-4 w-4 mr-2 flex-shrink-0" />
-              <span className="truncate">Logout</span>
-            </Button>
+            )}
           </div>
         </nav>
         
-        {/* Resize Handle */}
-        <div
-          className={cn(
-            "absolute top-0 right-0 w-1 h-full cursor-col-resize transition-colors z-50",
-            "lg:block hidden",
-            "hover:w-1.5 hover:bg-primary/30",
-            isResizing && "bg-primary w-1.5"
-          )}
-          onMouseDown={(e) => {
-            e.preventDefault();
-            setIsResizing(true);
-          }}
-          style={{
-            touchAction: 'none'
-          }}
-          title="Drag to resize sidebar"
-        >
-          <div className="absolute inset-y-0 -right-1 w-3" />
-        </div>
+        {/* Resize Handle - Only show when expanded */}
+        {(!isSidebarCollapsed || isMobileMenuOpen) && (
+          <div
+            className={cn(
+              "absolute top-0 right-0 w-1 h-full cursor-col-resize transition-colors z-50",
+              "lg:block hidden",
+              "hover:w-1.5 hover:bg-primary/30",
+              isResizing && "bg-primary w-1.5"
+            )}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              setIsResizing(true);
+            }}
+            style={{
+              touchAction: 'none'
+            }}
+            title="Drag to resize sidebar"
+          >
+            <div className="absolute inset-y-0 -right-1 w-3" />
+          </div>
+        )}
       </aside>
 
       {/* Mobile Menu Button - Fixed position at top left */}
@@ -327,14 +484,28 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
       {/* Main Content */}
       <main 
+        ref={mainContentRef}
+        tabIndex={-1}
         className={cn(
           "flex-1 min-h-screen",
           "p-4 lg:p-6", 
           "lg:pt-6 pt-20" // Add top padding for mobile header
         )}
         style={{ 
-          marginLeft: isDesktop ? `${sidebarWidth}px` : '0',
-          transition: isResizing ? 'none' : 'margin-left 0.2s ease-in-out'
+          marginLeft: isDesktop && !isMobileMenuOpen
+            ? (isSidebarHovered ? `${sidebarWidth}px` : `${SIDEBAR_COLLAPSED_WIDTH}px`)
+            : isDesktop ? `${sidebarWidth}px` : '0',
+          transition: isResizing ? 'none' : 'margin-left 0.2s ease-in-out',
+          background: `
+            radial-gradient(ellipse at bottom left, rgba(255, 100, 50, 0.08) 0%, rgba(255, 150, 0, 0.04) 20%, transparent 50%),
+            linear-gradient(to bottom,
+              #2a1f4d 0%,
+              #3d2a5f 25%,
+              #4a3569 50%,
+              #3d2a5f 75%,
+              #2a1f4d 100%
+            )
+          `
         }}
       >
         <div className="max-w-6xl mx-auto w-full">

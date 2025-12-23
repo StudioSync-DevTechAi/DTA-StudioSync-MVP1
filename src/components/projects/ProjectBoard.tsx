@@ -412,7 +412,7 @@ export function ProjectBoard({ onNewProject }: ProjectBoardProps) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
           {statusColumns.map((column) => (
             <div key={column.id} className="flex items-center justify-center h-8 sm:h-10">
-              <h3 className="font-bold text-xs sm:text-sm uppercase tracking-wide text-center">
+              <h3 className="font-bold text-xs sm:text-sm uppercase tracking-wide text-center text-white">
                 {column.label}
               </h3>
             </div>

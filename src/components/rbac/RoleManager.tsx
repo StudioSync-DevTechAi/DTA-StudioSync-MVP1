@@ -31,10 +31,10 @@ export function RoleManager() {
   // Only managers can access this component
   if (!hasRole('manager')) {
     return (
-      <Card>
+      <Card className="bg-white/10 backdrop-blur-sm border-white/20">
         <CardContent className="p-6 text-center">
-          <Shield className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-          <p className="text-muted-foreground">Only managers can access role management.</p>
+          <Shield className="h-12 w-12 mx-auto mb-4 text-white/70" />
+          <p className="text-white/80">Only managers can access role management.</p>
         </CardContent>
       </Card>
     );
@@ -168,10 +168,10 @@ export function RoleManager() {
 
   if (loading) {
     return (
-      <Card>
+      <Card className="bg-white/10 backdrop-blur-sm border-white/20">
         <CardContent className="p-6 text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-muted-foreground">Loading role management...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white/60 mx-auto"></div>
+          <p className="mt-2 text-white/80">Loading role management...</p>
         </CardContent>
       </Card>
     );
@@ -179,9 +179,9 @@ export function RoleManager() {
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="bg-white/10 backdrop-blur-sm border-white/20">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-white">
             <Users className="h-5 w-5" />
             Team Role Management
           </CardTitle>
@@ -191,7 +191,7 @@ export function RoleManager() {
             {/* Assign Role Section */}
             <div className="flex gap-4 items-end">
               <div className="flex-1">
-                <Label>Select User</Label>
+                <Label className="text-white">Select User</Label>
                 <Select value={selectedUser} onValueChange={setSelectedUser}>
                   <SelectTrigger>
                     <SelectValue placeholder="Choose team member" />
@@ -207,7 +207,7 @@ export function RoleManager() {
               </div>
               
               <div className="flex-1">
-                <Label>Select Role</Label>
+                <Label className="text-white">Select Role</Label>
                 <Select value={selectedRole} onValueChange={setSelectedRole}>
                   <SelectTrigger>
                     <SelectValue placeholder="Choose role" />
@@ -230,12 +230,12 @@ export function RoleManager() {
 
             {/* Team Members List */}
             <div className="space-y-3">
-              <h4 className="font-medium">Current Team Roles</h4>
+              <h4 className="font-medium text-white">Current Team Roles</h4>
               {teamMembers.map(member => (
-                <div key={member.id} className="flex items-center justify-between p-3 border rounded-lg">
+                <div key={member.id} className="flex items-center justify-between p-3 border border-white/20 rounded-lg bg-white/5">
                   <div>
-                    <h5 className="font-medium">{member.name}</h5>
-                    <p className="text-sm text-muted-foreground">{member.email}</p>
+                    <h5 className="font-medium text-white">{member.name}</h5>
+                    <p className="text-sm text-white/70">{member.email}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     {member.roles.length > 0 ? (

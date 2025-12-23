@@ -106,10 +106,10 @@ function MediaTaggerComponent({
   }, []);
 
   return (
-    <Card className="w-full">
+    <Card className="w-full" style={{ backgroundColor: 'transparent', borderColor: '#00bfe7' }}>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2" style={{ color: '#ffffff' }}>
             <Tag className="h-5 w-5" />
             <span>AI Media Tagger</span>
           </CardTitle>
@@ -124,7 +124,7 @@ function MediaTaggerComponent({
       <CardContent className="space-y-4">
         <div className="grid grid-cols-4 gap-4">
           <div className="col-span-3">
-            <Label htmlFor="media-url">Media URL</Label>
+            <Label htmlFor="media-url" style={{ color: '#ffffff' }}>Media URL</Label>
             <Input
               id="media-url"
               placeholder="Enter a URL to an image or video file"
@@ -135,7 +135,7 @@ function MediaTaggerComponent({
             />
           </div>
           <div>
-            <Label htmlFor="media-type">Type</Label>
+            <Label htmlFor="media-type" style={{ color: '#ffffff' }}>Type</Label>
             <Select 
               value={mediaType} 
               onValueChange={(value) => setMediaType(value as "image" | "video")}
@@ -169,7 +169,7 @@ function MediaTaggerComponent({
             <div className="space-y-3">
               {Object.entries(tags).map(([category, tagList]) => (
                 <div key={category}>
-                  <h3 className="text-sm font-medium capitalize mb-1">{category}</h3>
+                  <h3 className="text-sm font-medium capitalize mb-1" style={{ color: '#ffffff' }}>{category}</h3>
                   <div className="flex flex-wrap gap-1">
                     {tagList.map((tag, i) => (
                       <Badge key={i} variant="secondary" className="text-xs">{tag}</Badge>
@@ -185,7 +185,7 @@ function MediaTaggerComponent({
           </div>
         ) : notes ? (
           <div className="space-y-2">
-            <h3 className="text-sm font-medium">AI Analysis</h3>
+            <h3 className="text-sm font-medium" style={{ color: '#ffffff' }}>AI Analysis</h3>
             <Textarea 
               value={notes} 
               onChange={(e) => setNotes(e.target.value)} 
@@ -196,7 +196,7 @@ function MediaTaggerComponent({
         ) : null}
         
         {!loading && !Object.keys(tags).length && !notes && (
-          <div className="text-center py-6 text-muted-foreground">
+          <div className="text-center py-6" style={{ color: '#adadad' }}>
             <p>Enter a media URL and click "Generate Tags" to analyze and tag your content.</p>
           </div>
         )}

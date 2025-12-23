@@ -9,12 +9,12 @@ interface EmptyEstimatesListProps {
 
 export function EmptyEstimatesList({ currentTab, onNewEstimate }: EmptyEstimatesListProps) {
   return (
-    <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg">
-      <FileText className="h-8 w-8 text-muted-foreground mb-4" />
-      <h3 className="text-lg font-medium text-muted-foreground mb-2">
+    <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-white/20 rounded-lg bg-white/5">
+      <FileText className="h-8 w-8 text-white/70 mb-4" />
+      <h3 className="text-lg font-medium text-white mb-2">
         No {currentTab} estimates
       </h3>
-      <p className="text-sm text-muted-foreground text-center mb-4">
+      <p className="text-sm text-white/80 text-center mb-4">
         {currentTab === "pending" ? 
           "Create a new estimate or wait for client responses." :
           currentTab === "approved" ? 
