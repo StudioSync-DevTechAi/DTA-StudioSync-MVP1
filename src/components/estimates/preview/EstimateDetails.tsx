@@ -39,10 +39,10 @@ interface EstimateDetailsProps {
 
 export function EstimateDetails({ estimate }: EstimateDetailsProps) {
   const statusClasses = {
-    approved: "bg-green-100 text-green-800",
-    declined: "bg-red-100 text-red-800",
-    negotiating: "bg-yellow-100 text-yellow-800",
-    pending: "bg-gray-100 text-gray-800"
+    approved: "bg-green-600 text-white",
+    declined: "bg-red-600 text-white",
+    negotiating: "bg-yellow-600 text-white",
+    pending: "bg-gray-600 text-white"
   };
 
   const statusClass = statusClasses[estimate.status] || statusClasses.pending;
@@ -166,27 +166,30 @@ export function EstimateDetails({ estimate }: EstimateDetailsProps) {
   };
 
   return (
-    <div className={`border rounded-lg overflow-hidden ${templateId === "bold" ? "border-none" : ""}`}>
-      <div className={`text-center space-y-3 ${styles.headerClass}`}>
-        <h1 className={`text-2xl font-semibold ${styles.headingClass}`}>ESTIMATE</h1>
-        <p className="text-muted-foreground">StudioSyncWork Photography Services</p>
+    <div className={`border rounded-lg overflow-hidden ${templateId === "bold" ? "border-none" : ""}`} style={{ borderColor: '#3d2a5f' }}>
+      <div 
+        className={`text-center space-y-3 ${styles.headerClass}`}
+        style={templateId !== "bold" ? { backgroundColor: '#2d1b4e', color: '#ffffff' } : undefined}
+      >
+        <h1 className={`text-2xl font-semibold ${styles.headingClass} text-white`}>ESTIMATE</h1>
+        <p className="text-gray-300">StudioSyncWork Photography Services</p>
         <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm ${statusClass}`}>
           Status: {estimate.status.charAt(0).toUpperCase() + estimate.status.slice(1)}
         </div>
       </div>
 
-      <div className={`p-6 space-y-6 ${templateId === "bold" ? "bg-gray-50" : ""}`}>
-        <div className={`flex justify-between items-start border-b pb-4 ${styles.sectionClass}`}>
+      <div className={`p-6 space-y-6 ${templateId === "bold" ? "bg-gray-50" : ""}`} style={{ backgroundColor: templateId === "bold" ? '' : '#1a0f3d' }}>
+        <div className={`flex justify-between items-start border-b pb-4 ${styles.sectionClass}`} style={{ borderColor: '#3d2a5f' }}>
           <div>
-            <h2 className={styles.headingClass}>Client</h2>
-            <p>{estimate.clientName}</p>
-            <p className="text-sm text-muted-foreground">
+            <h2 className={`${styles.headingClass} text-white`}>Client</h2>
+            <p className="text-white">{estimate.clientName}</p>
+            <p className="text-sm text-gray-300">
               Date: {new Date(estimate.date).toLocaleDateString()}
             </p>
           </div>
           <div className="text-right">
-            <h2 className={styles.headingClass}>Estimate #{estimate.id}</h2>
-            <p className="text-sm text-muted-foreground capitalize">
+            <h2 className={`${styles.headingClass} text-white`}>Estimate #{estimate.id}</h2>
+            <p className="text-sm text-gray-300 capitalize">
               Valid until: {new Date(new Date(estimate.date).getTime() + 30*24*60*60*1000).toLocaleDateString()}
             </p>
           </div>
@@ -194,24 +197,24 @@ export function EstimateDetails({ estimate }: EstimateDetailsProps) {
 
         {portfolioLinks.length > 0 && (
           <div className={styles.sectionClass}>
-            <h3 className={`${styles.headingClass} mb-4`}>Our Portfolio</h3>
+            <h3 className={`${styles.headingClass} mb-4 text-white`}>Our Portfolio</h3>
             <div className="grid md:grid-cols-2 gap-4">
               {portfolioLinks.map((link) => (
-                <div key={link.id} className={`${styles.cardClass} p-4 rounded-md`}>
+                <div key={link.id} className={`${styles.cardClass} p-4 rounded-md`} style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
                   <div className="flex items-center gap-2 mb-2">
                     {platformIcons[link.platform]}
-                    <h4 className="font-medium">{link.title}</h4>
+                    <h4 className="font-medium text-white">{link.title}</h4>
                   </div>
                   <a 
                     href={link.url} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-blue-500 hover:underline text-sm block mb-2"
+                    className="text-blue-400 hover:underline text-sm block mb-2"
                   >
                     {link.url}
                   </a>
                   {link.description && (
-                    <p className="text-sm text-muted-foreground">{link.description}</p>
+                    <p className="text-sm text-gray-300">{link.description}</p>
                   )}
                 </div>
               ))}
@@ -221,7 +224,7 @@ export function EstimateDetails({ estimate }: EstimateDetailsProps) {
 
         {selectedServices.length > 0 && (
           <div className={styles.sectionClass}>
-            <h3 className={`${styles.headingClass} mb-4`}>Selected Services</h3>
+            <h3 className={`${styles.headingClass} mb-4 text-white`}>Selected Services</h3>
             <div className="grid md:grid-cols-2 gap-4">
               {/* Regular service packages */}
               {selectedServices
@@ -230,9 +233,9 @@ export function EstimateDetails({ estimate }: EstimateDetailsProps) {
                   const service = serviceOptions[serviceKey];
                   if (!service) return null;
                   return (
-                    <div key={serviceKey} className={`${styles.cardClass} p-4 rounded-md`}>
-                      <h4 className="font-medium mb-2">{service.title}</h4>
-                      <ul className="list-disc ml-5 space-y-1 text-sm text-muted-foreground">
+                    <div key={serviceKey} className={`${styles.cardClass} p-4 rounded-md`} style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
+                      <h4 className="font-medium mb-2 text-white">{service.title}</h4>
+                      <ul className="list-disc ml-5 space-y-1 text-sm text-gray-300">
                         {service.items.map((item, index) => (
                           <li key={index}>{item}</li>
                         ))}
@@ -243,9 +246,9 @@ export function EstimateDetails({ estimate }: EstimateDetailsProps) {
               
               {/* Individual selected addons */}
               {selectedServices.some(key => key.startsWith('addon:')) && (
-                <div className={`${styles.cardClass} p-4 rounded-md`}>
-                  <h4 className="font-medium mb-2">{serviceOptions.addons?.title || "Optional Addons"}</h4>
-                  <ul className="list-disc ml-5 space-y-1 text-sm text-muted-foreground">
+                <div className={`${styles.cardClass} p-4 rounded-md`} style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
+                  <h4 className="font-medium mb-2 text-white">{serviceOptions.addons?.title || "Optional Addons"}</h4>
+                  <ul className="list-disc ml-5 space-y-1 text-sm text-gray-300">
                     {selectedServices
                       .filter(key => key.startsWith('addon:'))
                       .map(key => {
@@ -260,30 +263,30 @@ export function EstimateDetails({ estimate }: EstimateDetailsProps) {
         )}
 
         {packagesToRender.map((pkg, packageIndex) => (
-          <div key={packageIndex} className={`${styles.cardClass} p-4 rounded-md mb-6`}>
-            <h2 className={`text-xl ${styles.headingClass} mb-4`}>
+          <div key={packageIndex} className={`${styles.cardClass} p-4 rounded-md mb-6`} style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
+            <h2 className={`text-xl ${styles.headingClass} mb-4 text-white`}>
               {pkg.name || `Package Option ${packageIndex + 1}`}
             </h2>
             
             {pkg.services && pkg.services.length > 0 && (
               <div className="mb-4">
-                <h3 className={`${styles.headingClass} mb-2`}>Services</h3>
+                <h3 className={`${styles.headingClass} mb-2 text-white`}>Services</h3>
                 <table className="w-full border-collapse">
                   <thead>
-                    <tr className="border-b">
-                      <th className="text-left py-2">Event</th>
-                      <th className="text-left py-2">Date</th>
-                      <th className="text-center py-2">Photographers</th>
-                      <th className="text-center py-2">Cinematographers</th>
+                    <tr className="border-b" style={{ borderColor: '#3d2a5f' }}>
+                      <th className="text-left py-2 text-white">Event</th>
+                      <th className="text-left py-2 text-white">Date</th>
+                      <th className="text-center py-2 text-white">Photographers</th>
+                      <th className="text-center py-2 text-white">Cinematographers</th>
                     </tr>
                   </thead>
                   <tbody>
                     {pkg.services.map((service, index) => (
-                      <tr key={index} className="border-b">
-                        <td className="py-2">{service.event}</td>
-                        <td className="py-2">{new Date(service.date).toLocaleDateString()}</td>
-                        <td className="py-2 text-center">{service.photographers}</td>
-                        <td className="py-2 text-center">{service.cinematographers}</td>
+                      <tr key={index} className="border-b" style={{ borderColor: '#3d2a5f' }}>
+                        <td className="py-2 text-white">{service.event}</td>
+                        <td className="py-2 text-white">{new Date(service.date).toLocaleDateString()}</td>
+                        <td className="py-2 text-center text-white">{service.photographers}</td>
+                        <td className="py-2 text-center text-white">{service.cinematographers}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -293,8 +296,8 @@ export function EstimateDetails({ estimate }: EstimateDetailsProps) {
 
             {pkg.deliverables && pkg.deliverables.length > 0 && (
               <div className="mb-4">
-                <h3 className={`${styles.headingClass} mb-2`}>Deliverables</h3>
-                <ul className="list-disc ml-5 space-y-1">
+                <h3 className={`${styles.headingClass} mb-2 text-white`}>Deliverables</h3>
+                <ul className="list-disc ml-5 space-y-1 text-white">
                   {pkg.deliverables.map((deliverable, index) => (
                     <li key={index}>{deliverable}</li>
                   ))}
@@ -302,13 +305,13 @@ export function EstimateDetails({ estimate }: EstimateDetailsProps) {
               </div>
             )}
 
-            <div className={`text-right pt-2 border-t ${templateId === "bold" ? "border-black" : ""}`}>
-              <span className="font-medium">Package Total: </span>
-              <span className={`text-xl font-semibold ${templateId === "bold" ? "text-black" : ""}`}>
+            <div className={`text-right pt-2 border-t ${templateId === "bold" ? "border-black" : ""}`} style={{ borderColor: templateId === "bold" ? '#000000' : '#3d2a5f' }}>
+              <span className="font-medium text-white">Package Total: </span>
+              <span className={`text-xl font-semibold ${templateId === "bold" ? "text-black" : "text-blue-400"}`}>
                 {calculatePackageTotal(pkg.amount)}
               </span>
               {addonTotal > 0 && (
-                <div className="text-sm text-muted-foreground mt-1">
+                <div className="text-sm text-gray-300 mt-1">
                   (Base: {pkg.amount} + Addons: ₹{addonTotal.toLocaleString('en-IN')})
                 </div>
               )}
@@ -316,9 +319,9 @@ export function EstimateDetails({ estimate }: EstimateDetailsProps) {
           </div>
         ))}
 
-        <div className={`pt-4 text-sm text-muted-foreground ${styles.sectionClass}`}>
-          <p className={styles.headingClass}>Terms & Conditions</p>
-          <ul className="list-disc ml-5 mt-2 space-y-1">
+        <div className={`pt-4 text-sm text-gray-300 ${styles.sectionClass}`}>
+          <p className={`${styles.headingClass} text-white`}>Terms & Conditions</p>
+          <ul className="list-disc ml-5 mt-2 space-y-1 text-white">
             {termsToDisplay.map((term, index) => (
               <li key={index}>{term}</li>
             ))}

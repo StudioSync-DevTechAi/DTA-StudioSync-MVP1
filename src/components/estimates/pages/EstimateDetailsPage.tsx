@@ -199,15 +199,15 @@ export function EstimateDetailsPage({ estimateDetails, onDetailsChange }: Estima
   return (
     <div className="space-y-8">
       <div className="space-y-4">
-        <h2 className="text-3xl font-light">ESTIMATES</h2>
-        <p className="text-sm text-muted-foreground">as per your requirement</p>
+        <h2 className="text-3xl font-light text-white">ESTIMATES</h2>
+        <p className="text-sm text-gray-300">as per your requirement</p>
         
-        <Card className="p-6">
+        <Card className="p-6" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-medium mb-4">Events Coverage</h3>
+              <h3 className="text-lg font-medium mb-4 text-white">Events Coverage</h3>
               <div className="space-y-4">
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-gray-300">
                   Candid Photography & Cinematography (All events)
                 </p>
               </div>
@@ -233,16 +233,19 @@ export function EstimateDetailsPage({ estimateDetails, onDetailsChange }: Estima
               />
             ))}
 
-            <Button
-              type="button"
-              variant="outline"
-              onClick={addEstimate}
-              className="w-full"
-              disabled={estimateDetails.estimates.length >= 3}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Add Estimate Option {estimateDetails.estimates.length >= 3 && "(Maximum 3)"}
-            </Button>
+            <div className="space-y-4 p-3 rounded-lg" style={{ backgroundColor: '#1a0f3d' }}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={addEstimate}
+                className="w-full"
+                disabled={estimateDetails.estimates.length >= 3}
+                style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Estimate Option {estimateDetails.estimates.length >= 3 && "(Maximum 3)"}
+              </Button>
+            </div>
           </div>
         </Card>
       </div>

@@ -77,9 +77,9 @@ export function ServicesPage({ selectedServices, onServicesChange, isReadOnly = 
   return (
     <div className="space-y-8">
       <div className="text-center">
-        <h2 className="text-3xl font-light">SERVICES</h2>
+        <h2 className="text-3xl font-light text-white">SERVICES</h2>
         {!isReadOnly && (
-          <p className="text-sm text-muted-foreground mt-2">
+          <p className="text-sm text-gray-300 mt-2">
             (Optional) Select service packages to include in your estimate. This page will always be displayed in the final estimate.
           </p>
         )}
@@ -88,7 +88,7 @@ export function ServicesPage({ selectedServices, onServicesChange, isReadOnly = 
       <div className="grid md:grid-cols-2 gap-8">
         {/* Render regular service packages */}
         {serviceEntries.map(([key, service]) => (
-          <Card key={key} className="p-6 space-y-4 relative">
+          <Card key={key} className="p-6 space-y-4 relative" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
             {!isReadOnly && (
               <div className="absolute right-4 top-4">
                 <Checkbox 
@@ -98,8 +98,8 @@ export function ServicesPage({ selectedServices, onServicesChange, isReadOnly = 
                 />
               </div>
             )}
-            <h3 className="text-xl font-medium">{service.title}</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
+            <h3 className="text-xl font-medium text-white">{service.title}</h3>
+            <ul className="space-y-2 text-sm text-gray-300">
               {service.items.map((item) => (
                 <li key={item}>{item}</li>
               ))}
@@ -109,9 +109,9 @@ export function ServicesPage({ selectedServices, onServicesChange, isReadOnly = 
 
         {/* Render addons card with individual checkboxes */}
         {addonsService && (
-          <Card className="p-6 space-y-4 relative">
-            <h3 className="text-xl font-medium">{addonsService.title}</h3>
-            <ul className="space-y-3 text-sm text-muted-foreground">
+          <Card className="p-6 space-y-4 relative" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
+            <h3 className="text-xl font-medium text-white">{addonsService.title}</h3>
+            <ul className="space-y-3 text-sm text-gray-300">
               {addonsService.items.map((item, index) => (
                 <li key={item} className="flex items-start justify-between gap-3">
                   <span className="flex-1">{item}</span>
@@ -131,7 +131,7 @@ export function ServicesPage({ selectedServices, onServicesChange, isReadOnly = 
         )}
       </div>
 
-      <div className="text-center text-sm text-muted-foreground">
+      <div className="text-center text-sm text-gray-300">
         <p>TailorMade - Customised as per clients requirement</p>
       </div>
     </div>

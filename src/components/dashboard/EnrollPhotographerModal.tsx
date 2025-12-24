@@ -222,14 +222,17 @@ export function EnrollPhotographerModal({ open, onOpenChange }: EnrollPhotograph
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="w-fit min-w-[400px] max-w-[90vw] sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent 
+        className="w-fit min-w-[400px] max-w-[90vw] sm:max-w-[600px] max-h-[90vh] overflow-y-auto"
+        style={{ backgroundColor: '#1a0f3d' }}
+      >
         <DialogHeader>
           <div className="flex items-center justify-between">
-            <DialogTitle>
+            <DialogTitle className="text-white">
               Enroll {isPhotographer ? "Photographer" : "Videographer"}
             </DialogTitle>
             <div className="flex items-center gap-2 -translate-x-4 translate-y-[20%]">
-              <Label htmlFor="toggle-type" className="text-sm font-normal">
+              <Label htmlFor="toggle-type" className="text-sm font-normal text-white">
                 PG
               </Label>
               <Switch
@@ -240,21 +243,21 @@ export function EnrollPhotographerModal({ open, onOpenChange }: EnrollPhotograph
                   handleReset();
                 }}
               />
-              <Label htmlFor="toggle-type" className="text-sm font-normal">
+              <Label htmlFor="toggle-type" className="text-sm font-normal text-white">
                 VG
               </Label>
             </div>
           </div>
-          <DialogDescription className="mt-2">
+          <DialogDescription className="mt-2 text-gray-300">
             Fill in the details to enroll a new {isPhotographer ? "photographer" : "videographer"}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           {/* Phone Number */}
-          <div className="space-y-2">
-            <Label htmlFor="phone">
-              {isPhotographer ? "Photographer" : "Videographer"} Phone Number <span className="text-red-500">*</span>
+          <div className="space-y-2 p-3 rounded-lg" style={{ backgroundColor: '#1a0f3d' }}>
+            <Label htmlFor="phone" className="text-white">
+              {isPhotographer ? "Photographer" : "Videographer"} Phone Number <span className="text-red-400">*</span>
             </Label>
             <Input
               id="phone"
@@ -264,14 +267,15 @@ export function EnrollPhotographerModal({ open, onOpenChange }: EnrollPhotograph
               onChange={(e) => setPhoneNumber(e.target.value)}
               required
               disabled={isSaving || isUploading}
-              className="w-1/2"
+              className="w-1/2 text-white placeholder:text-gray-400"
+              style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
             />
           </div>
 
           {/* Name */}
-          <div className="space-y-2">
-            <Label htmlFor="name">
-              {isPhotographer ? "Photographer" : "Videographer"} Name <span className="text-red-500">*</span>
+          <div className="space-y-2 p-3 rounded-lg" style={{ backgroundColor: '#1a0f3d' }}>
+            <Label htmlFor="name" className="text-white">
+              {isPhotographer ? "Photographer" : "Videographer"} Name <span className="text-red-400">*</span>
             </Label>
             <Input
               id="name"
@@ -281,13 +285,14 @@ export function EnrollPhotographerModal({ open, onOpenChange }: EnrollPhotograph
               onChange={(e) => setName(e.target.value)}
               required
               disabled={isSaving || isUploading}
-              className="w-1/2"
+              className="w-1/2 text-white placeholder:text-gray-400"
+              style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
             />
           </div>
 
           {/* Pay Per Day */}
-          <div className="space-y-2">
-            <Label htmlFor="payperday">
+          <div className="space-y-2 p-3 rounded-lg" style={{ backgroundColor: '#1a0f3d' }}>
+            <Label htmlFor="payperday" className="text-white">
               Pay Per Day ({isPhotographer ? "₹" : "₹"})
             </Label>
             <Input
@@ -299,13 +304,14 @@ export function EnrollPhotographerModal({ open, onOpenChange }: EnrollPhotograph
               value={payPerDay}
               onChange={(e) => setPayPerDay(e.target.value)}
               disabled={isSaving || isUploading}
-              className="w-1/2"
+              className="w-1/2 text-white placeholder:text-gray-400"
+              style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
             />
           </div>
 
           {/* Bio */}
-          <div className="space-y-2">
-            <Label htmlFor="bio">Bio</Label>
+          <div className="space-y-2 p-3 rounded-lg" style={{ backgroundColor: '#1a0f3d' }}>
+            <Label htmlFor="bio" className="text-white">Bio</Label>
             <Textarea
               id="bio"
               placeholder="Enter bio or description"
@@ -313,13 +319,14 @@ export function EnrollPhotographerModal({ open, onOpenChange }: EnrollPhotograph
               onChange={(e) => setBio(e.target.value)}
               rows={4}
               disabled={isSaving || isUploading}
-              className="resize min-w-[300px] max-w-full"
+              className="resize min-w-[300px] max-w-full text-white placeholder:text-gray-400"
+              style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
             />
           </div>
 
           {/* Display Picture Upload */}
-          <div className="space-y-2">
-            <Label htmlFor="dp">Display Picture</Label>
+          <div className="space-y-2 p-3 rounded-lg" style={{ backgroundColor: '#1a0f3d' }}>
+            <Label htmlFor="dp" className="text-white">Display Picture</Label>
             {dpPreview ? (
               <div className="relative">
                 <img
@@ -350,7 +357,7 @@ export function EnrollPhotographerModal({ open, onOpenChange }: EnrollPhotograph
                 />
                 <Label
                   htmlFor="dp"
-                  className="flex items-center gap-2 px-4 py-2 border border-dashed rounded-lg cursor-pointer hover:bg-accent transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 border border-dashed rounded-lg cursor-pointer hover:bg-accent transition-colors text-white border-gray-400 hover:border-gray-300"
                 >
                   <Upload className="h-4 w-4" />
                   <span>Upload Photo</span>
@@ -358,7 +365,7 @@ export function EnrollPhotographerModal({ open, onOpenChange }: EnrollPhotograph
               </div>
             )}
             {isUploading && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2 text-sm text-gray-300">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 <span>Uploading image...</span>
               </div>
