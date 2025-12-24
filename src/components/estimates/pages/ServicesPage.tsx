@@ -276,7 +276,7 @@ export function ServicesPage({ selectedServices, onServicesChange, isReadOnly = 
   return (
     <div className="space-y-8">
       <div className="text-center">
-        <h2 className="text-3xl font-light text-white">SERVICES</h2>
+        <h2 className="text-3xl font-light text-white text-center">SERVICES</h2>
         {!isReadOnly && (
           <div className="flex items-center justify-center gap-3 mt-2">
             {isEditingDescription ? (
@@ -313,23 +313,49 @@ export function ServicesPage({ selectedServices, onServicesChange, isReadOnly = 
         <div className="flex flex-wrap gap-2 mb-4 border-b border-white/20 pb-2">
           {allServices.map(([key, service]) => {
             const isExpanded = expandedTabs.has(key);
+            const isAddons = key === 'addons';
+            const isServiceSelected = !isAddons && selectedServices.includes(key);
+            
             return (
-              <button
+              <div
                 key={key}
-                onClick={() => toggleTab(key)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-t-lg transition-all ${
                   isExpanded 
                     ? 'bg-white/20 text-white border-b-2 border-white' 
                     : 'bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white'
                 }`}
               >
-                <span className="font-medium">{service.title}</span>
-                {isExpanded ? (
-                  <ChevronUp className="h-4 w-4" />
-                ) : (
-                  <ChevronDown className="h-4 w-4" />
+                {!isReadOnly && !isAddons && (
+                  <Checkbox 
+                    checked={isServiceSelected}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        // If checking, expand the tab and select the service
+                        if (!isExpanded) {
+                          toggleTab(key);
+                        }
+                        handleToggleService(key);
+                      } else {
+                        // If unchecking, just deselect
+                        handleToggleService(key);
+                      }
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                    id={`tab-checkbox-${key}`}
+                  />
                 )}
-              </button>
+                <button
+                  onClick={() => toggleTab(key)}
+                  className="flex items-center gap-2"
+                >
+                  <span className="font-medium">{service.title}</span>
+                  {isExpanded ? (
+                    <ChevronUp className="h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
             );
           })}
         </div>

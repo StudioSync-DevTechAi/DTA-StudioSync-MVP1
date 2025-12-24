@@ -127,6 +127,8 @@ export function EstimateForm({ open, onClose, editingEstimate }: EstimateFormPro
       open={open} 
       onClose={handleCloseAndReset}
       title={getDialogTitle()}
+      currentPage={currentPage}
+      onPrevious={currentPage > 0 ? handlePreviousPage : undefined}
     >
       <EstimateFormPages 
         currentPage={currentPage}

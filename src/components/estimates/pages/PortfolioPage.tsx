@@ -95,7 +95,7 @@ export function PortfolioPage({
   return (
     <div className="space-y-8">
       <div className="text-center">
-        <h2 className="text-3xl font-light text-white">PORTFOLIO SHOWCASE</h2>
+        <h2 className="text-3xl font-light text-white text-center">PORTFOLIO SHOWCASE</h2>
         {!isReadOnly && (
           <div className="flex items-center justify-center gap-3 mt-2">
             {isEditingDescription ? (

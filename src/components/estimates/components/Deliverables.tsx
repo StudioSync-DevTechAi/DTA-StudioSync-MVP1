@@ -1,6 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -59,25 +60,38 @@ export function Deliverables({
       ) : (
         <div className="space-y-2">
           {deliverables.map((deliverable, index) => (
-            <div key={index} className="flex gap-2 items-center">
-              <Input
+            <div key={index} className="flex gap-2 items-start">
+              <Textarea
                 value={deliverable}
                 onChange={(e) => onUpdate(index, e.target.value)}
                 placeholder="Enter deliverable (e.g., Photos, Videos, Album)"
-                className="flex-1 text-white placeholder:text-gray-400"
-                style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
+                className="flex-1 min-w-0 text-white placeholder:text-gray-400 resize-none"
+                style={{ 
+                  backgroundColor: '#2d1b4e', 
+                  borderColor: '#3d2a5f', 
+                  color: '#ffffff', 
+                  minWidth: '300px',
+                  minHeight: '40px',
+                  maxHeight: '200px'
+                }}
+                rows={1}
+                onInput={(e) => {
+                  const target = e.target as HTMLTextAreaElement;
+                  target.style.height = 'auto';
+                  target.style.height = `${target.scrollHeight}px`;
+                }}
               />
               <Input
                 type="text"
                 value={deliverableAmounts[index] || ''}
                 onChange={(e) => handleAmountChange(index, e.target.value)}
                 placeholder="₹0"
-                className="w-28 text-white placeholder:text-gray-400"
+                className="w-24 text-white placeholder:text-gray-400 flex-shrink-0"
                 style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
               />
               <Badge 
                 variant="secondary" 
-                className={`${getDeliverableBadgeColor(deliverable)} border-transparent`}
+                className={`${getDeliverableBadgeColor(deliverable)} border-transparent flex-shrink-0`}
               >
                 {deliverable.toLowerCase().includes('photo') ? 'Photos' : 
                   deliverable.toLowerCase().includes('video') || 

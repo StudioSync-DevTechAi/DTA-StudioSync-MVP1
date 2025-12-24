@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { generatePreviewEstimate } from "../../utils/estimateHelpers";
 import { EstimateFormData, PreviewEstimate } from "../types";
+import { supabase } from "@/integrations/supabase/client";
 
 export function useEstimateForm(editingEstimate?: any) {
   const { toast } = useToast();
@@ -115,37 +116,110 @@ export function useEstimateForm(editingEstimate?: any) {
     try {
       console.log("Saving estimate:", previewEstimate);
       
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const savedEstimates = localStorage.getItem("estimates");
-      let estimates = savedEstimates ? JSON.parse(savedEstimates) : [];
-      
-      if (editingEstimate) {
-        estimates = estimates.map(est => 
-          est.id === previewEstimate.id ? previewEstimate : est
-        );
+      // Get photography owner phone number
+      let photographyOwnerPhno = '';
+      try {
+        const { data: ownerData, error: ownerError } = await supabase
+          .from("photography_owner_table")
+          .select("photography_owner_phno")
+          .limit(1)
+          .maybeSingle();
         
-        toast({
-          title: "Estimate Updated",
-          description: `Estimate for ${previewEstimate.clientName} has been updated successfully.`,
-        });
-      } else {
-        estimates.unshift(previewEstimate);
-        
-        toast({
-          title: "Estimate Created",
-          description: `Estimate for ${formData.clientName} has been created successfully.`,
-        });
+        if (ownerError) {
+          console.warn("Error fetching photography owner:", ownerError);
+        } else if (ownerData?.photography_owner_phno) {
+          photographyOwnerPhno = ownerData.photography_owner_phno;
+        }
+      } catch (error) {
+        console.warn("Error fetching photography owner:", error);
       }
       
-      localStorage.setItem("estimates", JSON.stringify(estimates));
+      // Get client phone number from form data
+      const clientPhno = formData.clientPhNo?.replace(/\s/g, '') || '';
       
-      return Promise.resolve();
-    } catch (error) {
+      if (!photographyOwnerPhno) {
+        toast({
+          title: "Error",
+          description: "Photography owner information not found. Please contact support.",
+          variant: "destructive",
+        });
+        return Promise.reject(new Error("Photography owner not found"));
+      }
+      
+      if (!clientPhno) {
+        toast({
+          title: "Error",
+          description: "Client phone number is required to save the estimate.",
+          variant: "destructive",
+        });
+        return Promise.reject(new Error("Client phone number is required"));
+      }
+      
+      // Prepare estimate form data JSONB
+      const estimateFormData = {
+        clientName: formData.clientName,
+        clientEmail: formData.clientEmail,
+        clientPhNo: clientPhno,
+        selectedServices: formData.selectedServices,
+        estimateDetails: formData.estimateDetails,
+        terms: formData.terms,
+        portfolioLinks: formData.portfolioLinks,
+        selectedTemplate: formData.selectedTemplate,
+        previewEstimate: previewEstimate
+      };
+      
+      // Call RPC function to save estimate
+      const { data, error } = await supabase.rpc('save_estimate_form_data', {
+        p_photography_owner_phno: photographyOwnerPhno,
+        p_client_phno: clientPhno,
+        p_estimate_form_data: estimateFormData as any
+      });
+      
+      if (error) {
+        console.error("Error saving estimate to database:", error);
+        throw error;
+      }
+      
+      if (data && data.success) {
+        // Also save to localStorage for backward compatibility
+        const savedEstimates = localStorage.getItem("estimates");
+        let estimates = savedEstimates ? JSON.parse(savedEstimates) : [];
+        
+        if (editingEstimate) {
+          estimates = estimates.map(est => 
+            est.id === previewEstimate.id ? previewEstimate : est
+          );
+          
+          toast({
+            title: "Estimate Updated",
+            description: `Estimate for ${previewEstimate.clientName} has been updated successfully.`,
+          });
+        } else {
+          // Add the project_estimate_uuid to the preview estimate
+          const savedEstimate = {
+            ...previewEstimate,
+            id: data.project_estimate_uuid,
+            projectEstimateUuid: data.project_estimate_uuid
+          };
+          estimates.unshift(savedEstimate);
+          
+          toast({
+            title: "Estimate Created",
+            description: `Estimate for ${formData.clientName} has been created successfully.`,
+          });
+        }
+        
+        localStorage.setItem("estimates", JSON.stringify(estimates));
+        
+        return Promise.resolve();
+      } else {
+        throw new Error(data?.error || "Failed to save estimate");
+      }
+    } catch (error: any) {
       console.error("Error saving estimate:", error);
       toast({
         title: "Error",
-        description: "There was a problem saving your estimate. Please try again.",
+        description: error.message || "There was a problem saving your estimate. Please try again.",
         variant: "destructive",
       });
       return Promise.reject(error);

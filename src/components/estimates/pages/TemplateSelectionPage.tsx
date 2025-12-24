@@ -80,7 +80,7 @@ export function TemplateSelectionPage({
   return (
     <div className="space-y-8">
       <div className="text-center">
-        <h2 className="text-3xl font-light text-white">PRESENTATION STYLE</h2>
+        <h2 className="text-3xl font-light text-white text-center">PRESENTATION STYLE</h2>
         {!isReadOnly && (
           <div className="flex items-center justify-center gap-3 mt-2">
             {isEditingDescription ? (
