@@ -228,8 +228,8 @@ export function EstimateDetails({ estimate }: EstimateDetailsProps) {
                     <tr className="border-b">
                       <th className="text-left py-2">Event</th>
                       <th className="text-left py-2">Date</th>
-                      <th className="text-left py-2">Photographers</th>
-                      <th className="text-left py-2">Cinematographers</th>
+                      <th className="text-center py-2">Photographers</th>
+                      <th className="text-center py-2">Cinematographers</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -237,8 +237,8 @@ export function EstimateDetails({ estimate }: EstimateDetailsProps) {
                       <tr key={index} className="border-b">
                         <td className="py-2">{service.event}</td>
                         <td className="py-2">{new Date(service.date).toLocaleDateString()}</td>
-                        <td className="py-2">{service.photographers}</td>
-                        <td className="py-2">{service.cinematographers}</td>
+                        <td className="py-2 text-center">{service.photographers}</td>
+                        <td className="py-2 text-center">{service.cinematographers}</td>
                       </tr>
                     ))}
                   </tbody>
