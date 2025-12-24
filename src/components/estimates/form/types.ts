@@ -2,6 +2,7 @@
 export interface EstimateFormData {
   clientName: string;
   clientEmail: string;
+  clientPhNo?: string;
   selectedServices: string[];
   estimateDetails: {
     events: any[];
@@ -26,6 +27,7 @@ export interface PreviewEstimate {
   status?: string;
   clientName: string;
   clientEmail?: string;
+  clientPhNo?: string;
   selectedPackageIndex?: number;
   portfolioLinks?: PortfolioLink[];
   selectedTemplate?: string;

@@ -1,7 +1,10 @@
 
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Pencil } from "lucide-react";
 import { EstimateTemplate } from "../form/types";
 
 // Predefined templates with updated descriptions and styling
@@ -37,14 +40,74 @@ export function TemplateSelectionPage({
   onTemplateChange,
   isReadOnly = false,
 }: TemplateSelectionPageProps) {
+  const [description, setDescription] = useState(() => {
+    const saved = localStorage.getItem('templatePageDescription');
+    return saved || 'Choose a template design for your estimate presentation and emails.';
+  });
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [tempDescription, setTempDescription] = useState(description);
+
+  useEffect(() => {
+    localStorage.setItem('templatePageDescription', description);
+  }, [description]);
+
+  const handleDescriptionEdit = () => {
+    if (isReadOnly) return;
+    setIsEditingDescription(true);
+    setTempDescription(description);
+  };
+
+  const handleDescriptionSave = () => {
+    if (tempDescription.trim()) {
+      setDescription(tempDescription.trim());
+    }
+    setIsEditingDescription(false);
+  };
+
+  const handleDescriptionCancel = () => {
+    setTempDescription(description);
+    setIsEditingDescription(false);
+  };
+
+  const handleDescriptionKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleDescriptionSave();
+    } else if (e.key === 'Escape') {
+      handleDescriptionCancel();
+    }
+  };
+
   return (
     <div className="space-y-8">
       <div className="text-center">
         <h2 className="text-3xl font-light text-white">PRESENTATION STYLE</h2>
         {!isReadOnly && (
-          <p className="text-sm text-gray-300 mt-2">
-            Choose a template design for your estimate presentation and emails.
-          </p>
+          <div className="flex items-center justify-center gap-3 mt-2">
+            {isEditingDescription ? (
+              <Input
+                value={tempDescription}
+                onChange={(e) => setTempDescription(e.target.value)}
+                onBlur={handleDescriptionSave}
+                onKeyDown={handleDescriptionKeyDown}
+                className="text-sm text-gray-300 text-center bg-transparent border-white/30 focus:border-white/50"
+                style={{ backgroundColor: 'rgba(45, 27, 78, 0.5)', maxWidth: '600px' }}
+                autoFocus
+              />
+            ) : (
+              <>
+                <p className="text-sm text-gray-300 mt-2">
+                  {description}
+                </p>
+                <button
+                  onClick={handleDescriptionEdit}
+                  className="p-1 hover:bg-white/10 rounded transition-colors"
+                  title="Edit description"
+                >
+                  <Pencil className="h-4 w-4 text-gray-300/70 hover:text-gray-300" />
+                </button>
+              </>
+            )}
+          </div>
         )}
       </div>
 

@@ -1,12 +1,12 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { PortfolioLink } from "../form/types";
-import { X, Youtube, Video, Link, Globe, Instagram } from "lucide-react";
+import { X, Youtube, Video, Link, Globe, Instagram, Pencil } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 
 interface PortfolioPageProps {
@@ -20,6 +20,43 @@ export function PortfolioPage({
   onPortfolioLinksChange,
   isReadOnly = false,
 }: PortfolioPageProps) {
+  const [description, setDescription] = useState(() => {
+    const saved = localStorage.getItem('portfolioPageDescription');
+    return saved || 'Add links to your portfolio work that you\'d like to showcase to your clients.';
+  });
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [tempDescription, setTempDescription] = useState(description);
+
+  useEffect(() => {
+    localStorage.setItem('portfolioPageDescription', description);
+  }, [description]);
+
+  const handleDescriptionEdit = () => {
+    if (isReadOnly) return;
+    setIsEditingDescription(true);
+    setTempDescription(description);
+  };
+
+  const handleDescriptionSave = () => {
+    if (tempDescription.trim()) {
+      setDescription(tempDescription.trim());
+    }
+    setIsEditingDescription(false);
+  };
+
+  const handleDescriptionCancel = () => {
+    setTempDescription(description);
+    setIsEditingDescription(false);
+  };
+
+  const handleDescriptionKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleDescriptionSave();
+    } else if (e.key === 'Escape') {
+      handleDescriptionCancel();
+    }
+  };
+
   const [newLink, setNewLink] = useState<Omit<PortfolioLink, "id">>({
     title: "",
     url: "",
@@ -60,9 +97,32 @@ export function PortfolioPage({
       <div className="text-center">
         <h2 className="text-3xl font-light text-white">PORTFOLIO SHOWCASE</h2>
         {!isReadOnly && (
-          <p className="text-sm text-gray-300 mt-2">
-            Add links to your portfolio work that you'd like to showcase to your clients.
-          </p>
+          <div className="flex items-center justify-center gap-3 mt-2">
+            {isEditingDescription ? (
+              <Input
+                value={tempDescription}
+                onChange={(e) => setTempDescription(e.target.value)}
+                onBlur={handleDescriptionSave}
+                onKeyDown={handleDescriptionKeyDown}
+                className="text-sm text-gray-300 text-center bg-transparent border-white/30 focus:border-white/50"
+                style={{ backgroundColor: 'rgba(45, 27, 78, 0.5)', maxWidth: '600px' }}
+                autoFocus
+              />
+            ) : (
+              <>
+                <p className="text-sm text-gray-300 mt-2">
+                  {description}
+                </p>
+                <button
+                  onClick={handleDescriptionEdit}
+                  className="p-1 hover:bg-white/10 rounded transition-colors"
+                  title="Edit description"
+                >
+                  <Pencil className="h-4 w-4 text-gray-300/70 hover:text-gray-300" />
+                </button>
+              </>
+            )}
+          </div>
         )}
       </div>
 

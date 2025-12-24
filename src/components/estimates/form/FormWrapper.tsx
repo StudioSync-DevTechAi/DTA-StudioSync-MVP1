@@ -17,7 +17,7 @@ export function FormWrapper({ open, onClose, title, children }: FormWrapperProps
         style={{ backgroundColor: '#1a0f3d' }}
       >
         <DialogHeader>
-          <DialogTitle className="text-white">{title}</DialogTitle>
+          <DialogTitle className="text-white text-center">New Estimate</DialogTitle>
         </DialogHeader>
         <div 
           className="space-y-6 p-4 rounded-lg" 

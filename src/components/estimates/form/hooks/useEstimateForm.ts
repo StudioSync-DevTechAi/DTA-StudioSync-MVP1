@@ -10,6 +10,7 @@ export function useEstimateForm(editingEstimate?: any) {
   const [formData, setFormData] = useState<EstimateFormData>({
     clientName: "",
     clientEmail: "",
+    clientPhNo: "",
     selectedServices: [],
     estimateDetails: {
       events: [],
@@ -49,6 +50,7 @@ export function useEstimateForm(editingEstimate?: any) {
       setFormData({
         clientName: editingEstimate.clientName || "",
         clientEmail: editingEstimate.clientEmail || "",
+        clientPhNo: editingEstimate.clientPhNo || "",
         selectedServices,
         estimateDetails: {
           events: [],
