@@ -76,6 +76,8 @@ export function PreviewStep({ estimate, onSave }: PreviewStepProps) {
             onClick={handleShowEmailForm} 
             variant="outline"
             disabled={isSaving}
+            className="text-white"
+            style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
           >
             <Mail className="mr-2 h-4 w-4" />
             {isSaving ? "Saving..." : "Send via Email"}
@@ -84,6 +86,8 @@ export function PreviewStep({ estimate, onSave }: PreviewStepProps) {
             onClick={handleShowWhatsAppForm} 
             variant="outline"
             disabled={isSaving}
+            className="text-white"
+            style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
           >
             <Share2 className="mr-2 h-4 w-4" />
             {isSaving ? "Saving..." : "Share via WhatsApp"}

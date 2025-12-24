@@ -46,7 +46,7 @@ export function ServiceCard({ service, onUpdate, onRemove }: ServiceCardProps) {
   };
 
   return (
-    <Card className="p-4 relative">
+    <Card className="p-4 relative" style={{ backgroundColor: '#1a0f3d', borderColor: '#3d2a5f' }}>
       <div className="absolute right-2 top-2">
         <Button
           variant="ghost"
@@ -59,17 +59,17 @@ export function ServiceCard({ service, onUpdate, onRemove }: ServiceCardProps) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>Event</Label>
+          <Label className="text-white">Event</Label>
           <Select
             value={service.event}
             onValueChange={(value) => onUpdate("event", value)}
           >
-            <SelectTrigger>
-              <SelectValue placeholder="Select event" />
+            <SelectTrigger className="text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}>
+              <SelectValue placeholder="Select event" className="text-white" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
               {EVENT_OPTIONS.map((event) => (
-                <SelectItem key={event} value={event}>
+                <SelectItem key={event} value={event} className="text-white hover:bg-[#1a0f3d]">
                   {event}
                 </SelectItem>
               ))}
@@ -78,34 +78,40 @@ export function ServiceCard({ service, onUpdate, onRemove }: ServiceCardProps) {
         </div>
 
         <div className="space-y-2">
-          <Label>Date</Label>
+          <Label className="text-white">Date</Label>
           <Input
             type="date"
             value={service.date}
             min={today}
             onChange={handleDateChange}
+            className="text-white"
+            style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
           />
         </div>
 
         <div className="space-y-2">
-          <Label>Number of Photographers</Label>
+          <Label className="text-white">Number of Photographers</Label>
           <Input
             type="number"
             min="0"
             value={service.photographers}
             onChange={(e) => onUpdate("photographers", e.target.value)}
             placeholder="Enter number of photographers"
+            className="text-white placeholder:text-gray-400"
+            style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
           />
         </div>
 
         <div className="space-y-2">
-          <Label>Number of Cinematographers</Label>
+          <Label className="text-white">Number of Cinematographers</Label>
           <Input
             type="number"
             min="0"
             value={service.cinematographers}
             onChange={(e) => onUpdate("cinematographers", e.target.value)}
             placeholder="Enter number of cinematographers"
+            className="text-white placeholder:text-gray-400"
+            style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
           />
         </div>
       </div>

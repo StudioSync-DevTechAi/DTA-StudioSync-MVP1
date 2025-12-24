@@ -42,7 +42,7 @@ export function Header() {
 
   return (
     <header 
-      className="border-b shadow-sm sticky top-0 z-50"
+      className="border-b shadow-sm fixed top-0 left-0 right-0 z-50"
       style={{
         background: `
           radial-gradient(ellipse at bottom left, rgba(255, 100, 50, 0.15) 0%, rgba(255, 150, 0, 0.08) 20%, transparent 50%),

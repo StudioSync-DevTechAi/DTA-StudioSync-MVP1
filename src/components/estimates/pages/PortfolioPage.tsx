@@ -58,62 +58,66 @@ export function PortfolioPage({
   return (
     <div className="space-y-8">
       <div className="text-center">
-        <h2 className="text-3xl font-light">PORTFOLIO SHOWCASE</h2>
+        <h2 className="text-3xl font-light text-white">PORTFOLIO SHOWCASE</h2>
         {!isReadOnly && (
-          <p className="text-sm text-muted-foreground mt-2">
+          <p className="text-sm text-gray-300 mt-2">
             Add links to your portfolio work that you'd like to showcase to your clients.
           </p>
         )}
       </div>
 
       {!isReadOnly && (
-        <Card>
+        <Card style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
           <CardHeader>
-            <CardTitle>Add Portfolio Item</CardTitle>
+            <CardTitle className="text-white">Add Portfolio Item</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium">Title</label>
+                <label className="text-sm font-medium text-white">Title</label>
                 <Input
                   placeholder="Wedding Highlight Film"
                   value={newLink.title}
                   onChange={(e) =>
                     setNewLink({ ...newLink, title: e.target.value })
                   }
+                  className="text-white placeholder:text-gray-400"
+                  style={{ backgroundColor: '#1a0f3d', borderColor: '#3d2a5f', color: '#ffffff' }}
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">Platform</label>
+                <label className="text-sm font-medium text-white">Platform</label>
                 <Select
                   value={newLink.platform}
                   onValueChange={(value: any) =>
                     setNewLink({ ...newLink, platform: value })
                   }
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select platform" />
+                  <SelectTrigger className="text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}>
+                    <SelectValue placeholder="Select platform" className="text-white" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="youtube">YouTube</SelectItem>
-                    <SelectItem value="vimeo">Vimeo</SelectItem>
-                    <SelectItem value="website">Website</SelectItem>
-                    <SelectItem value="instagram">Instagram</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
+                  <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
+                    <SelectItem value="youtube" className="text-white hover:bg-[#1a0f3d]">YouTube</SelectItem>
+                    <SelectItem value="vimeo" className="text-white hover:bg-[#1a0f3d]">Vimeo</SelectItem>
+                    <SelectItem value="website" className="text-white hover:bg-[#1a0f3d]">Website</SelectItem>
+                    <SelectItem value="instagram" className="text-white hover:bg-[#1a0f3d]">Instagram</SelectItem>
+                    <SelectItem value="other" className="text-white hover:bg-[#1a0f3d]">Other</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
             <div>
-              <label className="text-sm font-medium">URL</label>
+              <label className="text-sm font-medium text-white">URL</label>
               <Input
                 placeholder="https://youtube.com/watch?v=..."
                 value={newLink.url}
                 onChange={(e) => setNewLink({ ...newLink, url: e.target.value })}
+                className="text-white placeholder:text-gray-400"
+                style={{ backgroundColor: '#1a0f3d', borderColor: '#3d2a5f', color: '#ffffff' }}
               />
             </div>
             <div>
-              <label className="text-sm font-medium">Description (Optional)</label>
+              <label className="text-sm font-medium text-white">Description (Optional)</label>
               <Textarea
                 placeholder="A brief description of this portfolio item..."
                 value={newLink.description || ""}
@@ -121,6 +125,8 @@ export function PortfolioPage({
                   setNewLink({ ...newLink, description: e.target.value })
                 }
                 rows={3}
+                className="text-white placeholder:text-gray-400"
+                style={{ backgroundColor: '#1a0f3d', borderColor: '#3d2a5f', color: '#ffffff' }}
               />
             </div>
           </CardContent>
@@ -133,9 +139,9 @@ export function PortfolioPage({
       {portfolioLinks.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {portfolioLinks.map((link) => (
-            <Card key={link.id}>
+            <Card key={link.id} style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-lg font-medium flex items-center gap-2">
+                <CardTitle className="text-lg font-medium flex items-center gap-2 text-white">
                   {platformIcons[link.platform]}
                   {link.title}
                 </CardTitle>
@@ -150,13 +156,13 @@ export function PortfolioPage({
                 )}
               </CardHeader>
               <CardContent>
-                <div className="text-sm truncate text-blue-500 hover:underline">
+                <div className="text-sm truncate text-blue-400 hover:underline">
                   <a href={link.url} target="_blank" rel="noopener noreferrer">
                     {link.url}
                   </a>
                 </div>
                 {link.description && (
-                  <p className="text-sm text-muted-foreground mt-2">
+                  <p className="text-sm text-gray-300 mt-2">
                     {link.description}
                   </p>
                 )}
@@ -165,8 +171,8 @@ export function PortfolioPage({
           ))}
         </div>
       ) : (
-        <div className="text-center py-10 border rounded-md bg-muted/20">
-          <p className="text-muted-foreground">
+        <div className="text-center py-10 border rounded-md bg-muted/20" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
+          <p className="text-gray-300">
             No portfolio links have been added yet.
             {!isReadOnly && " Add some links to showcase your work!"}
           </p>

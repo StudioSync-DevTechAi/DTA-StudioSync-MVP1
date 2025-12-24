@@ -40,9 +40,9 @@ export function TemplateSelectionPage({
   return (
     <div className="space-y-8">
       <div className="text-center">
-        <h2 className="text-3xl font-light">PRESENTATION STYLE</h2>
+        <h2 className="text-3xl font-light text-white">PRESENTATION STYLE</h2>
         {!isReadOnly && (
-          <p className="text-sm text-muted-foreground mt-2">
+          <p className="text-sm text-gray-300 mt-2">
             Choose a template design for your estimate presentation and emails.
           </p>
         )}
@@ -130,7 +130,7 @@ export function TemplateSelectionPage({
                         'text-blue-600 font-medium'
                       }`}>Selected</span>
                     ) : (
-                      <span className="text-muted-foreground">Select this template</span>
+                      <span className="text-gray-300">Select this template</span>
                     )}
                   </CardFooter>
                 </Card>
@@ -140,7 +140,7 @@ export function TemplateSelectionPage({
         </RadioGroup>
       ) : (
         <div className="text-center">
-          <p className="text-lg font-medium">
+          <p className="text-lg font-medium text-white">
             Selected Template: {estimateTemplates.find(t => t.id === selectedTemplate)?.name || "Default"}
           </p>
         </div>

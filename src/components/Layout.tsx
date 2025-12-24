@@ -246,16 +246,29 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen flex" style={{ 
+      background: `
+        radial-gradient(ellipse at bottom left, rgba(255, 100, 50, 0.08) 0%, rgba(255, 150, 0, 0.04) 20%, transparent 50%),
+        linear-gradient(to bottom,
+          #2a1f4d 0%,
+          #3d2a5f 25%,
+          #4a3569 50%,
+          #3d2a5f 75%,
+          #2a1f4d 100%
+        )
+      `
+    }}>
       {/* Sidebar Navigation - Always on the left */}
       <aside
         ref={sidebarRef}
         className={cn(
-          "fixed top-0 left-0 h-full bg-card border-r z-40",
+          "fixed left-0 bg-card border-r z-40",
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
           !isResizing && "transition-all duration-300 ease-in-out"
         )}
         style={{ 
+          top: 0,
+          height: '100vh',
           width: isDesktop && !isMobileMenuOpen 
             ? (isSidebarHovered ? `${sidebarWidth}px` : `${SIDEBAR_COLLAPSED_WIDTH}px`)
             : `${sidebarWidth}px`,
@@ -287,7 +300,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <nav 
           className={cn(
             "flex flex-col h-full relative z-10 transition-all duration-200",
-            isSidebarCollapsed && isDesktop && !isMobileMenuOpen ? "p-2" : "p-4"
+            isSidebarCollapsed && isDesktop && !isMobileMenuOpen ? "p-2" : "p-4",
+            "pt-20" // Add top padding to account for header
           )}
           onFocus={() => {
             // When sidebar nav receives focus, start with first item if nothing is focused
@@ -300,8 +314,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           }}
         >
           <div className={cn(
-            "space-y-1 py-2 flex-1 overflow-y-auto",
-            isSidebarCollapsed && isDesktop && !isMobileMenuOpen ? "mt-4" : "mt-12"
+            "space-y-1 py-2 flex-1 overflow-y-auto"
           )}>
             {filteredNavItems.map((item, index) => {
               const Icon = item.icon;
@@ -488,8 +501,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         tabIndex={-1}
         className={cn(
           "flex-1 min-h-screen",
-          "p-4 lg:p-6", 
-          "lg:pt-6 pt-20" // Add top padding for mobile header
+          "px-4 lg:px-6 pb-4 lg:pb-6"
         )}
         style={{ 
           marginLeft: isDesktop && !isMobileMenuOpen
