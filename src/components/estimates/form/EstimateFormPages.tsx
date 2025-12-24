@@ -38,11 +38,15 @@ export function EstimateFormPages({
           <WelcomePage 
             clientName={formData.clientName}
             clientEmail={formData.clientEmail}
+            clientPhNo={formData.clientPhNo}
             onClientNameChange={(name) => 
               onUpdateFormData("clientName", name)
             }
             onClientEmailChange={(email) =>
               onUpdateFormData("clientEmail", email)
+            }
+            onClientPhNoChange={(phNo) =>
+              onUpdateFormData("clientPhNo", phNo)
             }
             isReadOnly={isEditing}
           />

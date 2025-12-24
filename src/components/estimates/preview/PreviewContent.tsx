@@ -25,8 +25,10 @@ export function PreviewContent({ currentPageIndex, estimate }: PreviewContentPro
       key="welcome" 
       clientName={estimate.clientName}
       clientEmail={estimate.clientEmail || ""}
+      clientPhNo={estimate.clientPhNo || ""}
       onClientNameChange={() => {}} // No-op function since this is read-only
       onClientEmailChange={() => {}} // No-op function since this is read-only
+      onClientPhNoChange={() => {}} // No-op function since this is read-only
       isReadOnly={true}
     />,
     <ServicesPage 

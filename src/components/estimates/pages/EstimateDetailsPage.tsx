@@ -199,7 +199,7 @@ export function EstimateDetailsPage({ estimateDetails, onDetailsChange }: Estima
   return (
     <div className="space-y-8">
       <div className="space-y-4">
-        <h2 className="text-3xl font-light text-white">ESTIMATES</h2>
+        <h2 className="text-3xl font-light text-white text-center">ESTIMATES</h2>
         <p className="text-sm text-gray-300">as per your requirement</p>
         
         <Card className="p-6" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
