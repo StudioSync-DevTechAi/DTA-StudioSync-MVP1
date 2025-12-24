@@ -172,12 +172,11 @@ function Dashboard() {
         }
       `}</style>
       <div 
-        className="space-y-12 sm:space-y-16 lg:space-y-20 px-3 sm:px-4 md:px-6 pb-3 sm:pb-4 md:pb-6 max-w-7xl mx-auto" 
+        className="space-y-12 sm:space-y-16 lg:space-y-20 px-3 sm:px-4 md:px-6 pt-4 sm:pt-6 md:pt-8 pb-3 sm:pb-4 md:pb-6 max-w-7xl mx-auto" 
         style={{ 
           minHeight: '100vh', 
           color: '#ffffff',
-          position: 'relative',
-          paddingTop: 0
+          position: 'relative'
         }}
       >
         {/* Exact hero background from theme-videograph */}
