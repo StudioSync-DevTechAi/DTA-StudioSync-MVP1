@@ -120,6 +120,51 @@ export function EstimateDetails({ estimate }: EstimateDetailsProps) {
 
   const styles = getTemplateStyles();
 
+  // Function to extract amount from addon string
+  // Examples: "LED Screen 25,000/-" -> 25000, "Evite (E-invitations) - starts from 2,000/-" -> 2000
+  const extractAmountFromAddon = (addonString: string): number => {
+    // Remove "addon:" prefix if present
+    const cleaned = addonString.replace(/^addon:/, '');
+    
+    // Try to find patterns like "25,000/-", "2,000/-", "15,000/-", etc.
+    // Look for numbers with optional commas followed by "/-" or just numbers
+    const patterns = [
+      /(\d{1,3}(?:,\d{3})*)\s*\/-/,  // Pattern: "25,000/-" or "2,000/-"
+      /starts from\s*(\d{1,3}(?:,\d{3})*)/,  // Pattern: "starts from 2,000"
+      /(\d{1,3}(?:,\d{3})*)\s*Per Day/,  // Pattern: "30,000 Per Day"
+      /(\d{1,3}(?:,\d{3})*)/,  // Fallback: any number with commas
+    ];
+    
+    for (const pattern of patterns) {
+      const match = cleaned.match(pattern);
+      if (match && match[1]) {
+        // Remove commas and parse as float
+        return parseFloat(match[1].replace(/,/g, '')) || 0;
+      }
+    }
+    
+    return 0;
+  };
+
+  // Calculate total addon amount from selected addons
+  const calculateAddonTotal = (): number => {
+    const selectedAddons = selectedServices.filter(key => key.startsWith('addon:'));
+    return selectedAddons.reduce((total, addonKey) => {
+      const amount = extractAmountFromAddon(addonKey);
+      return total + amount;
+    }, 0);
+  };
+
+  const addonTotal = calculateAddonTotal();
+
+  // Function to calculate package total including addons
+  const calculatePackageTotal = (packageAmount: string): string => {
+    // Parse package amount (remove currency symbols and commas)
+    const packageNum = parseFloat(packageAmount.replace(/[₹,]/g, '')) || 0;
+    const total = packageNum + addonTotal;
+    return `₹${total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
+
   return (
     <div className={`border rounded-lg overflow-hidden ${templateId === "bold" ? "border-none" : ""}`}>
       <div className={`text-center space-y-3 ${styles.headerClass}`}>
@@ -259,7 +304,14 @@ export function EstimateDetails({ estimate }: EstimateDetailsProps) {
 
             <div className={`text-right pt-2 border-t ${templateId === "bold" ? "border-black" : ""}`}>
               <span className="font-medium">Package Total: </span>
-              <span className={`text-xl font-semibold ${templateId === "bold" ? "text-black" : ""}`}>{pkg.amount}</span>
+              <span className={`text-xl font-semibold ${templateId === "bold" ? "text-black" : ""}`}>
+                {calculatePackageTotal(pkg.amount)}
+              </span>
+              {addonTotal > 0 && (
+                <div className="text-sm text-muted-foreground mt-1">
+                  (Base: {pkg.amount} + Addons: ₹{addonTotal.toLocaleString('en-IN')})
+                </div>
+              )}
             </div>
           </div>
         ))}
