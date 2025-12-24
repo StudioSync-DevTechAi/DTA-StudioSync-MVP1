@@ -172,11 +172,12 @@ function Dashboard() {
         }
       `}</style>
       <div 
-        className="space-y-12 sm:space-y-16 lg:space-y-20 p-3 sm:p-4 md:p-6 max-w-7xl mx-auto" 
+        className="space-y-12 sm:space-y-16 lg:space-y-20 px-3 sm:px-4 md:px-6 pb-3 sm:pb-4 md:pb-6 max-w-7xl mx-auto" 
         style={{ 
           minHeight: '100vh', 
           color: '#ffffff',
-          position: 'relative'
+          position: 'relative',
+          paddingTop: 0
         }}
       >
         {/* Exact hero background from theme-videograph */}
@@ -207,7 +208,7 @@ function Dashboard() {
             zIndex: 1
           }}
         />
-        <div style={{ position: 'relative', zIndex: 3 }}>
+        <div style={{ position: 'relative', zIndex: 3, paddingTop: 0, marginTop: 0 }}>
         {/* Welcome Section */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex-1 min-w-0">

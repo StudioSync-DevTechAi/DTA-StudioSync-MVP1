@@ -45,7 +45,7 @@ function App() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
-      <div className="flex-1">
+      <div className="flex-1 pt-16">
         <Suspense fallback={<LoadingSpinner />}>
           <Routes>
           {/* Public routes - these should be accessible without authentication */}
