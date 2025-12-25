@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface Project {
   id: string;
@@ -384,10 +385,7 @@ export function ProjectBoard({ onNewProject }: ProjectBoardProps) {
 
       {/* Loading State */}
       {loading && (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          <span className="ml-2 text-sm text-muted-foreground">Loading projects...</span>
-        </div>
+        <LoadingSpinner text="Loading projects..." fullScreen={false} />
       )}
 
       {/* Error State */}
@@ -407,7 +405,10 @@ export function ProjectBoard({ onNewProject }: ProjectBoardProps) {
 
       {/* Projects Board */}
       {!loading && !error && (
-      <div className="space-y-3 sm:space-y-4">
+      <div 
+        className="space-y-3 sm:space-y-4"
+        style={{ backgroundColor: 'rgba(26, 15, 61, 0.98)', backdropFilter: 'blur(10px)', minHeight: '100vh' }}
+      >
         {/* Status Headers Row */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
           {statusColumns.map((column) => (
@@ -457,11 +458,12 @@ export function ProjectBoard({ onNewProject }: ProjectBoardProps) {
                           draggable
                           onDragStart={(e) => handleDragStart(e, project.id)}
                           onDragEnd={handleDragEnd}
-                          className={`p-3 sm:p-4 cursor-move hover:shadow-md transition-all ${
+                          className={`relative overflow-hidden transition-all hover:shadow-lg p-3 sm:p-4 cursor-move ${
                             isDragging
                               ? "opacity-50 scale-95 shadow-lg border-primary"
                               : "opacity-100"
                           }`}
+                          style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}
                           onClick={(e) => {
                             // Only navigate if not dragging
                             if (!isDragging && project.projectUuid) {
@@ -470,7 +472,7 @@ export function ProjectBoard({ onNewProject }: ProjectBoardProps) {
                           }}
                         >
                           <div className="flex items-start justify-between gap-2 mb-1">
-                            <h4 className="font-medium text-sm sm:text-base flex-1 truncate">
+                            <h4 className="font-medium text-sm sm:text-base flex-1 truncate text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>
                               {project.title}
                             </h4>
                             {isUpdatingStatus && isDragging && (
@@ -478,17 +480,17 @@ export function ProjectBoard({ onNewProject }: ProjectBoardProps) {
                             )}
                           </div>
                           {project.clientName && (
-                            <p className="text-xs text-muted-foreground mb-1 truncate">
+                            <p className="text-xs text-white/80 mb-1 truncate" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
                               {project.clientName}
                             </p>
                           )}
                           {project.eventType && (
-                            <p className="text-xs text-muted-foreground mb-1 truncate">
+                            <p className="text-xs text-white/80 mb-1 truncate" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
                               {project.eventType}
                             </p>
                           )}
                           {project.startDate && (
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-xs text-white/80" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
                               {new Date(project.startDate).toLocaleDateString()}
                             </p>
                           )}

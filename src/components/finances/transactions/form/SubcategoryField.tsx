@@ -22,20 +22,23 @@ export function SubcategoryField({ form, subcategories }: SubcategoryFieldProps)
       name="subcategory_id"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Subcategory</FormLabel>
+          <FormLabel className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Subcategory</FormLabel>
           <Select
             onValueChange={field.onChange}
             value={field.value || "none"}
           >
             <FormControl>
-              <SelectTrigger>
+              <SelectTrigger 
+                className="text-white placeholder:text-gray-400"
+                style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff' }}
+              >
                 <SelectValue placeholder="Select subcategory (optional)" />
               </SelectTrigger>
             </FormControl>
-            <SelectContent>
-              <SelectItem value="none">None</SelectItem>
+            <SelectContent className="bg-[#2d1b4e] border-[#3d2a5f]">
+              <SelectItem value="none" className="text-white hover:bg-white/10">None</SelectItem>
               {subcategories.map((subcategory) => (
-                <SelectItem key={subcategory.id} value={subcategory.id}>
+                <SelectItem key={subcategory.id} value={subcategory.id} className="text-white hover:bg-white/10">
                   {subcategory.name}
                 </SelectItem>
               ))}

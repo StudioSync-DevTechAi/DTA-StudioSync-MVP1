@@ -102,10 +102,28 @@ export function FinancialReports({ year }: FinancialReportsProps) {
       <ReportsHeader isLoading={isLoading} onRefresh={fetchMonthlyData} />
 
       <Tabs defaultValue="monthly" value={activeReport} onValueChange={setActiveReport}>
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="monthly">Monthly Trends</TabsTrigger>
-          <TabsTrigger value="categories">Category Breakdown</TabsTrigger>
-          <TabsTrigger value="cashflow">Cash Flow Analysis</TabsTrigger>
+        <TabsList 
+          className="grid w-full grid-cols-3 bg-white/10 border-white/20"
+          style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', borderColor: 'rgba(255, 255, 255, 0.2)' }}
+        >
+          <TabsTrigger 
+            value="monthly"
+            className="data-[state=active]:bg-white/20 data-[state=active]:text-white text-gray-300"
+          >
+            Monthly Trends
+          </TabsTrigger>
+          <TabsTrigger 
+            value="categories"
+            className="data-[state=active]:bg-white/20 data-[state=active]:text-white text-gray-300"
+          >
+            Category Breakdown
+          </TabsTrigger>
+          <TabsTrigger 
+            value="cashflow"
+            className="data-[state=active]:bg-white/20 data-[state=active]:text-white text-gray-300"
+          >
+            Cash Flow Analysis
+          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="monthly" className="mt-6">

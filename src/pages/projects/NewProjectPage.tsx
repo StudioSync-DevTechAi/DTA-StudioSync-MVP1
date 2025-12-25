@@ -2989,7 +2989,11 @@ export default function NewProjectPage() {
                           )}
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
+                      <PopoverContent 
+                        className="w-auto p-0 bg-[#2d1b4e] border-[#3d2a5f]" 
+                        align="start"
+                        style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}
+                      >
                         <Calendar
                           mode="single"
                           selected={formData.startDate}
@@ -3067,7 +3071,11 @@ export default function NewProjectPage() {
                           )}
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
+                      <PopoverContent 
+                        className="w-auto p-0 bg-[#2d1b4e] border-[#3d2a5f]" 
+                        align="start"
+                        style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}
+                      >
                         <Calendar
                           mode="single"
                           selected={formData.endDate}

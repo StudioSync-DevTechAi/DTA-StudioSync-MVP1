@@ -9,6 +9,7 @@ import { Footer } from "@/components/home/Footer";
 import { Button } from "@/components/ui/button";
 import { Camera, Briefcase, Users, ShieldCheck } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 export default function Home() {
   const { user, loading, toggleBypassAuth } = useAuth();
@@ -24,28 +25,16 @@ export default function Home() {
     }
   }, [user, loading, navigate]);
 
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+
   // Show loading while auth state is being determined
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner text="Loading..." />;
   }
 
   // If user is authenticated, show redirecting message
   if (user) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-muted-foreground">Redirecting to dashboard...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner text="Redirecting to dashboard..." />;
   }
   
   // Toggle bypass options with a secret key combination (triple-click on the logo)

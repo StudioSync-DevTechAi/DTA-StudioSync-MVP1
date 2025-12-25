@@ -40,7 +40,7 @@ export function TransactionsView({ categories, onAddTransaction }: TransactionsV
     <div className="space-y-4">
       <TransactionHeader onAddTransaction={onAddTransaction} />
 
-      <Card className="p-4">
+      <Card className="p-4 transition-all hover:shadow-lg" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
         <TransactionFilters
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}

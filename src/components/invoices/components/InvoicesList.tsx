@@ -72,29 +72,46 @@ export function InvoicesList({
   };
 
   return (
-    <Card>
+    <Card style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
       <div className="p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Recent Invoices</h2>
+          <h2 className="text-lg font-semibold text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Recent Invoices</h2>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="gap-2">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="gap-2 text-white hover:bg-white/10"
+                style={{ color: '#ffffff' }}
+              >
                 <ArrowUpDown className="h-4 w-4" />
                 Sort by {getSortLabel()}
                 <ChevronDown className="h-4 w-4 ml-1" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setSortBy("date")}>
+            <DropdownMenuContent align="end" className="bg-[#2d1b4e] border-[#3d2a5f]">
+              <DropdownMenuItem 
+                onClick={() => setSortBy("date")}
+                className="text-white hover:bg-white/10"
+              >
                 Date
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy("amount")}>
+              <DropdownMenuItem 
+                onClick={() => setSortBy("amount")}
+                className="text-white hover:bg-white/10"
+              >
                 Amount
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy("balanceHighToLow")}>
+              <DropdownMenuItem 
+                onClick={() => setSortBy("balanceHighToLow")}
+                className="text-white hover:bg-white/10"
+              >
                 Balance (High to Low)
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy("balanceLowToHigh")}>
+              <DropdownMenuItem 
+                onClick={() => setSortBy("balanceLowToHigh")}
+                className="text-white hover:bg-white/10"
+              >
                 Balance (Low to High)
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -103,7 +120,7 @@ export function InvoicesList({
         
         {invoices.length === 0 ? (
           <div className="py-8 text-center">
-            <p className="text-muted-foreground">No invoices found</p>
+            <p className="text-white/80" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>No invoices found</p>
           </div>
         ) : (
           <div className="rounded-md border">

@@ -33,10 +33,11 @@ export function TransactionFilters({
   return (
     <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
       <div className="relative flex-1">
-        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-white/70" />
         <Input
           placeholder="Search transactions..."
-          className="pl-8"
+          className="pl-8 text-white placeholder:text-gray-400"
+          style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff' }}
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
         />
@@ -46,14 +47,17 @@ export function TransactionFilters({
           value={filterType} 
           onValueChange={onFilterTypeChange}
         >
-          <SelectTrigger className="w-[150px]">
+          <SelectTrigger 
+            className="w-[150px] text-white placeholder:text-gray-400"
+            style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff' }}
+          >
             <Filter className="mr-2 h-4 w-4" />
             <SelectValue placeholder="Filter by type" />
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Types</SelectItem>
-            <SelectItem value="income">Income</SelectItem>
-            <SelectItem value="expense">Expense</SelectItem>
+          <SelectContent className="bg-[#2d1b4e] border-[#3d2a5f]">
+            <SelectItem value="all" className="text-white hover:bg-white/10">All Types</SelectItem>
+            <SelectItem value="income" className="text-white hover:bg-white/10">Income</SelectItem>
+            <SelectItem value="expense" className="text-white hover:bg-white/10">Expense</SelectItem>
           </SelectContent>
         </Select>
 
@@ -61,14 +65,17 @@ export function TransactionFilters({
           value={filterCategory} 
           onValueChange={onFilterCategoryChange}
         >
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger 
+            className="w-[180px] text-white placeholder:text-gray-400"
+            style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff' }}
+          >
             <Filter className="mr-2 h-4 w-4" />
             <SelectValue placeholder="Filter by category" />
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
+          <SelectContent className="bg-[#2d1b4e] border-[#3d2a5f]">
+            <SelectItem value="all" className="text-white hover:bg-white/10">All Categories</SelectItem>
             {categories.map((category) => (
-              <SelectItem key={category.id} value={category.id}>
+              <SelectItem key={category.id} value={category.id} className="text-white hover:bg-white/10">
                 {category.name}
               </SelectItem>
             ))}

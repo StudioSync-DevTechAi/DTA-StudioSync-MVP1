@@ -75,7 +75,10 @@ export default function InvoicesPage() {
 
   return (
     <Layout>
-      <div className="space-y-4 sm:space-y-6 lg:space-y-8 p-3 sm:p-4 md:p-6 animate-in">
+      <div 
+        className="space-y-4 sm:space-y-6 lg:space-y-8 p-3 sm:p-4 md:p-6 animate-in"
+        style={{ backgroundColor: 'rgba(26, 15, 61, 0.98)', backdropFilter: 'blur(10px)', minHeight: '100vh' }}
+      >
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex-1 min-w-0 text-white">
             <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold tracking-tight">Invoices</h1>

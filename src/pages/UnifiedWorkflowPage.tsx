@@ -65,7 +65,10 @@ export default function UnifiedWorkflowPage() {
 
   return (
     <Layout>
-      <div className="space-y-6">
+      <div 
+        className="space-y-6 p-3 sm:p-4 md:p-6"
+        style={{ backgroundColor: 'rgba(26, 15, 61, 0.98)', backdropFilter: 'blur(10px)', minHeight: '100vh' }}
+      >
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -82,24 +85,24 @@ export default function UnifiedWorkflowPage() {
 
         {/* Main Tabs */}
         <Tabs value={mainTab} onValueChange={setMainTab}>
-          <TabsList className="w-full justify-start mb-6">
-            <TabsTrigger value="overview" className="flex items-center gap-2">
+          <TabsList className="w-full justify-start mb-6 bg-white/10 border-white/20" style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', borderColor: 'rgba(255, 255, 255, 0.2)' }}>
+            <TabsTrigger value="overview" className="flex items-center gap-2 data-[state=active]:bg-white/20 data-[state=active]:text-white text-gray-300">
               <Calendar className="h-4 w-4" />
               Overview
             </TabsTrigger>
-            <TabsTrigger value="pre-production" className="flex items-center gap-2">
+            <TabsTrigger value="pre-production" className="flex items-center gap-2 data-[state=active]:bg-white/20 data-[state=active]:text-white text-gray-300">
               <Users className="h-4 w-4" />
               Pre-Production ({getStageCount("pre-production")})
             </TabsTrigger>
-            <TabsTrigger value="production" className="flex items-center gap-2">
+            <TabsTrigger value="production" className="flex items-center gap-2 data-[state=active]:bg-white/20 data-[state=active]:text-white text-gray-300">
               <Clock className="h-4 w-4" />
               Production ({getStageCount("production")})
             </TabsTrigger>
-            <TabsTrigger value="post-production" className="flex items-center gap-2">
+            <TabsTrigger value="post-production" className="flex items-center gap-2 data-[state=active]:bg-white/20 data-[state=active]:text-white text-gray-300">
               <CheckCircle className="h-4 w-4" />
               Post-Production ({getStageCount("post-production")})
             </TabsTrigger>
-            <TabsTrigger value="team" className="flex items-center gap-2">
+            <TabsTrigger value="team" className="flex items-center gap-2 data-[state=active]:bg-white/20 data-[state=active]:text-white text-gray-300">
               <Users className="h-4 w-4" />
               Team
             </TabsTrigger>

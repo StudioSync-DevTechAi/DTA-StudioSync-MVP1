@@ -16,20 +16,23 @@ export function TransactionTypeField({ form }: TransactionTypeFieldProps) {
       name="transaction_type"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Transaction Type</FormLabel>
+          <FormLabel className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Transaction Type</FormLabel>
           <Select
             onValueChange={field.onChange}
             defaultValue={field.value}
             value={field.value}
           >
             <FormControl>
-              <SelectTrigger>
+              <SelectTrigger 
+                className="text-white placeholder:text-gray-400"
+                style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff' }}
+              >
                 <SelectValue placeholder="Select transaction type" />
               </SelectTrigger>
             </FormControl>
-            <SelectContent>
-              <SelectItem value="income">Income</SelectItem>
-              <SelectItem value="expense">Expense</SelectItem>
+            <SelectContent className="bg-[#2d1b4e] border-[#3d2a5f]">
+              <SelectItem value="income" className="text-white hover:bg-white/10">Income</SelectItem>
+              <SelectItem value="expense" className="text-white hover:bg-white/10">Expense</SelectItem>
             </SelectContent>
           </Select>
           <FormMessage />

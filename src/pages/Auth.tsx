@@ -52,26 +52,12 @@ export default function Auth() {
 
   // Show loading state while checking auth
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner text="Loading..." />;
   }
 
   // If user is already authenticated, show redirecting message
   if (user) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-muted-foreground">Redirecting to dashboard...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner text="Redirecting to dashboard..." />;
   }
 
   const handleGoogleAuth = async () => {
@@ -364,7 +350,7 @@ export default function Auth() {
             >
               {emailPasswordLoading ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  <InlineLoadingSpinner size="sm" className="mr-2" />
                   {isSignUp ? "Creating Account..." : "Signing In..."}
                 </>
               ) : (

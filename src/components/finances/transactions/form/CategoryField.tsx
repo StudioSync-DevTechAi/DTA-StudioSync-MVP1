@@ -18,19 +18,22 @@ export function CategoryField({ form, filteredCategories }: CategoryFieldProps) 
       name="category_id"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Category</FormLabel>
+          <FormLabel className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Category</FormLabel>
           <Select
             onValueChange={field.onChange}
             value={field.value}
           >
             <FormControl>
-              <SelectTrigger>
+              <SelectTrigger 
+                className="text-white placeholder:text-gray-400"
+                style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff' }}
+              >
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
             </FormControl>
-            <SelectContent>
+            <SelectContent className="bg-[#2d1b4e] border-[#3d2a5f]">
               {filteredCategories.map((category) => (
-                <SelectItem key={category.id} value={category.id}>
+                <SelectItem key={category.id} value={category.id} className="text-white hover:bg-white/10">
                   {category.name}
                 </SelectItem>
               ))}

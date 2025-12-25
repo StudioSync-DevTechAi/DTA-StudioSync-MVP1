@@ -16,13 +16,15 @@ export function AmountField({ form }: AmountFieldProps) {
       name="amount"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Amount</FormLabel>
+          <FormLabel className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Amount</FormLabel>
           <FormControl>
             <Input 
               type="number" 
               placeholder="Enter amount" 
               {...field}
               step="0.01"
+              className="text-white placeholder:text-gray-400"
+              style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff' }}
             />
           </FormControl>
           <FormMessage />

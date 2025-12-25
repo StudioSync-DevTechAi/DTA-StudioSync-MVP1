@@ -16,7 +16,10 @@ export default function ProjectsPage() {
 
   return (
     <Layout>
-      <div className="space-y-4 sm:space-y-6 p-3 sm:p-4 md:p-6">
+      <div 
+        className="space-y-4 sm:space-y-6 p-3 sm:p-4 md:p-6"
+        style={{ backgroundColor: 'rgba(26, 15, 61, 0.98)', backdropFilter: 'blur(10px)', minHeight: '100vh' }}
+      >
         <EstimatesHeader 
           onNewEstimate={handleNewEstimate}
           canCreate={true}
