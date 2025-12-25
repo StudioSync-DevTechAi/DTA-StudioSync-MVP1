@@ -64,8 +64,8 @@ export function ServiceCard({ service, onUpdate, onRemove }: ServiceCardProps) {
             value={service.event}
             onValueChange={(value) => onUpdate("event", value)}
           >
-            <SelectTrigger className="text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}>
-              <SelectValue placeholder="Select event" className="text-white" />
+            <SelectTrigger className="text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}>
+              <SelectValue placeholder="Select event" className="text-white text-center" style={{ textAlign: 'center', width: '100%' }} />
             </SelectTrigger>
             <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
               {EVENT_OPTIONS.map((event) => (
@@ -84,8 +84,8 @@ export function ServiceCard({ service, onUpdate, onRemove }: ServiceCardProps) {
             value={service.date}
             min={today}
             onChange={handleDateChange}
-            className="text-white"
-            style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
+            className="text-white text-center"
+            style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid', textAlign: 'center' }}
           />
         </div>
 
@@ -97,8 +97,8 @@ export function ServiceCard({ service, onUpdate, onRemove }: ServiceCardProps) {
             value={service.photographers}
             onChange={(e) => onUpdate("photographers", e.target.value)}
             placeholder="Enter number of photographers"
-            className="text-white placeholder:text-gray-400"
-            style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
+            className="text-white placeholder:text-gray-400 text-center"
+            style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid', textAlign: 'center' }}
           />
         </div>
 
@@ -110,8 +110,8 @@ export function ServiceCard({ service, onUpdate, onRemove }: ServiceCardProps) {
             value={service.cinematographers}
             onChange={(e) => onUpdate("cinematographers", e.target.value)}
             placeholder="Enter number of cinematographers"
-            className="text-white placeholder:text-gray-400"
-            style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
+            className="text-white placeholder:text-gray-400 text-center"
+            style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid', textAlign: 'center' }}
           />
         </div>
       </div>
