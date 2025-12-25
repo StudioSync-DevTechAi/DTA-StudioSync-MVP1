@@ -2824,44 +2824,47 @@ export default function NewProjectPage() {
         />
         
         <div className="flex items-center justify-center px-2 sm:px-4">
-          <Card className="w-full max-w-6xl shadow-lg">
-            <CardContent className="p-4 sm:p-6 md:p-8">
+          <Card className="w-full max-w-6xl shadow-lg" style={{ backgroundColor: 'rgba(26, 15, 61, 0.98)', backdropFilter: 'blur(10px)', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)' }}>
+            <CardContent className="p-4 sm:p-6 md:p-8" style={{ backgroundColor: 'rgba(26, 15, 61, 0.98)', backdropFilter: 'blur(10px)' }}>
               {currentPage === 1 ? (
                 <>
                   {/* Project Owner Information */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-3 sm:p-4 bg-muted/50 rounded-lg mb-4 sm:mb-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-3 sm:p-4 rounded-lg mb-4 sm:mb-6" style={{ backgroundColor: 'rgba(45, 27, 78, 0.98)', backdropFilter: 'blur(10px)' }}>
                     <div className="space-y-2">
-                      <Label className="text-left block">Project Owner</Label>
+                      <Label className="text-left block text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Project Owner</Label>
                       <Input
                         value={loadingOwner ? "Loading..." : (photographyOwner?.photography_owner_name || "Not available")}
                         disabled
-                        className="bg-background"
+                        className="bg-background text-white"
+                        style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-left block">Project Owner PhNo</Label>
+                      <Label className="text-left block text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Project Owner PhNo</Label>
                       <Input
                         value={loadingOwner ? "Loading..." : (photographyOwner?.photography_owner_phno || "Not available")}
                         disabled
-                        className="bg-background"
+                        className="bg-background text-white"
+                        style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-left block">Project Owner Email Id</Label>
+                      <Label className="text-left block text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Project Owner Email Id</Label>
                       <Input
                         value={loadingOwner ? "Loading..." : (photographyOwner?.photography_owner_email || "Not available")}
                         disabled
-                        className="bg-background"
+                        className="bg-background text-white"
+                        style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                       />
                     </div>
                   </div>
-                  <h2 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6">Add New Client Booking</h2>
-                  <div className="space-y-4 sm:space-y-6">
+                  <h2 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 text-white" style={{ textShadow: '0 2px 4px rgba(0, 0, 0, 0.8)' }}>Add New Client Booking</h2>
+                  <div className="space-y-4 sm:space-y-6" style={{ backgroundColor: 'rgba(26, 15, 61, 0.98)', backdropFilter: 'blur(10px)', padding: '1rem', borderRadius: '0.5rem' }}>
 
               {/* Project Name and Project Type Row */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2 min-w-0">
-                  <Label htmlFor="projectName" className="text-sm sm:text-base">
+                <div className="space-y-2 min-w-0" style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', padding: '0.5rem', borderRadius: '0.25rem' }}>
+                  <Label htmlFor="projectName" className="text-sm sm:text-base text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>
                     Project Name <span className="text-red-500">*</span>
                   </Label>
                   <Input
@@ -2870,11 +2873,12 @@ export default function NewProjectPage() {
                     value={formData.projectName}
                     onChange={(e) => handleInputChange("projectName", e.target.value)}
                     required
-                    className={`w-full ${formData.projectName.trim() === "" ? "border-red-300" : ""}`}
+                    className={`w-full text-white placeholder:text-gray-400 ${formData.projectName.trim() === "" ? "border-red-300" : ""}`}
+                    style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
                   />
                 </div>
-                <div className="space-y-2 min-w-0">
-                  <Label htmlFor="eventType" className="text-sm sm:text-base">
+                <div className="space-y-2 min-w-0" style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', padding: '0.5rem', borderRadius: '0.25rem' }}>
+                  <Label htmlFor="eventType" className="text-sm sm:text-base text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>
                     Project Type <span className="text-red-500">*</span>
                   </Label>
                   <Select
@@ -2884,17 +2888,18 @@ export default function NewProjectPage() {
                   >
                     <SelectTrigger 
                       id="eventType"
-                      className={formData.eventType === "" ? "border-red-300" : ""}
+                      className={`text-white placeholder:text-gray-400 ${formData.eventType === "" ? "border-red-300" : ""}`}
+                      style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
                     >
-                      <SelectValue placeholder="Select Event Type" />
+                      <SelectValue placeholder="Select Event Type" className="text-white" />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="wedding">Wedding</SelectItem>
-                      <SelectItem value="corporate">Corporate</SelectItem>
-                      <SelectItem value="portrait">Portrait</SelectItem>
-                      <SelectItem value="event">Event</SelectItem>
-                      <SelectItem value="commercial">Commercial</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
+                    <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
+                      <SelectItem value="wedding" className="text-white hover:bg-[#1a0f3d]">Wedding</SelectItem>
+                      <SelectItem value="corporate" className="text-white hover:bg-[#1a0f3d]">Corporate</SelectItem>
+                      <SelectItem value="portrait" className="text-white hover:bg-[#1a0f3d]">Portrait</SelectItem>
+                      <SelectItem value="event" className="text-white hover:bg-[#1a0f3d]">Event</SelectItem>
+                      <SelectItem value="commercial" className="text-white hover:bg-[#1a0f3d]">Commercial</SelectItem>
+                      <SelectItem value="other" className="text-white hover:bg-[#1a0f3d]">Other</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -2902,18 +2907,19 @@ export default function NewProjectPage() {
 
               {/* Client Name, Email, and Phone Row */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div className="space-y-2 min-w-0">
-                  <Label htmlFor="clientFullName" className="text-sm sm:text-base">Client Name:</Label>
+                <div className="space-y-2 min-w-0" style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', padding: '0.5rem', borderRadius: '0.25rem' }}>
+                  <Label htmlFor="clientFullName" className="text-sm sm:text-base text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Client Name:</Label>
                   <Input
                     id="clientFullName"
                     placeholder="Enter client name"
                     value={formData.clientFullName}
                     onChange={(e) => handleInputChange("clientFullName", e.target.value)}
-                    className="w-full"
+                    className="w-full text-white placeholder:text-gray-400"
+                    style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
                   />
                 </div>
-                <div className="space-y-2 min-w-0">
-                  <Label htmlFor="clientEmail" className="text-sm sm:text-base">Client Email:</Label>
+                <div className="space-y-2 min-w-0" style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', padding: '0.5rem', borderRadius: '0.25rem' }}>
+                  <Label htmlFor="clientEmail" className="text-sm sm:text-base text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Client Email:</Label>
                   <Input
                     id="clientEmail"
                     type="email"
@@ -2921,18 +2927,19 @@ export default function NewProjectPage() {
                     value={formData.clientEmail}
                     onChange={(e) => handleInputChange("clientEmail", e.target.value)}
                     className={cn(
-                      "w-full",
+                      "w-full text-white placeholder:text-gray-400",
                       formData.clientEmail && !isValidEmail(formData.clientEmail) ? "border-red-300" : ""
                     )}
+                    style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
                   />
                   {formData.clientEmail && !isValidEmail(formData.clientEmail) && (
-                    <p className="text-xs text-red-500">
+                    <p className="text-xs text-red-400">
                       Email must contain '@' symbol and a valid domain name (e.g., example@domain.com)
                     </p>
                   )}
                 </div>
-                <div className="space-y-2 min-w-0">
-                  <Label htmlFor="clientPhone" className="text-sm sm:text-base">
+                <div className="space-y-2 min-w-0" style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', padding: '0.5rem', borderRadius: '0.25rem' }}>
+                  <Label htmlFor="clientPhone" className="text-sm sm:text-base text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>
                     Client Ph: <span className="text-red-500">*</span>
                   </Label>
                   <Input
@@ -2943,13 +2950,14 @@ export default function NewProjectPage() {
                     onChange={(e) => handleClientPhoneChange(e.target.value)}
                     required
                     className={cn(
-                      "w-full",
+                      "w-full text-white placeholder:text-gray-400",
                       !isPage1Valid() && formData.clientPhone.length < 14 ? "border-red-300" : ""
                     )}
+                    style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
                     maxLength={14}
                   />
                   {formData.clientPhone.length < 14 && formData.clientPhone.length > 4 && (
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-gray-300">
                       {10 - (formData.clientPhone.length - 4)} digits remaining
                     </p>
                   )}
@@ -2957,20 +2965,21 @@ export default function NewProjectPage() {
               </div>
 
               {/* Start Date & Time */}
-              <div className="space-y-2">
-                <Label className="text-sm sm:text-base">Project Start Date & Time <span className="text-red-500">*</span></Label>
-                <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-1 items-end">
+              <div className="space-y-2" style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', padding: '0.5rem', borderRadius: '0.25rem' }}>
+                <Label className="text-sm sm:text-base text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Project Start Date & Time <span className="text-red-500">*</span></Label>
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-1 items-end" style={{ backgroundColor: '#2d1b4e', padding: '0.5rem', borderRadius: '0.25rem' }}>
                   {/* Date Selection - Narrower */}
-                  <div className="col-span-1 sm:col-span-3 w-full sm:max-w-[70%]">
+                  <div className="col-span-1 sm:col-span-3 w-full sm:max-w-[70%]" style={{ backgroundColor: '#1a0f3d', padding: '0.5rem', borderRadius: '0.25rem' }}>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
                           id="startDate"
                           variant="outline"
                           className={cn(
-                            "inline-flex items-center gap-1 sm:gap-2 whitespace-nowrap rounded-md text-xs sm:text-sm md:text-base ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:h-3 [&_svg]:w-3 sm:[&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 sm:h-9 md:h-10 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 w-full justify-start text-left font-normal",
-                            !formData.startDate && "text-muted-foreground"
+                            "inline-flex items-center gap-1 sm:gap-2 whitespace-nowrap rounded-md text-xs sm:text-sm md:text-base ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:h-3 [&_svg]:w-3 sm:[&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 sm:h-9 md:h-10 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 w-full justify-start text-left font-normal text-white",
+                            !formData.startDate && "text-gray-400"
                           )}
+                          style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                         >
                           <CalendarIcon className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                           {formData.startDate ? (
@@ -2980,7 +2989,11 @@ export default function NewProjectPage() {
                           )}
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
+                      <PopoverContent 
+                        className="w-auto p-0 bg-[#2d1b4e] border-[#3d2a5f]" 
+                        align="start"
+                        style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}
+                      >
                         <Calendar
                           mode="single"
                           selected={formData.startDate}
@@ -2991,7 +3004,7 @@ export default function NewProjectPage() {
                   </div>
 
                   {/* Time Picker Clock */}
-                  <div className="col-span-1 sm:col-span-3 w-full sm:max-w-[70%]">
+                  <div className="col-span-1 sm:col-span-3 w-full sm:max-w-[70%]" style={{ backgroundColor: '#1a0f3d', padding: '0.5rem', borderRadius: '0.25rem' }}>
                     <TimePickerClock
                       hour={formData.startHour || "00"}
                       minute={formData.startMinute || "00"}
@@ -3007,7 +3020,7 @@ export default function NewProjectPage() {
                         htmlFor="confirmationStatus" 
                         className={cn(
                           "font-normal cursor-pointer whitespace-nowrap text-xs sm:text-sm md:text-base transition-colors",
-                          formData.confirmationStatus ? "text-green-600" : "text-gray-500"
+                          formData.confirmationStatus ? "text-green-400" : "text-gray-300"
                         )}
                       >
                         Confirmed
@@ -3026,19 +3039,19 @@ export default function NewProjectPage() {
               </div>
 
               {/* End Date & Time */}
-              <div className="space-y-2">
-                <Label className="text-sm sm:text-base">Project End Date & Time</Label>
-                <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-1 items-end">
+              <div className="space-y-2" style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', padding: '0.5rem', borderRadius: '0.25rem' }}>
+                <Label className="text-sm sm:text-base text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Project End Date & Time</Label>
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-1 items-end" style={{ backgroundColor: '#2d1b4e', padding: '0.5rem', borderRadius: '0.25rem' }}>
                   {/* Date Selection - Narrower */}
-                  <div className="col-span-1 sm:col-span-3 w-full sm:max-w-[70%]">
+                  <div className="col-span-1 sm:col-span-3 w-full sm:max-w-[70%]" style={{ backgroundColor: '#1a0f3d', padding: '0.5rem', borderRadius: '0.25rem' }}>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
                           id="endDate"
                           variant="outline"
                           className={cn(
-                            "inline-flex items-center gap-1 sm:gap-2 whitespace-nowrap rounded-md text-xs sm:text-sm md:text-base ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:h-3 [&_svg]:w-3 sm:[&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 sm:h-9 md:h-10 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 w-full justify-start text-left font-normal",
-                            !formData.endDate && "text-muted-foreground",
+                            "inline-flex items-center gap-1 sm:gap-2 whitespace-nowrap rounded-md text-xs sm:text-sm md:text-base ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:h-3 [&_svg]:w-3 sm:[&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 sm:h-9 md:h-10 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 w-full justify-start text-left font-normal text-white",
+                            !formData.endDate && "text-gray-400",
                             (() => {
                               if (!formData.endDate || !formData.startDate) return false;
                               const startDateOnly = new Date(formData.startDate);
@@ -3048,6 +3061,7 @@ export default function NewProjectPage() {
                               return endDateOnly < startDateOnly;
                             })() && "border-red-300"
                           )}
+                          style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                         >
                           <CalendarIcon className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                           {formData.endDate ? (
@@ -3057,7 +3071,11 @@ export default function NewProjectPage() {
                           )}
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
+                      <PopoverContent 
+                        className="w-auto p-0 bg-[#2d1b4e] border-[#3d2a5f]" 
+                        align="start"
+                        style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}
+                      >
                         <Calendar
                           mode="single"
                           selected={formData.endDate}
@@ -3091,7 +3109,7 @@ export default function NewProjectPage() {
                   </div>
 
                   {/* Time Picker Clock */}
-                  <div className="col-span-1 sm:col-span-3 w-full sm:max-w-[70%]">
+                  <div className="col-span-1 sm:col-span-3 w-full sm:max-w-[70%]" style={{ backgroundColor: '#1a0f3d', padding: '0.5rem', borderRadius: '0.25rem' }}>
                     <TimePickerClock
                       hour={formData.endHour || "00"}
                       minute={formData.endMinute || "00"}
@@ -3107,7 +3125,7 @@ export default function NewProjectPage() {
                         htmlFor="endConfirmationStatus" 
                         className={cn(
                           "font-normal cursor-pointer whitespace-nowrap text-xs sm:text-sm md:text-base transition-colors",
-                          formData.endConfirmationStatus ? "text-green-600" : "text-gray-500"
+                          formData.endConfirmationStatus ? "text-green-400" : "text-gray-300"
                         )}
                       >
                         Confirmed
@@ -3174,8 +3192,9 @@ export default function NewProjectPage() {
                               }}
                               className="p-2 hover:bg-accent rounded-md transition-colors"
                               title="Revert changes"
+                              style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}
                             >
-                              <RotateCcw className="h-5 w-5 text-muted-foreground hover:text-foreground" />
+                              <RotateCcw className="h-5 w-5 text-gray-300 hover:text-white" />
                             </button>
                           )}
                           {projectEstimateUuid && (
@@ -3186,30 +3205,30 @@ export default function NewProjectPage() {
                                 setCurrentPage(1);
                                 setSearchParams({ projectUuid: projectEstimateUuid, page: '1' });
                               }}
-                              className="flex items-center gap-2"
+                              className="flex items-center gap-2 bg-[#2d1b4e] text-white border-[#3d2a5f] hover:bg-[#1a0f3d]"
                             >
                               <ArrowLeft className="h-4 w-4" />
                               Project Details
                             </Button>
                           )}
                           <div className="flex-1 flex justify-center">
-                            <h2 className="text-2xl font-semibold">Events Details</h2>
+                            <h2 className="text-2xl font-semibold text-white">Events Details</h2>
                           </div>
                         </div>
                         <div className="flex flex-wrap items-center gap-2 text-sm mt-2">
-                          <span className="font-medium">Project:</span>
-                          <span className="text-muted-foreground">{projectDetails?.project_name || formData.projectName || "Not set"}</span>
-                          <span className="text-muted-foreground">|</span>
-                          <span className="font-medium">Project Type:</span>
-                          <span className="text-muted-foreground">{projectDetails?.project_type || formData.eventType || "Not set"}</span>
-                          <span className="text-muted-foreground">|</span>
-                          <span className="font-medium">StartDate:</span>
-                          <span className="text-muted-foreground">
+                          <span className="font-medium text-white">Project:</span>
+                          <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>{projectDetails?.project_name || formData.projectName || "Not set"}</span>
+                          <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>|</span>
+                          <span className="font-medium text-white">Project Type:</span>
+                          <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>{projectDetails?.project_type || formData.eventType || "Not set"}</span>
+                          <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>|</span>
+                          <span className="font-medium text-white">StartDate:</span>
+                          <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>
                             {formData.startDate ? format(formData.startDate, "MM/dd/yyyy") : "Not set"}
                           </span>
-                          <span className="text-muted-foreground">|</span>
-                          <span className="font-medium">EndDate:</span>
-                          <span className="text-muted-foreground">
+                          <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>|</span>
+                          <span className="font-medium text-white">EndDate:</span>
+                          <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>
                             {formData.endDate ? format(formData.endDate, "MM/dd/yyyy") : "Not set"}
                           </span>
                         </div>
@@ -3229,17 +3248,17 @@ export default function NewProjectPage() {
                             'Save Events'
                           )}
                         </Button>
-                        <Button variant="outline" onClick={handleCancel}>
+                        <Button variant="outline" onClick={handleCancel} className="bg-[#2d1b4e] text-white border-[#3d2a5f] hover:bg-[#1a0f3d]">
                           Cancel
                         </Button>
                       </div>
                     </div>
                     <div className="flex flex-wrap items-center gap-2 text-sm">
-                      <span className="font-medium">Client Name:</span>
-                      <span className="text-muted-foreground">{formData.clientFullName || "Not set"}</span>
-                      <span className="text-muted-foreground">|</span>
-                      <span className="font-medium">Client PhNo:</span>
-                      <span className="text-muted-foreground">{formData.clientPhone || "Not set"}</span>
+                      <span className="font-medium text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Client Name:</span>
+                      <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>{formData.clientFullName || "Not set"}</span>
+                      <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>|</span>
+                      <span className="font-medium text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Client PhNo:</span>
+                      <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>{formData.clientPhone || "Not set"}</span>
                     </div>
                   </div>
 
@@ -3254,6 +3273,7 @@ export default function NewProjectPage() {
                           <Card 
                             key={pkg.id} 
                             className="p-3 sm:p-4 w-full sm:w-[45%] relative"
+                            style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}
                             onClick={(e) => {
                               // Only save if clicking on the card itself (white space), not on interactive elements
                               const target = e.target as HTMLElement;
@@ -3288,18 +3308,20 @@ export default function NewProjectPage() {
                                       }
                                     }}
                                     autoFocus
-                                    className="font-medium h-8 w-auto min-w-[150px]"
+                                    className="font-medium h-8 w-auto min-w-[150px] text-white placeholder:text-gray-400"
+                                    style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                   />
                                 ) : (
                                   <h3 
-                                    className="font-medium cursor-pointer hover:text-primary"
+                                    className="font-medium cursor-pointer hover:text-primary text-white"
+                                    style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}
                                     onClick={() => handleEditPackageName(pkg.id)}
                                   >
                                     {pkg.packageName || `Event Package ${index + 1}`}
                                   </h3>
                                 )}
                                 {!isExpanded && pkg.daysCount && (
-                                  <span className="text-sm text-muted-foreground absolute left-[42%] transform -translate-x-1/2">
+                                  <span className="text-sm text-gray-300 absolute left-[42%] transform -translate-x-1/2" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>
                                     Days {pkg.daysCount || "1"}
                                   </span>
                                 )}
@@ -3313,13 +3335,14 @@ export default function NewProjectPage() {
                                           ? 'opacity-50 cursor-not-allowed' 
                                           : 'hover:bg-accent'
                                       }`}
+                                      style={{ backgroundColor: isExpanded ? 'transparent' : '#2d1b4e' }}
                                       aria-label="Edit event"
                                       title={isExpanded ? "Save changes first" : "Edit event"}
                                     >
                                       <Pencil className={`h-4 w-4 ${
                                         isExpanded 
-                                          ? 'text-muted-foreground' 
-                                          : 'text-muted-foreground hover:text-foreground'
+                                          ? 'text-gray-400' 
+                                          : 'text-gray-300 hover:text-white'
                                       }`} />
                                     </button>
                                   )}
@@ -3327,13 +3350,14 @@ export default function NewProjectPage() {
                                     variant="outline"
                                     size="sm"
                                     onClick={() => toggleEventDetails(pkg.id)}
-                                    className="h-8"
+                                    className="h-8 bg-[#2d1b4e] text-white border-[#3d2a5f] hover:bg-[#1a0f3d]"
+                                    style={{ color: '#ffffff' }}
                                   >
-                                    Details
+                                    <span style={{ color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Details</span>
                                     {isExpanded ? (
-                                      <ChevronUp className="ml-2 h-4 w-4" />
+                                      <ChevronUp className="ml-2 h-4 w-4 text-white" style={{ color: '#ffffff' }} />
                                     ) : (
-                                      <ChevronDown className="ml-2 h-4 w-4" />
+                                      <ChevronDown className="ml-2 h-4 w-4 text-white" style={{ color: '#ffffff' }} />
                                     )}
                                   </Button>
                                   <Button
@@ -3342,8 +3366,8 @@ export default function NewProjectPage() {
                                     onClick={() => handleSaveEventCard(pkg.id)}
                                     className={`${
                                       isExpanded && pkg.eventType && pkg.startDate && hasUnsavedChanges(pkg)
-                                        ? 'text-green-600 hover:text-green-700 hover:bg-green-50'
-                                        : 'text-muted-foreground opacity-50'
+                                        ? 'text-green-400 hover:text-green-300 hover:bg-[#1a0f3d]'
+                                        : 'text-gray-300 opacity-50'
                                     }`}
                                     disabled={!isExpanded || !pkg.eventType || !pkg.startDate || !hasUnsavedChanges(pkg)}
                                     title={
@@ -3363,7 +3387,7 @@ export default function NewProjectPage() {
                                       variant="ghost"
                                       size="sm"
                                       onClick={() => handleRemoveEventPackage(pkg.id)}
-                                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                      className="text-red-400 hover:text-red-300 hover:bg-[#1a0f3d]"
                                     >
                                       <Trash2 className="h-4 w-4" />
                                     </Button>
@@ -3384,17 +3408,17 @@ export default function NewProjectPage() {
                                           handleEventPackageChange(pkg.id, "eventType", value)
                                         }
                                       >
-                                        <SelectTrigger id={`eventType-${pkg.id}`}>
-                                          <SelectValue placeholder="Select an event type" />
+                                        <SelectTrigger id={`eventType-${pkg.id}`} className="text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}>
+                                          <SelectValue placeholder="Select an event type" className="text-white" />
                                         </SelectTrigger>
-                                        <SelectContent>
-                                          <SelectItem value="wedding">Wedding</SelectItem>
-                                          <SelectItem value="engagement">Engagement</SelectItem>
-                                          <SelectItem value="corporate">Corporate</SelectItem>
-                                          <SelectItem value="portrait">Portrait</SelectItem>
-                                          <SelectItem value="event">Event</SelectItem>
-                                          <SelectItem value="commercial">Commercial</SelectItem>
-                                          <SelectItem value="other">Other</SelectItem>
+                                        <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
+                                          <SelectItem value="wedding" className="text-white hover:bg-[#1a0f3d]">Wedding</SelectItem>
+                                          <SelectItem value="engagement" className="text-white hover:bg-[#1a0f3d]">Engagement</SelectItem>
+                                          <SelectItem value="corporate" className="text-white hover:bg-[#1a0f3d]">Corporate</SelectItem>
+                                          <SelectItem value="portrait" className="text-white hover:bg-[#1a0f3d]">Portrait</SelectItem>
+                                          <SelectItem value="event" className="text-white hover:bg-[#1a0f3d]">Event</SelectItem>
+                                          <SelectItem value="commercial" className="text-white hover:bg-[#1a0f3d]">Commercial</SelectItem>
+                                          <SelectItem value="other" className="text-white hover:bg-[#1a0f3d]">Other</SelectItem>
                                         </SelectContent>
                                       </Select>
                                     </div>
@@ -3408,12 +3432,13 @@ export default function NewProjectPage() {
                                           onChange={(e) =>
                                             handleEventPackageChange(pkg.id, "customEventTypeName", e.target.value)
                                           }
-                                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm text-white"
+                                          style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                         />
                                       </div>
                                     )}
                                     <div className="flex-shrink-0 flex items-center gap-2 ml-4">
-                                      <Label htmlFor={`daysCount-${pkg.id}`} className="text-sm font-medium leading-none whitespace-nowrap">Days No.</Label>
+                                      <Label htmlFor={`daysCount-${pkg.id}`} className="text-sm font-medium leading-none whitespace-nowrap text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Days No.</Label>
                                       <Input
                                         id={`daysCount-${pkg.id}`}
                                         type="number"
@@ -3422,7 +3447,8 @@ export default function NewProjectPage() {
                                         placeholder="Days No."
                                         value={pkg.daysCount || "1"}
                                         onChange={(e) => handleEventPackageChange(pkg.id, "daysCount", e.target.value)}
-                                        className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm w-20"
+                                        className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm w-20 text-white"
+                                        style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                       />
                                     </div>
                                   </div>
@@ -3430,7 +3456,7 @@ export default function NewProjectPage() {
                                   {/* Second row: PGs No, PGDays, VGs No, VGDays */}
                                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                                     <div className="space-y-2 min-w-0">
-                                      <Label htmlFor={`photographers-${pkg.id}`} className="text-xs sm:text-sm font-medium leading-none">PGs No</Label>
+                                      <Label htmlFor={`photographers-${pkg.id}`} className="text-xs sm:text-sm font-medium leading-none text-white">PGs No</Label>
                                       <Input
                                         id={`photographers-${pkg.id}`}
                                         type="number"
@@ -3444,28 +3470,29 @@ export default function NewProjectPage() {
                                             e.target.value
                                           )
                                         }
-                                        className="w-full text-sm"
+                                        className="w-full text-sm text-white placeholder:text-gray-400"
+                                        style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                       />
                                     </div>
                                     <div className="space-y-2 min-w-0">
-                                      <Label htmlFor={`pgType-${pkg.id}`} className="text-xs sm:text-sm font-medium leading-none">PG-Type</Label>
+                                      <Label htmlFor={`pgType-${pkg.id}`} className="text-xs sm:text-sm font-medium leading-none text-white">PG-Type</Label>
                                       <Select
                                         value={pkg.pgType || ""}
                                         onValueChange={(value) =>
                                           handleEventPackageChange(pkg.id, "pgType", value)
                                         }
                                       >
-                                        <SelectTrigger id={`pgType-${pkg.id}`} className="w-full sm:w-16">
-                                          <SelectValue placeholder="--" />
+                                        <SelectTrigger id={`pgType-${pkg.id}`} className="w-full sm:w-16 text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}>
+                                          <SelectValue placeholder="--" className="text-white" />
                                         </SelectTrigger>
-                                        <SelectContent>
-                                          <SelectItem value="EF">EF</SelectItem>
-                                          <SelectItem value="GH">GH</SelectItem>
+                                        <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
+                                          <SelectItem value="EF" className="text-white hover:bg-[#1a0f3d]">EF</SelectItem>
+                                          <SelectItem value="GH" className="text-white hover:bg-[#1a0f3d]">GH</SelectItem>
                                         </SelectContent>
                                       </Select>
                                     </div>
                                     <div className="space-y-2 min-w-0">
-                                      <Label htmlFor={`videographers-${pkg.id}`} className="text-xs sm:text-sm font-medium leading-none">VGs No</Label>
+                                      <Label htmlFor={`videographers-${pkg.id}`} className="text-xs sm:text-sm font-medium leading-none text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>VGs No</Label>
                                       <Input
                                         id={`videographers-${pkg.id}`}
                                         type="number"
@@ -3479,24 +3506,24 @@ export default function NewProjectPage() {
                                             e.target.value
                                           )
                                         }
-                                        className="w-full text-sm"
-                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                        className="w-full text-sm text-white placeholder:text-gray-400"
+                                        style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                       />
                                     </div>
                                     <div className="space-y-2">
-                                      <Label htmlFor={`vgType-${pkg.id}`} className="text-sm font-medium leading-none">VG-Type</Label>
+                                      <Label htmlFor={`vgType-${pkg.id}`} className="text-sm font-medium leading-none text-white">VG-Type</Label>
                                       <Select
                                         value={pkg.vgType || ""}
                                         onValueChange={(value) =>
                                           handleEventPackageChange(pkg.id, "vgType", value)
                                         }
                                       >
-                                        <SelectTrigger id={`vgType-${pkg.id}`} className="w-16">
-                                          <SelectValue placeholder="--" />
+                                        <SelectTrigger id={`vgType-${pkg.id}`} className="w-16 text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}>
+                                          <SelectValue placeholder="--" className="text-white" />
                                         </SelectTrigger>
-                                        <SelectContent>
-                                          <SelectItem value="AB">AB</SelectItem>
-                                          <SelectItem value="CD">CD</SelectItem>
+                                        <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
+                                          <SelectItem value="AB" className="text-white hover:bg-[#1a0f3d]">AB</SelectItem>
+                                          <SelectItem value="CD" className="text-white hover:bg-[#1a0f3d]">CD</SelectItem>
                                         </SelectContent>
                                       </Select>
                                     </div>
@@ -3517,17 +3544,17 @@ export default function NewProjectPage() {
                                               handleEventPackageChange(pkg.id, "eventType", value)
                                             }
                                           >
-                                            <SelectTrigger id={`eventType-${pkg.id}`}>
-                                              <SelectValue placeholder="Select an event type" />
+                                            <SelectTrigger id={`eventType-${pkg.id}`} className="text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}>
+                                              <SelectValue placeholder="Select an event type" className="text-white" />
                                             </SelectTrigger>
-                                            <SelectContent>
-                                              <SelectItem value="wedding">Wedding</SelectItem>
-                                              <SelectItem value="engagement">Engagement</SelectItem>
-                                              <SelectItem value="corporate">Corporate</SelectItem>
-                                              <SelectItem value="portrait">Portrait</SelectItem>
-                                              <SelectItem value="event">Event</SelectItem>
-                                              <SelectItem value="commercial">Commercial</SelectItem>
-                                              <SelectItem value="other">Other</SelectItem>
+                                            <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
+                                              <SelectItem value="wedding" className="text-white hover:bg-[#1a0f3d]">Wedding</SelectItem>
+                                              <SelectItem value="engagement" className="text-white hover:bg-[#1a0f3d]">Engagement</SelectItem>
+                                              <SelectItem value="corporate" className="text-white hover:bg-[#1a0f3d]">Corporate</SelectItem>
+                                              <SelectItem value="portrait" className="text-white hover:bg-[#1a0f3d]">Portrait</SelectItem>
+                                              <SelectItem value="event" className="text-white hover:bg-[#1a0f3d]">Event</SelectItem>
+                                              <SelectItem value="commercial" className="text-white hover:bg-[#1a0f3d]">Commercial</SelectItem>
+                                              <SelectItem value="other" className="text-white hover:bg-[#1a0f3d]">Other</SelectItem>
                                             </SelectContent>
                                           </Select>
                                         </div>
@@ -3541,12 +3568,13 @@ export default function NewProjectPage() {
                                               onChange={(e) =>
                                                 handleEventPackageChange(pkg.id, "customEventTypeName", e.target.value)
                                               }
-                                              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm text-white"
+                                          style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                             />
                                           </div>
                                         )}
                                         <div className="flex-shrink-0 flex items-center gap-2 ml-4">
-                                          <Label htmlFor={`daysCount-${pkg.id}`} className="text-sm font-medium leading-none whitespace-nowrap">Days No.</Label>
+                                          <Label htmlFor={`daysCount-${pkg.id}`} className="text-sm font-medium leading-none whitespace-nowrap text-white">Days No.</Label>
                                           <Input
                                             id={`daysCount-${pkg.id}`}
                                             type="number"
@@ -3555,7 +3583,8 @@ export default function NewProjectPage() {
                                             placeholder="Days No."
                                             value={pkg.daysCount || "1"}
                                             onChange={(e) => handleEventPackageChange(pkg.id, "daysCount", e.target.value)}
-                                            className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm w-20"
+                                            className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm w-20 text-white"
+                                            style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                           />
                                         </div>
                                       </div>
@@ -3563,7 +3592,7 @@ export default function NewProjectPage() {
                                       {/* Second row: PGs No, PGDays, VGs No, VGDays */}
                                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                                         <div className="space-y-2 min-w-0">
-                                          <Label htmlFor={`photographers-${pkg.id}`} className="text-xs sm:text-sm font-medium leading-none">PGs No</Label>
+                                          <Label htmlFor={`photographers-${pkg.id}`} className="text-xs sm:text-sm font-medium leading-none text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>PGs No</Label>
                                           <Input
                                             id={`photographers-${pkg.id}`}
                                             type="number"
@@ -3577,28 +3606,29 @@ export default function NewProjectPage() {
                                                 e.target.value
                                               )
                                             }
-                                            className="w-full text-sm"
+                                            className="w-full text-sm text-white placeholder:text-gray-400"
+                                            style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                           />
                                         </div>
                                         <div className="space-y-2 min-w-0">
-                                          <Label htmlFor={`pgType-${pkg.id}`} className="text-xs sm:text-sm font-medium leading-none">PG-Type</Label>
+                                          <Label htmlFor={`pgType-${pkg.id}`} className="text-xs sm:text-sm font-medium leading-none text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>PG-Type</Label>
                                           <Select
                                             value={pkg.pgType || ""}
                                             onValueChange={(value) =>
                                               handleEventPackageChange(pkg.id, "pgType", value)
                                             }
                                           >
-                                            <SelectTrigger id={`pgType-${pkg.id}`} className="w-full sm:w-16">
-                                              <SelectValue placeholder="--" />
+                                            <SelectTrigger id={`pgType-${pkg.id}`} className="w-full sm:w-16 text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}>
+                                              <SelectValue placeholder="--" className="text-white" />
                                             </SelectTrigger>
-                                            <SelectContent>
-                                              <SelectItem value="EF">EF</SelectItem>
-                                              <SelectItem value="GH">GH</SelectItem>
+                                            <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
+                                              <SelectItem value="EF" className="text-white hover:bg-[#1a0f3d]">EF</SelectItem>
+                                              <SelectItem value="GH" className="text-white hover:bg-[#1a0f3d]">GH</SelectItem>
                                             </SelectContent>
                                           </Select>
                                         </div>
                                         <div className="space-y-2 min-w-0">
-                                          <Label htmlFor={`videographers-${pkg.id}`} className="text-xs sm:text-sm font-medium leading-none">VGs No</Label>
+                                          <Label htmlFor={`videographers-${pkg.id}`} className="text-xs sm:text-sm font-medium leading-none text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>VGs No</Label>
                                           <Input
                                             id={`videographers-${pkg.id}`}
                                             type="number"
@@ -3612,24 +3642,24 @@ export default function NewProjectPage() {
                                                 e.target.value
                                               )
                                             }
-                                            className="w-full text-sm"
-                                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm text-white"
+                                            style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                           />
                                         </div>
                                         <div className="space-y-2">
-                                          <Label htmlFor={`vgType-${pkg.id}`} className="text-sm font-medium leading-none">VG-Type</Label>
+                                          <Label htmlFor={`vgType-${pkg.id}`} className="text-sm font-medium leading-none text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>VG-Type</Label>
                                           <Select
                                             value={pkg.vgType || ""}
                                             onValueChange={(value) =>
                                               handleEventPackageChange(pkg.id, "vgType", value)
                                             }
                                           >
-                                            <SelectTrigger id={`vgType-${pkg.id}`} className="w-16">
-                                              <SelectValue placeholder="--" />
+                                            <SelectTrigger id={`vgType-${pkg.id}`} className="w-16 text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}>
+                                              <SelectValue placeholder="--" className="text-white" />
                                             </SelectTrigger>
-                                            <SelectContent>
-                                              <SelectItem value="AB">AB</SelectItem>
-                                              <SelectItem value="CD">CD</SelectItem>
+                                            <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
+                                              <SelectItem value="AB" className="text-white hover:bg-[#1a0f3d]">AB</SelectItem>
+                                              <SelectItem value="CD" className="text-white hover:bg-[#1a0f3d]">CD</SelectItem>
                                             </SelectContent>
                                           </Select>
                                         </div>
@@ -3642,8 +3672,8 @@ export default function NewProjectPage() {
                                       <div className="w-full">
                                         <div className="flex items-center gap-4 text-sm flex-wrap">
                                           <div className="flex items-center gap-2">
-                                            <span className="text-muted-foreground">Event Type:</span>
-                                            <span className="font-medium capitalize">
+                                            <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>Event Type:</span>
+                                            <span className="font-medium capitalize text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>
                                               {pkg.eventType === "other" && pkg.customEventTypeName
                                                 ? pkg.customEventTypeName
                                                 : pkg.eventType || "Not set"}
@@ -3651,13 +3681,13 @@ export default function NewProjectPage() {
                                           </div>
                                           {pkg.startDate && (
                                             <div className="flex items-center gap-2">
-                                              <span className="text-muted-foreground">On:</span>
-                                              <span className="font-medium">{format(pkg.startDate, "MMM dd, yyyy")}</span>
+                                              <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>On:</span>
+                                              <span className="font-medium text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>{format(pkg.startDate, "MMM dd, yyyy")}</span>
                                             </div>
                                           )}
                                           <div className="flex items-center gap-2">
-                                            <span className="text-muted-foreground">Cost:</span>
-                                            <span className="font-medium">₹{(() => {
+                                            <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>Cost:</span>
+                                            <span className="font-medium text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>₹{(() => {
                                               // Calculate cost for this event package using same logic as calculateEventWiseCosts
                                               const basePricePerPhotographer = 10000;
                                               const basePricePerVideographer = 15000;
@@ -3688,20 +3718,20 @@ export default function NewProjectPage() {
                                       {/* Second row: PGs No, PGDays, VGs No, VGDays */}
                                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 text-xs sm:text-sm">
                                         <div className="flex items-center gap-2 min-w-0">
-                                          <span className="text-muted-foreground truncate">PGs No:</span>
-                                          <span className="font-medium">{pkg.photographersCount || "0"}</span>
+                                          <span className="text-gray-300 truncate" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>PGs No:</span>
+                                          <span className="font-medium text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>{pkg.photographersCount || "0"}</span>
                                         </div>
                                         <div className="flex items-center gap-2 min-w-0">
-                                          <span className="text-muted-foreground truncate">PG-Type:</span>
-                                          <span className="font-medium">{pkg.pgType || "--"}</span>
+                                          <span className="text-gray-300 truncate" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>PG-Type:</span>
+                                          <span className="font-medium text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>{pkg.pgType || "--"}</span>
                                         </div>
                                         <div className="flex items-center gap-2 min-w-0">
-                                          <span className="text-muted-foreground truncate">VGs No:</span>
-                                          <span className="font-medium">{pkg.videographersCount || "0"}</span>
+                                          <span className="text-gray-300 truncate" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>VGs No:</span>
+                                          <span className="font-medium text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>{pkg.videographersCount || "0"}</span>
                                         </div>
                                         <div className="flex items-center gap-2 min-w-0">
-                                          <span className="text-muted-foreground truncate">VG-Type:</span>
-                                          <span className="font-medium">{pkg.vgType || "--"}</span>
+                                          <span className="text-gray-300 truncate" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>VG-Type:</span>
+                                          <span className="font-medium text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>{pkg.vgType || "--"}</span>
                                         </div>
                                       </div>
                                     </>
@@ -3714,7 +3744,7 @@ export default function NewProjectPage() {
                               <div className="mt-4 pt-4 border-t space-y-4">
                                 {/* Start Date & Time */}
                                 <div className="space-y-2">
-                                  <Label className="text-sm font-medium leading-none">Event StartDate & Time</Label>
+                                  <Label className="text-sm font-medium leading-none text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Event StartDate & Time</Label>
                                   <div className="flex items-end gap-4">
                                     {/* Date Selection */}
                                     <div className="flex-shrink-0">
@@ -3723,15 +3753,16 @@ export default function NewProjectPage() {
                                           <Button
                                             variant="outline"
                                             className={cn(
-                                              "inline-flex items-center gap-1 sm:gap-2 whitespace-nowrap rounded-md text-xs sm:text-sm md:text-base ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:h-3 [&_svg]:w-3 sm:[&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 sm:h-9 md:h-10 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 w-full justify-start text-left font-normal",
-                                              !pkg.startDate && "text-muted-foreground"
+                                              "inline-flex items-center gap-1 sm:gap-2 whitespace-nowrap rounded-md text-xs sm:text-sm md:text-base ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:h-3 [&_svg]:w-3 sm:[&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 sm:h-9 md:h-10 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 w-full justify-start text-left font-normal text-white",
+                                              !pkg.startDate && "text-gray-400"
                                             )}
+                                            style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
                                           >
-                                            <CalendarIcon className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                                            <CalendarIcon className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 text-white" />
                                             {pkg.startDate ? (
                                               format(pkg.startDate, "MM/dd/yyyy")
                                             ) : (
-                                              <span className="text-xs sm:text-sm">mm/dd/yyyy</span>
+                                              <span className="text-xs sm:text-sm text-gray-400">mm/dd/yyyy</span>
                                             )}
                                           </Button>
                                         </PopoverTrigger>
@@ -3767,12 +3798,12 @@ export default function NewProjectPage() {
                                         handleEventPackageChange(pkg.id, "pgType", value)
                                       }
                                     >
-                                    <SelectTrigger id={`pgType-${pkg.id}`} className="w-full sm:w-16">
-                                      <SelectValue placeholder="--" />
+                                    <SelectTrigger id={`pgType-${pkg.id}`} className="w-full sm:w-16 text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}>
+                                      <SelectValue placeholder="--" className="text-white" />
                                     </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="EF">EF</SelectItem>
-                                      <SelectItem value="GH">GH</SelectItem>
+                                    <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
+                                      <SelectItem value="EF" className="text-white hover:bg-[#1a0f3d]">EF</SelectItem>
+                                      <SelectItem value="GH" className="text-white hover:bg-[#1a0f3d]">GH</SelectItem>
                                     </SelectContent>
                                   </Select>
                                 </div>
@@ -3784,12 +3815,12 @@ export default function NewProjectPage() {
                                         handleEventPackageChange(pkg.id, "vgType", value)
                                       }
                                     >
-                                    <SelectTrigger id={`vgType-${pkg.id}`} className="w-full sm:w-16">
-                                      <SelectValue placeholder="--" />
+                                    <SelectTrigger id={`vgType-${pkg.id}`} className="w-full sm:w-16 text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}>
+                                      <SelectValue placeholder="--" className="text-white" />
                                     </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="AB">AB</SelectItem>
-                                      <SelectItem value="CD">CD</SelectItem>
+                                    <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
+                                      <SelectItem value="AB" className="text-white hover:bg-[#1a0f3d]">AB</SelectItem>
+                                      <SelectItem value="CD" className="text-white hover:bg-[#1a0f3d]">CD</SelectItem>
                                     </SelectContent>
                                   </Select>
                                 </div>
@@ -3801,12 +3832,12 @@ export default function NewProjectPage() {
                                   <Label htmlFor={`photoCoordinator-${pkg.id}`} className="text-xs sm:text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">PhotoPOC</Label>
                                     <div className="flex items-end gap-2">
                                       {pkg.photographyCoordinatorId ? (
-                                        <div className="flex items-center justify-between p-3 border rounded-md bg-muted/50 flex-1 w-[60%]">
+                                        <div className="flex items-center justify-between p-3 border rounded-md flex-1 w-[60%]" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
                                           <div className="flex-1">
-                                            <div className="font-medium text-sm">
+                                            <div className="font-medium text-sm text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>
                                               {photographers.find(p => p.photographer_phno === pkg.photographyCoordinatorId)?.photographer_name || 'Photographer'}
                                             </div>
-                                            <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                                            <div className="flex items-center gap-1 text-xs text-gray-300 mt-1" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>
                                               <Phone className="h-3 w-3" />
                                               {pkg.photographyCoordinatorId}
                                             </div>
@@ -3815,7 +3846,7 @@ export default function NewProjectPage() {
                                             variant="ghost"
                                             size="sm"
                                             onClick={() => handleEventPackageChange(pkg.id, "photographyCoordinatorId", undefined)}
-                                            className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+                                            className="h-8 w-8 p-0 text-gray-300 hover:text-white hover:bg-[#1a0f3d]"
                                           >
                                             <X className="h-4 w-4" />
                                           </Button>
@@ -3828,12 +3859,12 @@ export default function NewProjectPage() {
                                           }
                                           disabled={loadingPhotographers}
                                         >
-                                          <SelectTrigger id={`photoCoordinator-${pkg.id}`} className="w-[60%]">
-                                            <SelectValue placeholder={loadingPhotographers ? "Loading..." : "select POC"} />
+                                          <SelectTrigger id={`photoCoordinator-${pkg.id}`} className="w-[60%] text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}>
+                                            <SelectValue placeholder={loadingPhotographers ? "Loading..." : "select POC"} className="text-white" />
                                           </SelectTrigger>
-                                          <SelectContent>
+                                          <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
                                             {photographers.map((photographer) => (
-                                              <SelectItem key={photographer.photographer_phno} value={photographer.photographer_phno}>
+                                              <SelectItem key={photographer.photographer_phno} value={photographer.photographer_phno} className="text-white hover:bg-[#1a0f3d]">
                                                 {photographer.photographer_name}
                                               </SelectItem>
                                             ))}
@@ -3846,12 +3877,12 @@ export default function NewProjectPage() {
                                     <Label htmlFor={`videoCoordinator-${pkg.id}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-nowrap max-w-fit">VideoPOC</Label>
                                     <div className="flex items-end gap-2">
                                       {pkg.videographyCoordinatorId ? (
-                                        <div className="flex items-center justify-between p-3 border rounded-md bg-muted/50 flex-1 w-[60%]">
+                                        <div className="flex items-center justify-between p-3 border rounded-md flex-1 w-[60%]" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
                                           <div className="flex-1">
-                                            <div className="font-medium text-sm">
+                                            <div className="font-medium text-sm text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>
                                               {videographers.find(v => v.videographer_phno === pkg.videographyCoordinatorId)?.videographer_name || 'Videographer'}
                                             </div>
-                                            <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                                            <div className="flex items-center gap-1 text-xs text-gray-300 mt-1" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>
                                               <Phone className="h-3 w-3" />
                                               {pkg.videographyCoordinatorId}
                                             </div>
@@ -3860,7 +3891,7 @@ export default function NewProjectPage() {
                                             variant="ghost"
                                             size="sm"
                                             onClick={() => handleEventPackageChange(pkg.id, "videographyCoordinatorId", undefined)}
-                                            className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+                                            className="h-8 w-8 p-0 text-gray-300 hover:text-white hover:bg-[#1a0f3d]"
                                           >
                                             <X className="h-4 w-4" />
                                           </Button>
@@ -3873,12 +3904,12 @@ export default function NewProjectPage() {
                                           }
                                           disabled={loadingVideographers}
                                         >
-                                          <SelectTrigger id={`videoCoordinator-${pkg.id}`} className="w-[60%]">
-                                            <SelectValue placeholder={loadingVideographers ? "Loading..." : "select POC"} />
+                                          <SelectTrigger id={`videoCoordinator-${pkg.id}`} className="w-[60%] text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}>
+                                            <SelectValue placeholder={loadingVideographers ? "Loading..." : "select POC"} className="text-white" />
                                           </SelectTrigger>
-                                          <SelectContent>
+                                          <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
                                             {videographers.map((videographer) => (
-                                              <SelectItem key={videographer.videographer_phno} value={videographer.videographer_phno}>
+                                              <SelectItem key={videographer.videographer_phno} value={videographer.videographer_phno} className="text-white hover:bg-[#1a0f3d]">
                                                 {videographer.videographer_name}
                                               </SelectItem>
                                             ))}
@@ -3892,19 +3923,21 @@ export default function NewProjectPage() {
                                 {/* Client Name and Phone Number */}
                                 <div className="grid grid-cols-2 gap-4 items-start">
                                   <div className="space-y-2">
-                                    <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-nowrap max-w-fit">Client Name:</Label>
+                                    <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-nowrap max-w-fit text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Client Name:</Label>
                                     <Input
                                       value={loadingProjectDetails ? "Loading..." : (projectDetails?.client_name || formData.clientFullName || "Not set")}
                                       disabled
-                                      className="bg-muted"
+                                      className="bg-muted text-white"
+                                      style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                     />
                                   </div>
                                   <div className="space-y-2">
-                                    <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-nowrap max-w-fit">Client Ph:</Label>
+                                    <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-nowrap max-w-fit text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Client Ph:</Label>
                                     <Input
                                       value={loadingProjectDetails ? "Loading..." : (projectDetails?.clientid_phno || formData.clientPhone || "Not set")}
                                       disabled
-                                      className="bg-muted max-w-[200px]"
+                                      className="bg-muted max-w-[200px] text-white"
+                                      style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                     />
                                   </div>
                                 </div>
@@ -3912,8 +3945,8 @@ export default function NewProjectPage() {
                                 {/* Event Deliverables Notes */}
                                 <div className="space-y-2">
                                   <div className="flex items-center gap-2">
-                                    <Label htmlFor={`deliverablesNotes-${pkg.id}`}>Event Deliverables Notes</Label>
-                                    <Pencil className="h-4 w-4 text-muted-foreground" />
+                                    <Label htmlFor={`deliverablesNotes-${pkg.id}`} className="text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Event Deliverables Notes</Label>
+                                    <Pencil className="h-4 w-4 text-gray-300" />
                                   </div>
                                   <Textarea
                                     id={`deliverablesNotes-${pkg.id}`}
@@ -3926,14 +3959,15 @@ export default function NewProjectPage() {
                                     rows={4}
                                     className={cn(
                                       pkg.isEditingDeliverablesNotes === false ? "bg-muted cursor-not-allowed" : "",
-                                      "w-full"
+                                      "w-full text-white placeholder:text-gray-400"
                                     )}
+                                    style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                   />
                                 </div>
 
                                 {/* Event Prep Checklist */}
                                 <div className="space-y-2">
-                                  <Label>Event Prep Checklist</Label>
+                                  <Label className="text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Event Prep Checklist</Label>
                                   <div className="space-y-2">
                                     {(pkg.prepChecklist || []).map((item) => (
                                       <div key={item.id} className="flex items-center gap-2">
@@ -3950,13 +3984,14 @@ export default function NewProjectPage() {
                                           onChange={(e) =>
                                             handleChecklistItemChange(pkg.id, item.id, "text", e.target.value)
                                           }
-                                          className="flex-1"
+                                          className="flex-1 text-white placeholder:text-gray-400"
+                                          style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                         />
                                         <Button
                                           variant="ghost"
                                           size="sm"
                                           onClick={() => handleRemoveChecklistItem(pkg.id, item.id)}
-                                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                          className="text-red-400 hover:text-red-300 hover:bg-[#1a0f3d]"
                                         >
                                           <Trash2 className="h-4 w-4" />
                                         </Button>
@@ -3966,7 +4001,7 @@ export default function NewProjectPage() {
                                       variant="outline"
                                       size="sm"
                                       onClick={() => handleAddChecklistItem(pkg.id)}
-                                      className="w-full"
+                                      className="w-full bg-[#2d1b4e] text-white border-[#3d2a5f] hover:bg-[#1a0f3d]"
                                     >
                                       <Plus className="h-4 w-4 mr-2" />
                                       Add Checklist Item
@@ -3986,7 +4021,7 @@ export default function NewProjectPage() {
                         <Button
                           variant="outline"
                           onClick={handleAddEventPackage}
-                          className="w-full sm:w-[45%] h-fit self-start"
+                          className="w-full sm:w-[45%] h-fit self-start bg-[#2d1b4e] text-white border-[#3d2a5f] hover:bg-[#1a0f3d]"
                         >
                           <Plus className="h-4 w-4 mr-2" />
                           Add New Event
@@ -3997,7 +4032,7 @@ export default function NewProjectPage() {
                           <Button
                             variant="outline"
                             onClick={handleAddEventPackage}
-                            className="w-full sm:w-[45%]"
+                            className="w-full sm:w-[45%] bg-[#2d1b4e] text-white border-[#3d2a5f] hover:bg-[#1a0f3d]"
                           >
                             <Plus className="h-4 w-4 mr-2" />
                             Add New Event
@@ -4009,9 +4044,9 @@ export default function NewProjectPage() {
 
                   {/* Price Summary - Bottom left, same width as event cards */}
                   <div className="w-full mt-4">
-                    <Card className="rounded-lg border bg-card text-card-foreground shadow-sm p-3 sm:p-4 w-full sm:w-[45%]">
+                    <Card className="rounded-lg border bg-card text-card-foreground shadow-sm p-3 sm:p-4 w-full sm:w-[45%]" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
                       <div className="flex justify-between items-center mb-4">
-                        <h3 className="font-semibold">Price</h3>
+                        <h3 className="font-semibold text-white">Price</h3>
                         <div className="flex items-center gap-2">
                           {!isEditingPriceCard ? (
                             <Button
@@ -4031,10 +4066,11 @@ export default function NewProjectPage() {
                                   total: totalCalc.toLocaleString(),
                                 });
                               }}
-                              className="h-8 px-2"
+                              className="h-8 px-2 text-white"
+                              style={{ color: '#ffffff' }}
                               title="Edit price values"
                             >
-                              <Pencil className="h-4 w-4" />
+                              <Pencil className="h-4 w-4 text-white" style={{ color: '#ffffff' }} />
                             </Button>
                           ) : (
                             <Button
@@ -4054,13 +4090,14 @@ export default function NewProjectPage() {
                             variant="ghost"
                             size="sm"
                             onClick={() => setIsPriceDetailsExpanded(!isPriceDetailsExpanded)}
-                            className="h-8 px-2"
+                            className="h-8 px-2 text-white"
+                            style={{ color: '#ffffff' }}
                           >
-                            Details
+                            <span style={{ color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Details</span>
                             {isPriceDetailsExpanded ? (
-                              <ChevronUp className="ml-1 h-4 w-4" />
+                              <ChevronUp className="ml-1 h-4 w-4 text-white" style={{ color: '#ffffff' }} />
                             ) : (
-                              <ChevronDown className="ml-1 h-4 w-4" />
+                              <ChevronDown className="ml-1 h-4 w-4 text-white" style={{ color: '#ffffff' }} />
                             )}
                           </Button>
                         </div>
@@ -4070,9 +4107,9 @@ export default function NewProjectPage() {
                           <>
                             {/* Row 1: Actual Price (editable) */}
                             <div className="flex justify-between items-center text-sm">
-                              <span className="text-muted-foreground">Actual price:</span>
+                              <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>Actual price:</span>
                               <div className="flex items-center gap-2">
-                                <span>₹</span>
+                                <span className="text-white">₹</span>
                                 <Input
                                   type="text"
                                   value={editablePrices.actualPrice}
@@ -4090,17 +4127,18 @@ export default function NewProjectPage() {
                                       total: totalValue.toLocaleString(),
                                     }));
                                   }}
-                                  className="w-24 h-8 text-right"
+                                  className="w-24 h-8 text-right text-white placeholder:text-gray-400"
+                                  style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                   placeholder="0"
                                 />
                               </div>
                             </div>
                             {/* Row 2: GST (not editable, calculated) */}
                             <div className="flex justify-between items-center text-sm">
-                              <span className="text-muted-foreground">GST (18%):</span>
+                              <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>GST (18%):</span>
                               <div className="flex items-center gap-2">
-                                <span>₹</span>
-                                <span className="w-24 h-8 text-right flex items-center justify-end">
+                                <span className="text-white">₹</span>
+                                <span className="w-24 h-8 text-right flex items-center justify-end text-white">
                                   {(() => {
                                     const actualPriceNum = parseFloat(editablePrices.actualPrice.replace(/,/g, '')) || 0;
                                     const gstValue = actualPriceNum * 0.18;
@@ -4111,10 +4149,10 @@ export default function NewProjectPage() {
                             </div>
                             {/* Row 3: Sub Total (not editable, actualPrice + GST) */}
                             <div className="flex justify-between items-center text-sm">
-                              <span className="text-muted-foreground">Sub total:</span>
+                              <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>Sub total:</span>
                               <div className="flex items-center gap-2">
-                                <span>₹</span>
-                                <span className="w-24 h-8 text-right flex items-center justify-end">
+                                <span className="text-white">₹</span>
+                                <span className="w-24 h-8 text-right flex items-center justify-end text-white">
                                   {(() => {
                                     const actualPriceNum = parseFloat(editablePrices.actualPrice.replace(/,/g, '')) || 0;
                                     const gstValue = actualPriceNum * 0.18;
@@ -4125,12 +4163,12 @@ export default function NewProjectPage() {
                               </div>
                             </div>
                             {/* Row 4: Total Price (not editable, calculated as actualPrice + GST) */}
-                            <div className="border-t pt-3 mt-3">
+                            <div className="border-t pt-3 mt-3" style={{ borderColor: '#3d2a5f' }}>
                               <div className="flex justify-between items-center">
-                                <span className="font-semibold">Total price:</span>
+                                <span className="font-semibold text-white">Total price:</span>
                                 <div className="flex items-center gap-2">
-                                  <span>₹</span>
-                                  <span className="w-32 h-8 text-right font-bold text-blue-600 flex items-center justify-end">
+                                  <span className="text-white">₹</span>
+                                  <span className="w-32 h-8 text-right font-bold text-blue-400 flex items-center justify-end">
                                     {(() => {
                                       const actualPriceNum = parseFloat(editablePrices.actualPrice.replace(/,/g, '')) || 0;
                                       const gstValue = actualPriceNum * 0.18;
@@ -4146,13 +4184,13 @@ export default function NewProjectPage() {
                           <>
                             {/* Row 1: Actual Price */}
                             <div className="flex justify-between text-sm">
-                              <span className="text-muted-foreground">Actual price:</span>
-                              <span>₹{editablePrices.actualPrice || actualPrice.toLocaleString()}</span>
+                              <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>Actual price:</span>
+                              <span className="text-white">₹{editablePrices.actualPrice || actualPrice.toLocaleString()}</span>
                             </div>
                             {/* Row 2: GST */}
                             <div className="flex justify-between text-sm">
-                              <span className="text-muted-foreground">GST (18%):</span>
-                              <span>₹{(() => {
+                              <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>GST (18%):</span>
+                              <span className="text-white">₹{(() => {
                                 const actualPriceNum = editablePrices.actualPrice 
                                   ? parseFloat(editablePrices.actualPrice.replace(/,/g, '')) 
                                   : actualPrice;
@@ -4162,8 +4200,8 @@ export default function NewProjectPage() {
                             </div>
                             {/* Row 3: Sub Total */}
                             <div className="flex justify-between text-sm">
-                              <span className="text-muted-foreground">Sub total:</span>
-                              <span>₹{(() => {
+                              <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>Sub total:</span>
+                              <span className="text-white">₹{(() => {
                                 const actualPriceNum = editablePrices.actualPrice 
                                   ? parseFloat(editablePrices.actualPrice.replace(/,/g, '')) 
                                   : actualPrice;
@@ -4173,10 +4211,10 @@ export default function NewProjectPage() {
                               })()}</span>
                             </div>
                             {/* Row 4: Total Price */}
-                            <div className="border-t pt-3 mt-3">
+                            <div className="border-t pt-3 mt-3" style={{ borderColor: '#3d2a5f' }}>
                               <div className="flex justify-between">
-                                <span className="font-semibold">Total price:</span>
-                                <span className="font-bold text-blue-600 text-lg">
+                                <span className="font-semibold text-white">Total price:</span>
+                                <span className="font-bold text-blue-400 text-lg">
                                   ₹{(() => {
                                     const actualPriceNum = editablePrices.actualPrice 
                                       ? parseFloat(editablePrices.actualPrice.replace(/,/g, '')) 
@@ -4194,22 +4232,22 @@ export default function NewProjectPage() {
 
                       {/* Event-wise Cost Breakdown */}
                       {isPriceDetailsExpanded && (
-                        <div className="mt-4 pt-4 border-t space-y-3">
-                          <h4 className="font-semibold text-sm mb-3">Event-wise Cost Estimates</h4>
+                        <div className="mt-4 pt-4 border-t space-y-3" style={{ borderColor: '#3d2a5f' }}>
+                          <h4 className="font-semibold text-sm mb-3 text-white">Event-wise Cost Estimates</h4>
                           {calculateEventWiseCosts().map((eventCost, index) => (
-                            <div key={index} className="bg-muted/50 rounded-md p-3 space-y-2">
+                            <div key={index} className="rounded-md p-3 space-y-2" style={{ backgroundColor: '#1a0f3d', borderColor: '#3d2a5f' }}>
                               <div className="flex justify-between items-start">
                                 <div>
-                                  <p className="font-medium text-sm">{eventCost.eventName}</p>
-                                  <p className="text-xs text-muted-foreground capitalize">
+                                  <p className="font-medium text-sm text-white">{eventCost.eventName}</p>
+                                  <p className="text-xs text-gray-300 capitalize">
                                     {eventCost.eventType}
                                   </p>
                                 </div>
-                                <p className="font-semibold text-sm">
+                                <p className="font-semibold text-sm text-white">
                                   ₹{eventCost.total.toLocaleString()}
                                 </p>
                               </div>
-                              <div className="text-xs space-y-1 text-muted-foreground">
+                              <div className="text-xs space-y-1 text-gray-300">
                                 <div className="flex justify-between">
                                   <span>
                                     {eventCost.photographers} Photographer{eventCost.photographers !== 1 ? 's' : ''} × {eventCost.videographers} Videographer{eventCost.videographers !== 1 ? 's' : ''}
@@ -4224,7 +4262,7 @@ export default function NewProjectPage() {
                             </div>
                           ))}
                           {calculateEventWiseCosts().length === 0 && (
-                            <p className="text-sm text-muted-foreground text-center py-2">
+                            <p className="text-sm text-gray-300 text-center py-2">
                               No events with complete details
                             </p>
                           )}
@@ -4238,7 +4276,7 @@ export default function NewProjectPage() {
                     <Button
                       onClick={handlePrevious}
                       variant="outline"
-                      className="mr-4"
+                      className="mr-4 bg-[#2d1b4e] text-white border-[#3d2a5f] hover:bg-[#1a0f3d]"
                     >
                       Previous
                     </Button>
@@ -4259,7 +4297,7 @@ export default function NewProjectPage() {
                     {/* Header */}
                     <div className="flex items-end justify-between gap-4">
                       <div className="flex flex-col">
-                        <Label className="text-sm text-muted-foreground mb-2">Select a template</Label>
+                        <Label className="text-sm text-gray-300 mb-2">Select a template</Label>
                         <Select 
                           value={selectedFormat} 
                           onValueChange={(value) => {
@@ -4275,16 +4313,16 @@ export default function NewProjectPage() {
                             }
                           }}
                         >
-                          <SelectTrigger className="w-48">
-                            <SelectValue placeholder="Select template" />
+                          <SelectTrigger className="w-48 text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}>
+                            <SelectValue placeholder="Select template" className="text-white" />
                           </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="standard_wedding.pdf">Standard Wedding</SelectItem>
-                            <SelectItem value="file-sample_150kB.pdf">Sample Template</SelectItem>
-                            <SelectItem value="premium_wedding.pdf">Premium Wedding</SelectItem>
-                            <SelectItem value="corporate.pdf">Corporate</SelectItem>
-                            <SelectItem value="portrait.pdf">Portrait</SelectItem>
-                            <SelectItem value="event.pdf">Event</SelectItem>
+                          <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
+                            <SelectItem value="standard_wedding.pdf" className="text-white hover:bg-[#1a0f3d]">Standard Wedding</SelectItem>
+                            <SelectItem value="file-sample_150kB.pdf" className="text-white hover:bg-[#1a0f3d]">Sample Template</SelectItem>
+                            <SelectItem value="premium_wedding.pdf" className="text-white hover:bg-[#1a0f3d]">Premium Wedding</SelectItem>
+                            <SelectItem value="corporate.pdf" className="text-white hover:bg-[#1a0f3d]">Corporate</SelectItem>
+                            <SelectItem value="portrait.pdf" className="text-white hover:bg-[#1a0f3d]">Portrait</SelectItem>
+                            <SelectItem value="event.pdf" className="text-white hover:bg-[#1a0f3d]">Event</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -4292,7 +4330,7 @@ export default function NewProjectPage() {
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          className="h-9"
+                          className="h-9 bg-[#2d1b4e] text-white border-[#3d2a5f] hover:bg-[#1a0f3d]"
                           onClick={handleEditPdf}
                         >
                           <Pencil className="h-4 w-4 mr-2" />
@@ -4301,7 +4339,7 @@ export default function NewProjectPage() {
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          className="h-9"
+                          className="h-9 bg-[#2d1b4e] text-white border-[#3d2a5f] hover:bg-[#1a0f3d]"
                           onClick={handlePreviewPdf}
                         >
                           <Eye className="h-4 w-4 mr-2" />
@@ -4323,11 +4361,11 @@ export default function NewProjectPage() {
                     </div>
 
                     {/* PDF Viewer Area */}
-                    <div className="border-2 border-gray-300 rounded-lg bg-white min-h-[600px] flex flex-col">
+                    <div className="border-2 rounded-lg min-h-[600px] flex flex-col" style={{ borderColor: '#3d2a5f', backgroundColor: '#1a0f3d' }}>
                       {isEditingPdf ? (
                         <div className="flex flex-col h-full">
                           {/* PDF Viewer */}
-                          <div className="flex-1 w-full h-full border-b">
+                          <div className="flex-1 w-full h-full border-b" style={{ borderColor: '#3d2a5f' }}>
                             <iframe
                               src={selectedPdfPath}
                               className="w-full h-full min-h-[400px] border-0"
@@ -4336,14 +4374,14 @@ export default function NewProjectPage() {
                           </div>
                           
                           {/* Editable Form Section */}
-                          <div className="p-6 bg-gray-50 border-t max-h-[400px] overflow-y-auto">
+                          <div className="p-6 border-t max-h-[400px] overflow-y-auto" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
                             <div className="space-y-6">
                               {/* Price Table Editor */}
-                              <div className="border rounded-lg p-4 bg-white">
-                                <h3 className="font-semibold text-lg mb-4">Edit Price Summary</h3>
+                              <div className="border rounded-lg p-4" style={{ backgroundColor: '#1a0f3d', borderColor: '#3d2a5f' }}>
+                                <h3 className="font-semibold text-lg mb-4 text-white">Edit Price Summary</h3>
                                 <div className="grid grid-cols-2 gap-4">
                                   <div className="space-y-2">
-                                    <Label htmlFor="edit-actual-price">Actual Price (₹)</Label>
+                                    <Label htmlFor="edit-actual-price" className="text-white">Actual Price (₹)</Label>
                                     <Input
                                       id="edit-actual-price"
                                       type="text"
@@ -4353,10 +4391,12 @@ export default function NewProjectPage() {
                                         setEditablePrices(prev => ({ ...prev, actualPrice: value }));
                                       }}
                                       placeholder="Enter actual price"
+                                      className="text-white placeholder:text-gray-400"
+                                      style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                     />
                                   </div>
                                   <div className="space-y-2">
-                                    <Label htmlFor="edit-subtotal">Sub Total (₹)</Label>
+                                    <Label htmlFor="edit-subtotal" className="text-white">Sub Total (₹)</Label>
                                     <Input
                                       id="edit-subtotal"
                                       type="text"
@@ -4366,10 +4406,12 @@ export default function NewProjectPage() {
                                         setEditablePrices(prev => ({ ...prev, subtotal: value }));
                                       }}
                                       placeholder="Enter subtotal"
+                                      className="text-white placeholder:text-gray-400"
+                                      style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                     />
                                   </div>
                                   <div className="space-y-2">
-                                    <Label htmlFor="edit-gst">GST (18%) (₹)</Label>
+                                    <Label htmlFor="edit-gst" className="text-white">GST (18%) (₹)</Label>
                                     <Input
                                       id="edit-gst"
                                       type="text"
@@ -4379,10 +4421,12 @@ export default function NewProjectPage() {
                                         setEditablePrices(prev => ({ ...prev, gst: value }));
                                       }}
                                       placeholder="Enter GST amount"
+                                      className="text-white placeholder:text-gray-400"
+                                      style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                     />
                                   </div>
                                   <div className="space-y-2">
-                                    <Label htmlFor="edit-total">Total Price (₹)</Label>
+                                    <Label htmlFor="edit-total" className="text-white">Total Price (₹)</Label>
                                     <Input
                                       id="edit-total"
                                       type="text"
@@ -4392,15 +4436,16 @@ export default function NewProjectPage() {
                                         setEditablePrices(prev => ({ ...prev, total: value }));
                                       }}
                                       placeholder="Enter total price"
-                                      className="font-semibold"
+                                      className="font-semibold text-white placeholder:text-gray-400"
+                                      style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                     />
                                   </div>
                                 </div>
                               </div>
                               
                               {/* Additional Notes Editor */}
-                              <div className="border rounded-lg p-4 bg-white">
-                                <Label htmlFor="pdf-edit-text" className="mb-2 block font-semibold">
+                              <div className="border rounded-lg p-4" style={{ backgroundColor: '#1a0f3d', borderColor: '#3d2a5f' }}>
+                                <Label htmlFor="pdf-edit-text" className="mb-2 block font-semibold text-white">
                                   Edit Additional Notes:
                                 </Label>
                                 <Textarea
@@ -4409,7 +4454,8 @@ export default function NewProjectPage() {
                                   onChange={(e) => setPdfEditText(e.target.value)}
                                   placeholder="Enter additional notes or text to add to the price card page..."
                                   rows={6}
-                                  className="mb-3"
+                                  className="mb-3 text-white placeholder:text-gray-400"
+                                  style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                 />
                               </div>
                               
@@ -4424,10 +4470,11 @@ export default function NewProjectPage() {
                                       setSelectedPdfPath(url);
                                     }
                                   }}
+                                  className="bg-[#2d1b4e] text-white border-[#3d2a5f] hover:bg-[#1a0f3d]"
                                 >
                                   Cancel
                                 </Button>
-                                <Button onClick={handleSavePdf} className="bg-blue-600 hover:bg-blue-700">
+                                <Button onClick={handleSavePdf} className="bg-blue-600 hover:bg-blue-700 text-white">
                                   <Save className="h-4 w-4 mr-2" />
                                   Save PDF
                                 </Button>
@@ -4453,16 +4500,16 @@ export default function NewProjectPage() {
                           />
                         </div>
                       ) : (
-                        <div className="flex flex-col items-center justify-center p-12 min-h-[500px] bg-gray-50">
+                        <div className="flex flex-col items-center justify-center p-12 min-h-[500px]" style={{ backgroundColor: '#1a0f3d' }}>
                           <div className="text-center space-y-4 mb-6">
-                            <p className="text-lg font-semibold text-gray-700">
+                            <p className="text-lg font-semibold text-white">
                               Your quotation will appear here
                             </p>
-                            <p className="text-sm text-gray-500">
+                            <p className="text-sm text-gray-300">
                               Please select a quotation format and then choose 'Preview' or 'Edit' to begin.
                             </p>
                           </div>
-                          <Button variant="outline" className="h-10 px-4 py-2 bg-white">
+                          <Button variant="outline" className="h-10 px-4 py-2 bg-[#2d1b4e] text-white border-[#3d2a5f] hover:bg-[#1a0f3d]">
                             Upload Custom Template
                           </Button>
                         </div>

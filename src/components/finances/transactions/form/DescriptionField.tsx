@@ -16,11 +16,12 @@ export function DescriptionField({ form }: DescriptionFieldProps) {
       name="description"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Description</FormLabel>
+          <FormLabel className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Description</FormLabel>
           <FormControl>
             <Textarea 
               placeholder="Add details about this transaction (optional)" 
-              className="resize-none" 
+              className="resize-none text-white placeholder:text-gray-400"
+              style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff' }}
               {...field} 
             />
           </FormControl>

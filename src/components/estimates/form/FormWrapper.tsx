@@ -16,17 +16,30 @@ interface FormWrapperProps {
 export function FormWrapper({ open, onClose, title, children, currentPage = 0, onPrevious }: FormWrapperProps) {
   const showPreviousButton = currentPage > 0 && onPrevious;
   const isEstimatesPage = currentPage === 2;
+  const isPreviewPage = currentPage === 5;
   
   // Wider width for Estimates page to match inner content width
+  // Even wider for Preview page to show full estimate
   // For other pages, use default responsive width
-  const dialogWidthClass = isEstimatesPage 
-    ? "w-[calc(100vw-1rem)] max-w-[calc(100vw-1rem)]"
-    : "w-full max-w-lg sm:max-w-lg";
+  let dialogWidthClass: string;
+  let dialogHeightClass: string;
+  
+  if (isPreviewPage) {
+    // Preview page: wider and taller to show full estimate
+    dialogWidthClass = "w-[calc(100vw-2rem)] max-w-6xl";
+    dialogHeightClass = "max-h-[95vh] overflow-y-auto";
+  } else if (isEstimatesPage) {
+    dialogWidthClass = "w-[calc(100vw-1rem)] max-w-[calc(100vw-1rem)]";
+    dialogHeightClass = "max-h-[90vh] overflow-y-auto";
+  } else {
+    dialogWidthClass = "w-full max-w-lg sm:max-w-lg";
+    dialogHeightClass = "max-h-[90vh] overflow-y-auto";
+  }
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent 
-        className={`${dialogWidthClass} max-h-[90vh] overflow-y-auto`}
+        className={`${dialogWidthClass} ${dialogHeightClass}`}
         style={{ backgroundColor: '#1a0f3d' }}
       >
         <DialogHeader className="relative">

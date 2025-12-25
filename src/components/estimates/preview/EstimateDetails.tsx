@@ -307,7 +307,7 @@ export function EstimateDetails({ estimate }: EstimateDetailsProps) {
 
             <div className={`text-right pt-2 border-t ${templateId === "bold" ? "border-black" : ""}`} style={{ borderColor: templateId === "bold" ? '#000000' : '#3d2a5f' }}>
               <span className="font-medium text-white">Package Total: </span>
-              <span className={`text-xl font-semibold ${templateId === "bold" ? "text-black" : "text-blue-400"}`}>
+              <span className="text-xl font-semibold text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>
                 {calculatePackageTotal(pkg.amount)}
               </span>
               {addonTotal > 0 && (

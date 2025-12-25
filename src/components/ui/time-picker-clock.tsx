@@ -113,8 +113,9 @@ export function TimePickerClock({
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
           "flex items-center gap-2 px-3 py-2 border rounded-md bg-background hover:bg-accent",
-          "w-full justify-start text-left font-normal"
+          "w-full justify-start text-left font-normal text-white"
         )}
+        style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
       >
         <Clock className="h-4 w-4" />
         <span>
@@ -128,7 +129,10 @@ export function TimePickerClock({
             className="fixed inset-0 z-40"
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute z-50 bottom-full mb-2 left-0 p-4 bg-background border rounded-lg shadow-lg">
+          <div 
+            className="absolute z-50 bottom-full mb-2 left-0 p-4 bg-background border rounded-lg shadow-lg"
+            style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}
+          >
             <div className="flex gap-4 items-center">
               {/* Mode Toggle */}
               <div className="flex flex-col gap-2">
@@ -136,11 +140,12 @@ export function TimePickerClock({
                   type="button"
                   onClick={() => setMode("hour")}
                   className={cn(
-                    "px-3 py-1 rounded text-sm",
+                    "px-3 py-1 rounded text-sm text-white",
                     mode === "hour"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted hover:bg-muted/80"
+                      ? "bg-blue-600 text-white"
+                      : "bg-white/10 hover:bg-white/20"
                   )}
+                  style={mode === "hour" ? {} : { backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
                 >
                   Hour
                 </button>
@@ -148,11 +153,12 @@ export function TimePickerClock({
                   type="button"
                   onClick={() => setMode("minute")}
                   className={cn(
-                    "px-3 py-1 rounded text-sm",
+                    "px-3 py-1 rounded text-sm text-white",
                     mode === "minute"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted hover:bg-muted/80"
+                      ? "bg-blue-600 text-white"
+                      : "bg-white/10 hover:bg-white/20"
                   )}
+                  style={mode === "minute" ? {} : { backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
                 >
                   Minute
                 </button>
@@ -164,6 +170,7 @@ export function TimePickerClock({
                   ref={clockRef}
                   onClick={handleClockClick}
                   className="relative w-48 h-48 border-2 border-primary rounded-full cursor-pointer bg-background"
+                  style={{ backgroundColor: '#1a0f3d', borderColor: '#3d2a5f' }}
                 >
                   {/* Clock Center */}
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-primary rounded-full z-10" />
@@ -220,7 +227,8 @@ export function TimePickerClock({
                       return (
                         <div
                           key={i}
-                          className="absolute text-xs font-medium text-foreground"
+                          className="absolute text-xs font-medium text-white"
+                          style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}
                           style={{
                             left: `${pos.x}%`,
                             top: `${pos.y}%`,
@@ -240,7 +248,8 @@ export function TimePickerClock({
                       return (
                         <div
                           key={i}
-                          className="absolute text-xs font-medium text-foreground"
+                          className="absolute text-xs font-medium text-white"
+                          style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}
                           style={{
                             left: `${pos.x}%`,
                             top: `${pos.y}%`,
@@ -257,7 +266,7 @@ export function TimePickerClock({
               {/* Display Current Time and AM/PM */}
               <div className="flex flex-col gap-2">
                 <div className="text-center">
-                  <div className="text-2xl font-bold">
+                  <div className="text-2xl font-bold text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>
                     {displayHour}:{minute.padStart(2, "0")}
                   </div>
                   {/* AM/PM Toggle - Only show in hour mode */}
@@ -267,11 +276,12 @@ export function TimePickerClock({
                         type="button"
                         onClick={() => handleAmPmChange("AM")}
                         className={cn(
-                          "px-4 py-1 rounded text-sm font-medium",
+                          "px-4 py-1 rounded text-sm font-medium text-white",
                           amPm === "AM"
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-muted hover:bg-muted/80"
+                            ? "bg-blue-600 text-white"
+                            : "bg-white/10 hover:bg-white/20"
                         )}
+                        style={amPm === "AM" ? {} : { backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
                       >
                         AM
                       </button>
@@ -279,24 +289,26 @@ export function TimePickerClock({
                         type="button"
                         onClick={() => handleAmPmChange("PM")}
                         className={cn(
-                          "px-4 py-1 rounded text-sm font-medium",
+                          "px-4 py-1 rounded text-sm font-medium text-white",
                           amPm === "PM"
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-muted hover:bg-muted/80"
+                            ? "bg-blue-600 text-white"
+                            : "bg-white/10 hover:bg-white/20"
                         )}
+                        style={amPm === "PM" ? {} : { backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
                       >
                         PM
                       </button>
                     </div>
                   )}
-                  <div className="text-xs text-muted-foreground mt-2 whitespace-nowrap">
+                  <div className="text-xs text-white/80 mt-2 whitespace-nowrap" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
                     {mode === "hour" ? "Select Hour (12-hour)" : "Select Minute"}
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
-                  className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  style={{ backgroundColor: '#2563eb', color: '#ffffff' }}
                 >
                   Done
                 </button>

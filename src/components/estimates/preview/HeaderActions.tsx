@@ -26,26 +26,54 @@ export function HeaderActions({
   return (
     <div className="flex gap-2">
       {!isApproved && (
-        <Button onClick={onShowApprovalForm} variant="secondary">
+        <Button 
+          onClick={onShowApprovalForm} 
+          className="text-white border-[#3d2a5f] hover:bg-[#1a0f3d]"
+          style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
+        >
           Approve
         </Button>
       )}
       
-      <Button onClick={onShowEmailForm} variant="outline" size="icon">
+      <Button 
+        onClick={onShowEmailForm} 
+        variant="outline" 
+        size="icon"
+        className="text-white border-[#3d2a5f] hover:bg-[#1a0f3d]"
+        style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
+      >
         <Mail className="h-4 w-4" />
       </Button>
       
-      <Button onClick={onShowWhatsAppForm} variant="outline" size="icon">
+      <Button 
+        onClick={onShowWhatsAppForm} 
+        variant="outline" 
+        size="icon"
+        className="text-white border-[#3d2a5f] hover:bg-[#1a0f3d]"
+        style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
+      >
         <Share2 className="h-4 w-4" />
       </Button>
       
       {isApproved && onCreateInvoice && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button>Next Steps</Button>
+            <Button 
+              className="text-white border-[#3d2a5f] hover:bg-[#1a0f3d]"
+              style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
+            >
+              Next Steps
+            </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={onCreateInvoice}>
+          <DropdownMenuContent 
+            align="end"
+            className="bg-[#2d1b4e] border-[#3d2a5f]"
+            style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}
+          >
+            <DropdownMenuItem 
+              onClick={onCreateInvoice}
+              className="text-white hover:bg-white/10"
+            >
               <FileText className="h-4 w-4 mr-2" />
               Create Invoice
             </DropdownMenuItem>

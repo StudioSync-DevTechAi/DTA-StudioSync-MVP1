@@ -36,18 +36,19 @@ export function WorkflowOverview({
 
   const EventCard = ({ event }: { event: ScheduledEvent }) => (
     <Card 
-      className="cursor-pointer hover:shadow-md transition-shadow"
+      className="cursor-pointer hover:shadow-lg hover:scale-105 transition-all"
+      style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}
       onClick={() => onSelectEvent(event)}
     >
       <CardContent className="p-4">
         <div className="flex justify-between items-start mb-2">
-          <h4 className="font-medium">{event.name}</h4>
+          <h4 className="font-medium text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>{event.name}</h4>
           <Badge className={getStageColor(event.stage)}>
             {event.stage.replace('-', ' ')}
           </Badge>
         </div>
         
-        <div className="space-y-2 text-sm text-muted-foreground">
+        <div className="space-y-2 text-sm text-white/80" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
           <div className="flex items-center gap-2">
             <Calendar className="h-3 w-3" />
             {format(parseISO(event.date), 'MMM dd, yyyy')}
@@ -73,61 +74,66 @@ export function WorkflowOverview({
     <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
+        <Card style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Pre-Production</CardTitle>
+            <CardTitle className="text-sm font-medium text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Pre-Production</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">
+            <div className="text-2xl font-bold text-blue-400" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>
               {preProductionEvents.length}
             </div>
-            <p className="text-xs text-muted-foreground">Events in planning</p>
+            <p className="text-xs text-white/80" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>Events in planning</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Production</CardTitle>
+            <CardTitle className="text-sm font-medium text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Production</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">
+            <div className="text-2xl font-bold text-yellow-400" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>
               {productionEvents.length}
             </div>
-            <p className="text-xs text-muted-foreground">Active shoots</p>
+            <p className="text-xs text-white/80" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>Active shoots</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Post-Production</CardTitle>
+            <CardTitle className="text-sm font-medium text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Post-Production</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-purple-600">
+            <div className="text-2xl font-bold text-purple-400" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>
               {postProductionEvents.length}
             </div>
-            <p className="text-xs text-muted-foreground">In editing</p>
+            <p className="text-xs text-white/80" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>In editing</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Completed</CardTitle>
+            <CardTitle className="text-sm font-medium text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Completed</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-2xl font-bold text-green-400" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>
               {completedEvents.length}
             </div>
-            <p className="text-xs text-muted-foreground">Delivered</p>
+            <p className="text-xs text-white/80" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>Delivered</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Recent Events */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
+        <Card style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Upcoming Events</CardTitle>
-            <Button size="sm" onClick={onCreateEvent}>
+            <CardTitle className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Upcoming Events</CardTitle>
+            <Button 
+              size="sm" 
+              onClick={onCreateEvent}
+              className="text-white border-[#3d2a5f] hover:bg-[#1a0f3d]"
+              style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
+            >
               <Plus className="h-4 w-4 mr-1" />
               Add Event
             </Button>
@@ -138,7 +144,7 @@ export function WorkflowOverview({
                 <EventCard key={event.id} event={event} />
               ))}
               {preProductionEvents.length === 0 && (
-                <div className="text-center py-4 text-muted-foreground">
+                <div className="text-center py-4 text-white/80" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
                   No upcoming events
                 </div>
               )}
@@ -146,9 +152,9 @@ export function WorkflowOverview({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
           <CardHeader>
-            <CardTitle>Active Productions</CardTitle>
+            <CardTitle className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Active Productions</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
@@ -156,7 +162,7 @@ export function WorkflowOverview({
                 <EventCard key={event.id} event={event} />
               ))}
               {productionEvents.length === 0 && (
-                <div className="text-center py-4 text-muted-foreground">
+                <div className="text-center py-4 text-white/80" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
                   No active productions
                 </div>
               )}
@@ -166,35 +172,44 @@ export function WorkflowOverview({
       </div>
 
       {/* Timeline View */}
-      <Card>
+      <Card style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
         <CardHeader>
-          <CardTitle>Workflow Timeline</CardTitle>
+          <CardTitle className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Workflow Timeline</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             {events.slice(0, 5).map(event => (
-              <div key={event.id} className="flex items-center gap-4 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer" onClick={() => onSelectEvent(event)}>
+              <div 
+                key={event.id} 
+                className="flex items-center gap-4 p-3 border rounded-lg hover:bg-white/10 cursor-pointer transition-all" 
+                style={{ borderColor: '#3d2a5f' }}
+                onClick={() => onSelectEvent(event)}
+              >
                 <div className="flex-shrink-0">
                   <Badge className={getStageColor(event.stage)}>
                     {event.stage.replace('-', ' ')}
                   </Badge>
                 </div>
                 <div className="flex-grow">
-                  <h4 className="font-medium">{event.name}</h4>
-                  <p className="text-sm text-muted-foreground">
+                  <h4 className="font-medium text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>{event.name}</h4>
+                  <p className="text-sm text-white/80" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
                     {event.clientName} • {format(parseISO(event.date), 'MMM dd, yyyy')}
                   </p>
                 </div>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-sm text-white/80" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
                   {event.assignments.length} team members
                 </div>
               </div>
             ))}
             {events.length === 0 && (
-              <div className="text-center py-8 text-muted-foreground">
+              <div className="text-center py-8 text-white/80" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
                 <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <p>No events found</p>
-                <Button className="mt-4" onClick={onCreateEvent}>
+                <Button 
+                  className="mt-4 text-white border-[#3d2a5f] hover:bg-[#1a0f3d]"
+                  style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
+                  onClick={onCreateEvent}
+                >
                   Create Your First Event
                 </Button>
               </div>

@@ -25,24 +25,36 @@ export function FinancesHeader({ selectedYear, setSelectedYear, handleNewTransac
           defaultValue={selectedYear}
           onValueChange={setSelectedYear}
         >
-          <SelectTrigger className="w-[120px]">
+          <SelectTrigger 
+            className="w-[120px] text-white placeholder:text-gray-400"
+            style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff' }}
+          >
             <SelectValue placeholder="Select year" />
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="2024">2024</SelectItem>
-            <SelectItem value="2023">2023</SelectItem>
-            <SelectItem value="2022">2022</SelectItem>
+          <SelectContent className="bg-[#2d1b4e] border-[#3d2a5f]">
+            <SelectItem value="2024" className="text-white hover:bg-white/10">2024</SelectItem>
+            <SelectItem value="2023" className="text-white hover:bg-white/10">2023</SelectItem>
+            <SelectItem value="2022" className="text-white hover:bg-white/10">2022</SelectItem>
           </SelectContent>
         </Select>
         
-        <Button variant="outline" asChild>
+        <Button 
+          variant="outline" 
+          asChild
+          className="text-white border-[#3d2a5f] hover:bg-[#1a0f3d]"
+          style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
+        >
           <Link to="/finances/categories">
             <Tags className="mr-2 h-4 w-4" />
             Manage Categories
           </Link>
         </Button>
         
-        <Button onClick={handleNewTransaction}>
+        <Button 
+          onClick={handleNewTransaction}
+          className="text-white border-[#3d2a5f] hover:bg-[#1a0f3d]"
+          style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
+        >
           <Receipt className="mr-2 h-4 w-4" />
           New Transaction
         </Button>

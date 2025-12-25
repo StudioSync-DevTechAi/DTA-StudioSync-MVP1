@@ -26,10 +26,28 @@ export function EstimatesTabs({
 }: EstimatesTabsProps) {
   return (
     <Tabs defaultValue="pending" value={currentTab} onValueChange={onTabChange}>
-      <TabsList className="mb-4">
-        <TabsTrigger value="pending">Pending</TabsTrigger>
-        <TabsTrigger value="approved">Approved</TabsTrigger>
-        <TabsTrigger value="declined">Declined</TabsTrigger>
+      <TabsList 
+        className="mb-4 bg-white/10 border-white/20"
+        style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', borderColor: 'rgba(255, 255, 255, 0.2)' }}
+      >
+        <TabsTrigger 
+          value="pending"
+          className="data-[state=active]:bg-white/20 data-[state=active]:text-white text-gray-300"
+        >
+          Pending
+        </TabsTrigger>
+        <TabsTrigger 
+          value="approved"
+          className="data-[state=active]:bg-white/20 data-[state=active]:text-white text-gray-300"
+        >
+          Approved
+        </TabsTrigger>
+        <TabsTrigger 
+          value="declined"
+          className="data-[state=active]:bg-white/20 data-[state=active]:text-white text-gray-300"
+        >
+          Declined
+        </TabsTrigger>
       </TabsList>
 
       <TabsContent value={currentTab} className="space-y-4">

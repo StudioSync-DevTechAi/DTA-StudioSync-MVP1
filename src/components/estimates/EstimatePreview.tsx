@@ -92,12 +92,15 @@ export function EstimatePreview({ open, onClose, estimate, onStatusChange }: Est
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent 
+        className="max-w-4xl max-h-[90vh] overflow-y-auto [&>button]:text-white [&>button]:hover:bg-white/10"
+        style={{ backgroundColor: 'rgba(26, 15, 61, 0.98)', backdropFilter: 'blur(10px)' }}
+      >
         <DialogHeader className="flex flex-row items-center justify-between">
-          <DialogTitle>Estimate Preview</DialogTitle>
+          <DialogTitle className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Estimate Preview</DialogTitle>
           {hasMultiplePackages && selectedPackage && (
-            <div className="text-sm text-muted-foreground">
-              Selected Package: <span className="font-medium">{selectedPackage.name || `Option ${estimate.selectedPackageIndex! + 1}`}</span>
+            <div className="text-sm text-white/80" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
+              Selected Package: <span className="font-medium text-white">{selectedPackage.name || `Option ${estimate.selectedPackageIndex! + 1}`}</span>
             </div>
           )}
           <HeaderActions 

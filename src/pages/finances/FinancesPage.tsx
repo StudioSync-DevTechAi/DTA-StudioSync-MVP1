@@ -36,7 +36,10 @@ export default function FinancesPage() {
 
   return (
     <Layout>
-      <div className="space-y-4 sm:space-y-6 lg:space-y-8 p-3 sm:p-4 md:p-6 animate-in">
+      <div 
+        className="space-y-4 sm:space-y-6 lg:space-y-8 p-3 sm:p-4 md:p-6 animate-in"
+        style={{ backgroundColor: 'rgba(26, 15, 61, 0.98)', backdropFilter: 'blur(10px)', minHeight: '100vh' }}
+      >
         <FinancesHeader 
           selectedYear={selectedYear}
           setSelectedYear={setSelectedYear}
@@ -49,13 +52,31 @@ export default function FinancesPage() {
           onValueChange={setActiveTab}
           className="w-full"
         >
-          <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 mb-4 sm:mb-8 gap-2 sm:gap-0">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsList 
+            className="grid w-full grid-cols-1 sm:grid-cols-3 mb-4 sm:mb-8 gap-2 sm:gap-0 bg-white/10 border-white/20"
+            style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', borderColor: 'rgba(255, 255, 255, 0.2)' }}
+          >
+            <TabsTrigger 
+              value="overview"
+              className="data-[state=active]:bg-white/20 data-[state=active]:text-white text-gray-300"
+            >
+              Overview
+            </TabsTrigger>
             <PermissionGuard permission={PERMISSIONS.FINANCES_MANAGE} fallback={<></>}>
-              <TabsTrigger value="transactions">Transactions</TabsTrigger>
+              <TabsTrigger 
+                value="transactions"
+                className="data-[state=active]:bg-white/20 data-[state=active]:text-white text-gray-300"
+              >
+                Transactions
+              </TabsTrigger>
             </PermissionGuard>
             <PermissionGuard permission={PERMISSIONS.FINANCES_REPORTS} fallback={<></>}>
-              <TabsTrigger value="reports">Reports & Analysis</TabsTrigger>
+              <TabsTrigger 
+                value="reports"
+                className="data-[state=active]:bg-white/20 data-[state=active]:text-white text-gray-300"
+              >
+                Reports & Analysis
+              </TabsTrigger>
             </PermissionGuard>
           </TabsList>
           
@@ -85,9 +106,12 @@ export default function FinancesPage() {
       
       <PermissionGuard permission={PERMISSIONS.FINANCES_MANAGE}>
         <Dialog open={isTransactionModalOpen} onOpenChange={setIsTransactionModalOpen}>
-          <DialogContent className="sm:max-w-[600px]">
+          <DialogContent 
+            className="sm:max-w-[600px]"
+            style={{ backgroundColor: 'rgba(26, 15, 61, 0.98)', backdropFilter: 'blur(10px)' }}
+          >
             <DialogHeader>
-              <DialogTitle>Record New Transaction</DialogTitle>
+              <DialogTitle className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Record New Transaction</DialogTitle>
             </DialogHeader>
             <TransactionForm 
               onSubmit={handleTransactionSubmit} 

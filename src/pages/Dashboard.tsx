@@ -26,6 +26,7 @@ import { StatCard } from "@/components/stats/StatCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { WorkInProgress } from "@/components/ui/WorkInProgress";
 import { EnrollPhotographerModal } from "@/components/dashboard/EnrollPhotographerModal";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 // Lazy-loaded components
 const MediaTagger = React.lazy(() => import("@/components/ai/MediaTagger").then(mod => ({ default: mod.MediaTagger })));
@@ -40,12 +41,7 @@ function Dashboard() {
   if (loading) {
     return (
       <Layout>
-        <div className="flex min-h-screen items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-            <p className="mt-2 text-muted-foreground">Loading dashboard...</p>
-          </div>
-        </div>
+        <LoadingSpinner text="Loading dashboard..." />
       </Layout>
     );
   }

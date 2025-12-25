@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Upload, X, Plus, ArrowLeft, ChevronDown, ChevronUp, Check, Image, Loader2, Pencil } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { PortfolioSidebar } from "@/components/portfolio/PortfolioSidebar";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { uploadImageDirect, uploadImageViaEdgeFunction, ImageUploadResponse, deleteImageByUuid } from "@/services/imageUpload/imageUploadService";
 import { createProjectDetails, updateProjectDetails, fetchProjectDetails, saveAlbumStorage, fetchAlbumsStorage, fetchSubEventsList, SubEvent, fetchAlbumsForLinking, linkAlbumToProject, AlbumLinkInfo, fetchLinkedAlbums, unlinkAlbumFromProject, deleteAlbumStorage, fetchAlbumById, fetchAllProjectsForUser } from "@/hooks/photobank/api/photobankApi";
 import { buildProjectImageObjectsJSON } from "@/utils/projectImageObjectsBuilder";
@@ -2915,10 +2916,7 @@ export default function PhotoBank() {
 
         {/* Loading indicator while projects are loading */}
         {isLoadingProjects && (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <span className="ml-2 text-gray-600">Loading your projects...</span>
-          </div>
+          <LoadingSpinner text="Loading your projects..." fullScreen={false} />
         )}
 
         {/* Project Form - Show below for new projects, in modal for editing */}
