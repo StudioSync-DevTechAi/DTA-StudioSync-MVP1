@@ -1,9 +1,9 @@
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useEffect, useRef } from "react";
 
 interface DeliverablesProps {
   deliverables: string[];
@@ -60,58 +60,119 @@ export function Deliverables({
       ) : (
         <div className="space-y-2">
           {deliverables.map((deliverable, index) => (
-            <div key={index} className="flex gap-2 items-start">
-              <Textarea
-                value={deliverable}
-                onChange={(e) => onUpdate(index, e.target.value)}
-                placeholder="Enter deliverable (e.g., Photos, Videos, Album)"
-                className="flex-1 min-w-0 text-white placeholder:text-gray-400 resize-none"
-                style={{ 
-                  backgroundColor: '#2d1b4e', 
-                  borderColor: '#3d2a5f', 
-                  color: '#ffffff', 
-                  minWidth: '300px',
-                  minHeight: '40px',
-                  maxHeight: '200px'
-                }}
-                rows={1}
-                onInput={(e) => {
-                  const target = e.target as HTMLTextAreaElement;
-                  target.style.height = 'auto';
-                  target.style.height = `${target.scrollHeight}px`;
-                }}
-              />
-              <Input
-                type="text"
-                value={deliverableAmounts[index] || ''}
-                onChange={(e) => handleAmountChange(index, e.target.value)}
-                placeholder="₹0"
-                className="w-24 text-white placeholder:text-gray-400 flex-shrink-0"
-                style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
-              />
-              <Badge 
-                variant="secondary" 
-                className={`${getDeliverableBadgeColor(deliverable)} border-transparent flex-shrink-0`}
-              >
-                {deliverable.toLowerCase().includes('photo') ? 'Photos' : 
-                  deliverable.toLowerCase().includes('video') || 
-                  deliverable.toLowerCase().includes('film') || 
-                  deliverable.toLowerCase().includes('cinemat') ? 'Videos' : 
-                  deliverable.toLowerCase().includes('album') || 
-                  deliverable.toLowerCase().includes('book') ? 'Album' : 'Other'}
-              </Badge>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onRemove(index)}
-                className="flex-shrink-0"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
+            <DeliverableRow
+              key={index}
+              deliverable={deliverable}
+              amount={deliverableAmounts[index] || ''}
+              onUpdate={(value) => onUpdate(index, value)}
+              onUpdateAmount={(value) => handleAmountChange(index, value)}
+              onRemove={() => onRemove(index)}
+              getBadgeColor={getDeliverableBadgeColor}
+            />
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+interface DeliverableRowProps {
+  deliverable: string;
+  amount: string;
+  onUpdate: (value: string) => void;
+  onUpdateAmount: (value: string) => void;
+  onRemove: () => void;
+  getBadgeColor: (deliverable: string) => string;
+}
+
+function DeliverableRow({ deliverable, amount, onUpdate, onUpdateAmount, onRemove, getBadgeColor }: DeliverableRowProps) {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const adjustTextareaHeight = () => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      const scrollHeight = textareaRef.current.scrollHeight;
+      const minHeight = 40;
+      const maxHeight = 200;
+      const newHeight = Math.min(Math.max(scrollHeight, minHeight), maxHeight);
+      textareaRef.current.style.height = `${newHeight}px`;
+    }
+  };
+
+  useEffect(() => {
+    // Adjust height when deliverable value changes
+    adjustTextareaHeight();
+  }, [deliverable]);
+
+  useEffect(() => {
+    // Adjust height on mount
+    adjustTextareaHeight();
+  }, []);
+
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    onUpdate(e.target.value);
+  };
+
+  const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    adjustTextareaHeight();
+  };
+
+  return (
+    <div className="grid grid-cols-[1fr_100px_auto_auto] gap-2 items-center">
+      <Textarea
+        ref={textareaRef}
+        value={deliverable}
+        onChange={handleChange}
+        onInput={handleInput}
+        placeholder="Enter deliverable (e.g., Photos, Videos, Album)"
+        className="text-white placeholder:text-gray-400 resize-none overflow-hidden"
+        style={{ 
+          backgroundColor: '#2d1b4e', 
+          borderColor: '#5a4a7a', 
+          color: '#ffffff',
+          borderWidth: '1.5px',
+          borderStyle: 'solid',
+          minHeight: '40px',
+          maxHeight: '200px',
+          height: 'auto',
+          lineHeight: '1.5'
+        }}
+        rows={1}
+      />
+      <Input
+        type="text"
+        value={amount}
+        onChange={(e) => onUpdateAmount(e.target.value)}
+        placeholder="₹0"
+        className="text-white placeholder:text-gray-400 text-center"
+        style={{ 
+          backgroundColor: '#2d1b4e', 
+          borderColor: '#5a4a7a', 
+          color: '#ffffff',
+          borderWidth: '1.5px',
+          borderStyle: 'solid',
+          textAlign: 'center'
+        }}
+      />
+      <Badge 
+        variant="secondary" 
+        className={`${getBadgeColor(deliverable)} border-transparent flex-shrink-0`}
+      >
+        {deliverable.toLowerCase().includes('photo') ? 'Photos' : 
+          deliverable.toLowerCase().includes('video') || 
+          deliverable.toLowerCase().includes('film') || 
+          deliverable.toLowerCase().includes('cinemat') ? 'Videos' : 
+          deliverable.toLowerCase().includes('album') || 
+          deliverable.toLowerCase().includes('book') ? 'Album' : 'Other'}
+      </Badge>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={onRemove}
+        className="flex-shrink-0"
+      >
+        <Trash2 className="h-4 w-4" />
+      </Button>
     </div>
   );
 }
