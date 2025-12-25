@@ -178,7 +178,7 @@ export function EstimateDetails({ estimate }: EstimateDetailsProps) {
         </div>
       </div>
 
-      <div className={`p-6 space-y-6 ${templateId === "bold" ? "bg-gray-50" : ""}`} style={{ backgroundColor: templateId === "bold" ? '' : '#1a0f3d' }}>
+      <div className={`p-6 space-y-6 ${templateId === "bold" ? "bg-white/10 backdrop-blur-sm border-white/20" : ""}`} style={{ backgroundColor: templateId === "bold" ? '' : '#1a0f3d', borderColor: templateId === "bold" ? 'rgba(255, 255, 255, 0.2)' : undefined }}>
         <div className={`flex justify-between items-start border-b pb-4 ${styles.sectionClass}`} style={{ borderColor: '#3d2a5f' }}>
           <div>
             <h2 className={`${styles.headingClass} text-white`}>Client</h2>
