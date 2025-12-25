@@ -27,6 +27,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useRBAC } from "@/hooks/rbac/useRBAC";
 import { PERMISSIONS } from "@/types/rbac";
 import { PermissionGuard } from "@/components/rbac/PermissionGuard";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 // Define navigation items with access control
 const navItems = [
@@ -68,6 +69,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const { user, signOut, hasRole } = useAuth();
   const { hasPermission } = useRBAC();
+  const [isNavigating, setIsNavigating] = useState(false);
+  const previousPathname = useRef(location.pathname);
   
   // Save sidebar width to localStorage
   useEffect(() => {
@@ -78,6 +81,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location]);
+
+  // Handle navigation loading state
+  useEffect(() => {
+    // If pathname changed, navigation completed
+    if (previousPathname.current !== location.pathname) {
+      setIsNavigating(false);
+      previousPathname.current = location.pathname;
+    }
+  }, [location.pathname]);
   
   // Handle window resize to update desktop state
   useEffect(() => {
@@ -327,6 +339,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                       navRefs.current[index] = el;
                     }}
                     to={item.path}
+                    onClick={() => {
+                      if (location.pathname !== item.path) {
+                        setIsNavigating(true);
+                      }
+                    }}
                     onFocus={() => setFocusedNavIndex(index)}
                     onBlur={() => {
                       // Only clear if focus is moving outside sidebar
@@ -369,6 +386,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   navRefs.current[roleIndex] = el;
                 }}
                 to="/admin/roles"
+                onClick={() => {
+                  if (location.pathname !== "/admin/roles") {
+                    setIsNavigating(true);
+                  }
+                }}
                 onFocus={() => setFocusedNavIndex(filteredNavItems.length)}
                 onBlur={() => {
                   setTimeout(() => {
@@ -500,7 +522,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         ref={mainContentRef}
         tabIndex={-1}
         className={cn(
-          "flex-1 min-h-screen",
+          "flex-1 min-h-screen relative",
           "px-4 lg:px-6 pb-4 lg:pb-6"
         )}
         style={{ 
@@ -520,6 +542,25 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           `
         }}
       >
+        {/* Navigation Loading Overlay */}
+        {isNavigating && (
+          <div 
+            className="fixed z-50 flex items-center justify-center"
+            style={{
+              top: 0,
+              left: isDesktop && !isMobileMenuOpen
+                ? (isSidebarHovered ? `${sidebarWidth}px` : `${SIDEBAR_COLLAPSED_WIDTH}px`)
+                : isDesktop ? `${sidebarWidth}px` : '0',
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(26, 15, 61, 0.98)',
+              backdropFilter: 'blur(10px)',
+              transition: isResizing ? 'none' : 'left 0.2s ease-in-out',
+            }}
+          >
+            <LoadingSpinner text="Loading..." fullScreen={false} />
+          </div>
+        )}
         <div className="max-w-6xl mx-auto w-full">
           {children}
         </div>

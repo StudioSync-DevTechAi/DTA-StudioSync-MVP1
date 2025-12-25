@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -458,12 +458,17 @@ export function ProjectBoard({ onNewProject }: ProjectBoardProps) {
                           draggable
                           onDragStart={(e) => handleDragStart(e, project.id)}
                           onDragEnd={handleDragEnd}
-                          className={`relative overflow-hidden transition-all hover:shadow-lg p-3 sm:p-4 cursor-move ${
+                          className={`relative overflow-hidden transition-all duration-300 p-3 sm:p-4 cursor-move border-2 ${
                             isDragging
                               ? "opacity-50 scale-95 shadow-lg border-primary"
-                              : "opacity-100"
+                              : "opacity-100 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(59,130,246,0.4)] hover:border-blue-400/60 hover:scale-[1.02]"
                           }`}
-                          style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}
+                          style={{ 
+                            backgroundColor: '#2d1b4e', 
+                            borderColor: '#3d2a5f',
+                            borderWidth: '2px',
+                            borderStyle: 'solid'
+                          }}
                           onClick={(e) => {
                             // Only navigate if not dragging
                             if (!isDragging && project.projectUuid) {

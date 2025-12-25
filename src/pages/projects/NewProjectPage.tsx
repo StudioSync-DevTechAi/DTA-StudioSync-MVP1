@@ -2831,34 +2831,33 @@ export default function NewProjectPage() {
                   {/* Project Owner Information */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-3 sm:p-4 rounded-lg mb-4 sm:mb-6" style={{ backgroundColor: 'rgba(45, 27, 78, 0.98)', backdropFilter: 'blur(10px)' }}>
                     <div className="space-y-2">
-                      <Label className="text-left block text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Project Owner</Label>
+                      <Label className="text-center block text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Project Owner</Label>
                       <Input
                         value={loadingOwner ? "Loading..." : (photographyOwner?.photography_owner_name || "Not available")}
                         disabled
-                        className="bg-background text-white"
+                        className="bg-background text-white text-center"
                         style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-left block text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Project Owner PhNo</Label>
+                      <Label className="text-center block text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Project Owner PhNo</Label>
                       <Input
                         value={loadingOwner ? "Loading..." : (photographyOwner?.photography_owner_phno || "Not available")}
                         disabled
-                        className="bg-background text-white"
+                        className="bg-background text-white text-center"
                         style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-left block text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Project Owner Email Id</Label>
+                      <Label className="text-center block text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Project Owner Email Id</Label>
                       <Input
                         value={loadingOwner ? "Loading..." : (photographyOwner?.photography_owner_email || "Not available")}
                         disabled
-                        className="bg-background text-white"
+                        className="bg-background text-white text-center"
                         style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                       />
                     </div>
                   </div>
-                  <h2 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 text-white" style={{ textShadow: '0 2px 4px rgba(0, 0, 0, 0.8)' }}>Add New Client Booking</h2>
                   <div className="space-y-4 sm:space-y-6" style={{ backgroundColor: 'rgba(26, 15, 61, 0.98)', backdropFilter: 'blur(10px)', padding: '1rem', borderRadius: '0.5rem' }}>
 
               {/* Project Name and Project Type Row */}
@@ -3205,7 +3204,8 @@ export default function NewProjectPage() {
                                 setCurrentPage(1);
                                 setSearchParams({ projectUuid: projectEstimateUuid, page: '1' });
                               }}
-                              className="flex items-center gap-2 bg-[#2d1b4e] text-white border-[#3d2a5f] hover:bg-[#1a0f3d]"
+                              className="flex items-center gap-2 bg-[#2d1b4e] text-white border-[#5a4a7a] hover:bg-[#1a0f3d]"
+                              style={{ borderWidth: '1.5px', borderStyle: 'solid' }}
                             >
                               <ArrowLeft className="h-4 w-4" />
                               Project Details
@@ -3272,8 +3272,8 @@ export default function NewProjectPage() {
                         return (
                           <Card 
                             key={pkg.id} 
-                            className="p-3 sm:p-4 w-full sm:w-[45%] relative"
-                            style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}
+                            className="p-3 sm:p-4 w-full sm:w-[45%] relative border-2 transition-all duration-300 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(59,130,246,0.4)] hover:border-blue-400/60 hover:scale-[1.02]"
+                            style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', borderWidth: '2px', borderStyle: 'solid' }}
                             onClick={(e) => {
                               // Only save if clicking on the card itself (white space), not on interactive elements
                               const target = e.target as HTMLElement;
@@ -3408,7 +3408,7 @@ export default function NewProjectPage() {
                                           handleEventPackageChange(pkg.id, "eventType", value)
                                         }
                                       >
-                                        <SelectTrigger id={`eventType-${pkg.id}`} className="text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}>
+                                        <SelectTrigger id={`eventType-${pkg.id}`} className="text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff' }}>
                                           <SelectValue placeholder="Select an event type" className="text-white" />
                                         </SelectTrigger>
                                         <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
@@ -3433,7 +3433,7 @@ export default function NewProjectPage() {
                                             handleEventPackageChange(pkg.id, "customEventTypeName", e.target.value)
                                           }
                                           className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm text-white"
-                                          style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
+                                          style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#5a4a7a', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                         />
                                       </div>
                                     )}
@@ -3448,7 +3448,7 @@ export default function NewProjectPage() {
                                         value={pkg.daysCount || "1"}
                                         onChange={(e) => handleEventPackageChange(pkg.id, "daysCount", e.target.value)}
                                         className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm w-20 text-white"
-                                        style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
+                                        style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#5a4a7a', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                       />
                                     </div>
                                   </div>
@@ -3471,7 +3471,7 @@ export default function NewProjectPage() {
                                           )
                                         }
                                         className="w-full text-sm text-white placeholder:text-gray-400"
-                                        style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
+                                        style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#5a4a7a', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                       />
                                     </div>
                                     <div className="space-y-2 min-w-0">
@@ -3482,7 +3482,7 @@ export default function NewProjectPage() {
                                           handleEventPackageChange(pkg.id, "pgType", value)
                                         }
                                       >
-                                        <SelectTrigger id={`pgType-${pkg.id}`} className="w-full sm:w-16 text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}>
+                                        <SelectTrigger id={`pgType-${pkg.id}`} className="w-full sm:w-16 text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff' }}>
                                           <SelectValue placeholder="--" className="text-white" />
                                         </SelectTrigger>
                                         <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
@@ -3507,7 +3507,7 @@ export default function NewProjectPage() {
                                           )
                                         }
                                         className="w-full text-sm text-white placeholder:text-gray-400"
-                                        style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
+                                        style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#5a4a7a', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                       />
                                     </div>
                                     <div className="space-y-2">
@@ -3518,7 +3518,7 @@ export default function NewProjectPage() {
                                           handleEventPackageChange(pkg.id, "vgType", value)
                                         }
                                       >
-                                        <SelectTrigger id={`vgType-${pkg.id}`} className="w-16 text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}>
+                                        <SelectTrigger id={`vgType-${pkg.id}`} className="w-16 text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff' }}>
                                           <SelectValue placeholder="--" className="text-white" />
                                         </SelectTrigger>
                                         <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
@@ -3544,7 +3544,7 @@ export default function NewProjectPage() {
                                               handleEventPackageChange(pkg.id, "eventType", value)
                                             }
                                           >
-                                            <SelectTrigger id={`eventType-${pkg.id}`} className="text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}>
+                                            <SelectTrigger id={`eventType-${pkg.id}`} className="text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff' }}>
                                               <SelectValue placeholder="Select an event type" className="text-white" />
                                             </SelectTrigger>
                                             <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
@@ -3569,7 +3569,7 @@ export default function NewProjectPage() {
                                                 handleEventPackageChange(pkg.id, "customEventTypeName", e.target.value)
                                               }
                                               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm text-white"
-                                          style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
+                                          style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#5a4a7a', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                             />
                                           </div>
                                         )}
@@ -3791,7 +3791,7 @@ export default function NewProjectPage() {
                                 {/* PG-Type & VG-Type */}
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
                                   <div className="space-y-2 min-w-0">
-                                    <Label htmlFor={`pgType-${pkg.id}`} className="text-xs sm:text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">PG-Type</Label>
+                                    <Label htmlFor={`pgType-${pkg.id}`} className="text-xs sm:text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>PG-Type</Label>
                                     <Select
                                       value={pkg.pgType || ""}
                                       onValueChange={(value) =>
@@ -3808,7 +3808,7 @@ export default function NewProjectPage() {
                                   </Select>
                                 </div>
                                 <div className="space-y-2 min-w-0">
-                                  <Label htmlFor={`vgType-${pkg.id}`} className="text-xs sm:text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">VG-Type</Label>
+                                  <Label htmlFor={`vgType-${pkg.id}`} className="text-xs sm:text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>VG-Type</Label>
                                     <Select
                                       value={pkg.vgType || ""}
                                       onValueChange={(value) =>
@@ -3829,7 +3829,7 @@ export default function NewProjectPage() {
                               {/* PhotoPOC & VideoPOC */}
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
                                 <div className="space-y-2 min-w-0">
-                                  <Label htmlFor={`photoCoordinator-${pkg.id}`} className="text-xs sm:text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">PhotoPOC</Label>
+                                  <Label htmlFor={`photoCoordinator-${pkg.id}`} className="text-xs sm:text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>PhotoPOC</Label>
                                     <div className="flex items-end gap-2">
                                       {pkg.photographyCoordinatorId ? (
                                         <div className="flex items-center justify-between p-3 border rounded-md flex-1 w-[60%]" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
@@ -3874,7 +3874,7 @@ export default function NewProjectPage() {
                                     </div>
                                   </div>
                                   <div className="space-y-2">
-                                    <Label htmlFor={`videoCoordinator-${pkg.id}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-nowrap max-w-fit">VideoPOC</Label>
+                                    <Label htmlFor={`videoCoordinator-${pkg.id}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-nowrap max-w-fit text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>VideoPOC</Label>
                                     <div className="flex items-end gap-2">
                                       {pkg.videographyCoordinatorId ? (
                                         <div className="flex items-center justify-between p-3 border rounded-md flex-1 w-[60%]" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
@@ -4021,7 +4021,8 @@ export default function NewProjectPage() {
                         <Button
                           variant="outline"
                           onClick={handleAddEventPackage}
-                          className="w-full sm:w-[45%] h-fit self-start bg-[#2d1b4e] text-white border-[#3d2a5f] hover:bg-[#1a0f3d]"
+                          className="w-full sm:w-[45%] h-fit self-start bg-[#2d1b4e] text-white border-[#5a4a7a] hover:bg-[#1a0f3d]"
+                          style={{ borderWidth: '1.5px', borderStyle: 'solid' }}
                         >
                           <Plus className="h-4 w-4 mr-2" />
                           Add New Event
@@ -4032,7 +4033,8 @@ export default function NewProjectPage() {
                           <Button
                             variant="outline"
                             onClick={handleAddEventPackage}
-                            className="w-full sm:w-[45%] bg-[#2d1b4e] text-white border-[#3d2a5f] hover:bg-[#1a0f3d]"
+                            className="w-full sm:w-[45%] bg-[#2d1b4e] text-white border-[#5a4a7a] hover:bg-[#1a0f3d]"
+                            style={{ borderWidth: '1.5px', borderStyle: 'solid' }}
                           >
                             <Plus className="h-4 w-4 mr-2" />
                             Add New Event
@@ -4044,7 +4046,7 @@ export default function NewProjectPage() {
 
                   {/* Price Summary - Bottom left, same width as event cards */}
                   <div className="w-full mt-4">
-                    <Card className="rounded-lg border bg-card text-card-foreground shadow-sm p-3 sm:p-4 w-full sm:w-[45%]" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
+                    <Card className="rounded-lg border-2 bg-card text-card-foreground shadow-sm p-3 sm:p-4 w-full sm:w-[45%] transition-all duration-300 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(59,130,246,0.4)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', borderWidth: '2px', borderStyle: 'solid' }}>
                       <div className="flex justify-between items-center mb-4">
                         <h3 className="font-semibold text-white">Price</h3>
                         <div className="flex items-center gap-2">
@@ -4276,7 +4278,8 @@ export default function NewProjectPage() {
                     <Button
                       onClick={handlePrevious}
                       variant="outline"
-                      className="mr-4 bg-[#2d1b4e] text-white border-[#3d2a5f] hover:bg-[#1a0f3d]"
+                      className="mr-4 bg-[#2d1b4e] text-white border-[#5a4a7a] hover:bg-[#1a0f3d]"
+                      style={{ borderWidth: '1.5px', borderStyle: 'solid' }}
                     >
                       Previous
                     </Button>
@@ -4313,7 +4316,7 @@ export default function NewProjectPage() {
                             }
                           }}
                         >
-                          <SelectTrigger className="w-48 text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}>
+                          <SelectTrigger className="w-48 text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff' }}>
                             <SelectValue placeholder="Select template" className="text-white" />
                           </SelectTrigger>
                           <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
@@ -4330,7 +4333,8 @@ export default function NewProjectPage() {
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          className="h-9 bg-[#2d1b4e] text-white border-[#3d2a5f] hover:bg-[#1a0f3d]"
+                          className="h-9 bg-[#2d1b4e] text-white border-[#5a4a7a] hover:bg-[#1a0f3d]"
+                          style={{ borderWidth: '1.5px', borderStyle: 'solid' }}
                           onClick={handleEditPdf}
                         >
                           <Pencil className="h-4 w-4 mr-2" />
@@ -4339,7 +4343,8 @@ export default function NewProjectPage() {
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          className="h-9 bg-[#2d1b4e] text-white border-[#3d2a5f] hover:bg-[#1a0f3d]"
+                          className="h-9 bg-[#2d1b4e] text-white border-[#5a4a7a] hover:bg-[#1a0f3d]"
+                          style={{ borderWidth: '1.5px', borderStyle: 'solid' }}
                           onClick={handlePreviewPdf}
                         >
                           <Eye className="h-4 w-4 mr-2" />
@@ -4522,13 +4527,16 @@ export default function NewProjectPage() {
                       <Button
                         onClick={handlePrevious}
                         variant="outline"
+                        className="h-9 bg-[#2d1b4e] text-white border-[#5a4a7a] hover:bg-[#1a0f3d]"
+                        style={{ borderWidth: '1.5px', borderStyle: 'solid' }}
                       >
                         Previous
                       </Button>
                       <Button
                         onClick={handleSaveEvent}
                         variant="outline"
-                        className="px-8"
+                        className="h-9 bg-[#2d1b4e] text-white border-[#5a4a7a] hover:bg-[#1a0f3d] px-8"
+                        style={{ borderWidth: '1.5px', borderStyle: 'solid' }}
                       >
                         Save
                       </Button>

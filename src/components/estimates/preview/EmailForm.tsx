@@ -139,22 +139,26 @@ export function EmailForm({ onClose, estimate }: EmailFormProps) {
   };
 
   return (
-    <Card className="mb-4">
+    <Card className="mb-4" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
       <CardContent className="pt-6">
         <div className="flex items-end gap-2">
           <div className="flex-1 space-y-2">
-            <Label htmlFor="email">Client Email</Label>
+            <Label htmlFor="email" className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Client Email</Label>
             <Input
               id="email"
               type="email"
               placeholder="client@example.com"
               value={emailInput}
               onChange={(e) => setEmailInput(e.target.value)}
+              className="text-white placeholder:text-gray-400"
+              style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
             />
           </div>
           <Button
             onClick={handleSendEmail}
             disabled={isLoading}
+            className="text-white hover:bg-[#1a0f3d]"
+            style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
           >
             {isLoading ? "Sending..." : "Send"}
             <Send className="ml-2 h-4 w-4" />
@@ -163,6 +167,8 @@ export function EmailForm({ onClose, estimate }: EmailFormProps) {
             variant="ghost"
             size="icon"
             onClick={onClose}
+            className="text-white hover:bg-white/10 border"
+            style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
           >
             <X className="h-4 w-4" />
           </Button>

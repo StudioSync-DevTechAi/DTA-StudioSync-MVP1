@@ -91,7 +91,7 @@ export function EstimateCard({
             variant="outline"
             onClick={() => onPreview(estimate)}
             className="text-white border-[#3d2a5f] hover:bg-[#1a0f3d]"
-            style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
+            style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
           >
             <Eye className="h-4 w-4 mr-2" />
             View
@@ -103,7 +103,7 @@ export function EstimateCard({
                 variant="outline"
                 onClick={() => onEdit(estimate)}
                 className="text-white border-[#3d2a5f] hover:bg-[#1a0f3d]"
-                style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
+                style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
               >
                 <Edit className="h-4 w-4 mr-2" />
                 Edit

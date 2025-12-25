@@ -69,12 +69,46 @@ export function EstimatesHeader({
       </div>
       {showActions && (
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-          <Button variant="outline" onClick={handleNewProject} className="w-full sm:w-auto">
+          <Button 
+            variant="outline" 
+            onClick={handleNewProject} 
+            className="animated-border w-full sm:w-auto"
+            style={{
+              backgroundColor: 'transparent',
+              color: '#ffffff',
+              borderColor: '#ffffff'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(26, 8, 61, 0.3)';
+              e.currentTarget.style.borderColor = '#ffffff';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.borderColor = '#ffffff';
+            }}
+          >
             <Plus className="h-4 w-4 mr-2" />
             New Project
           </Button>
           <PermissionGuard permission={PERMISSIONS.ESTIMATES_CREATE}>
-            <Button onClick={onNewEstimate} className="w-full sm:w-auto">
+            <Button 
+              onClick={onNewEstimate} 
+              className="animated-border w-full sm:w-auto"
+              variant="outline"
+              style={{
+                backgroundColor: 'transparent',
+                color: '#ffffff',
+                borderColor: '#ffffff'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(26, 8, 61, 0.3)';
+                e.currentTarget.style.borderColor = '#ffffff';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.borderColor = '#ffffff';
+              }}
+            >
               <Plus className="h-4 w-4 mr-2" />
               New Estimate
             </Button>

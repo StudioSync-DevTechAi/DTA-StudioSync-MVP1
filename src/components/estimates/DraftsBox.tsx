@@ -116,9 +116,10 @@ export function DraftsBox() {
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          className="relative flex items-center gap-2 px-4 py-2 h-auto"
+          className="relative flex items-center gap-2 px-5 py-2.5 h-auto text-white"
+          style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: 'rgb(61, 42, 95)', borderWidth: '1.5px', borderStyle: 'solid', color: 'rgb(255, 255, 255)', textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}
         >
-          <FileText className="h-4 w-4" />
+          <FileText className="h-5 w-5" />
           <span className="font-medium">Drafts</span>
           {draftCount > 0 && (
             <Badge 

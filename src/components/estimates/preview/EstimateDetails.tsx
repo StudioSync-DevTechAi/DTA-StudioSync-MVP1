@@ -169,7 +169,11 @@ export function EstimateDetails({ estimate }: EstimateDetailsProps) {
     <div className={`border rounded-lg overflow-hidden ${templateId === "bold" ? "border-none" : ""}`} style={{ borderColor: '#3d2a5f' }}>
       <div 
         className={`text-center space-y-3 ${styles.headerClass}`}
-        style={templateId !== "bold" ? { backgroundColor: '#2d1b4e', color: '#ffffff' } : undefined}
+        style={{ 
+          backgroundColor: 'rgba(26, 15, 61, 0.98)', 
+          backdropFilter: 'blur(10px)',
+          color: '#ffffff' 
+        }}
       >
         <h1 className={`text-2xl font-semibold ${styles.headingClass} text-white`}>ESTIMATE</h1>
         <p className="text-gray-300">StudioSyncWork Photography Services</p>
