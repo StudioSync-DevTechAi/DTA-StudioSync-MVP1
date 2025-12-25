@@ -25,8 +25,6 @@ export default function Home() {
     }
   }, [user, loading, navigate]);
 
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
-
   // Show loading while auth state is being determined
   if (loading) {
     return <LoadingSpinner text="Loading..." />;
