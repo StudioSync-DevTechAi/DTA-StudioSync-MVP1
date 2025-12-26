@@ -2824,12 +2824,12 @@ export default function NewProjectPage() {
         />
         
         <div className="flex items-center justify-center px-2 sm:px-4">
-          <Card className="rounded-lg bg-card text-card-foreground shadow-sm w-full max-w-6xl relative border-2 transition-all duration-300 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(59,130,246,0.4)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
+          <Card className="rounded-lg bg-card text-card-foreground shadow-sm w-full max-w-6xl relative border-2 transition-all duration-300 hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
             <CardContent className="p-4 sm:p-6 md:p-8" style={{ backgroundColor: 'transparent' }}>
               {currentPage === 1 ? (
                 <>
                   {/* Project Owner Information */}
-                  <div className="rounded-lg bg-card text-card-foreground shadow-sm grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-3 sm:p-4 mb-4 sm:mb-6 relative border-2 transition-all duration-300 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(59,130,246,0.4)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
+                  <div className="rounded-lg bg-card text-card-foreground shadow-sm grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-3 sm:p-4 mb-4 sm:mb-6 relative border-2 transition-all duration-300 hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
                     <div className="space-y-2">
                       <Label className="text-center block text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Project Owner</Label>
                       <Input
@@ -2858,11 +2858,11 @@ export default function NewProjectPage() {
                       />
                     </div>
                   </div>
-                  <div className="rounded-lg bg-card text-card-foreground shadow-sm space-y-4 sm:space-y-6 p-3 sm:p-4 relative border-2 transition-all duration-300 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(59,130,246,0.4)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
+                  <div className="rounded-lg bg-card text-card-foreground shadow-sm space-y-4 sm:space-y-6 p-3 sm:p-4 relative border-2 transition-all duration-300 hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
 
               {/* Project Name and Project Type Row */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="rounded-lg bg-card text-card-foreground shadow-sm space-y-2 min-w-0 p-3 sm:p-4 relative border-2 transition-all duration-300 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(59,130,246,0.4)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
+                <div className="rounded-lg bg-card text-card-foreground shadow-sm space-y-2 min-w-0 p-3 sm:p-4 relative border-2 transition-all duration-300 hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
                   <Label htmlFor="projectName" className="text-sm sm:text-base text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>
                     Project Name <span className="text-red-500">*</span>
                   </Label>
@@ -2876,7 +2876,7 @@ export default function NewProjectPage() {
                     style={{ backgroundColor: 'transparent', borderColor: '#ffffff', color: '#ffffff' }}
                   />
                 </div>
-                <div className="rounded-lg bg-card text-card-foreground shadow-sm space-y-2 min-w-0 p-3 sm:p-4 relative border-2 transition-all duration-300 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(59,130,246,0.4)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
+                <div className="rounded-lg bg-card text-card-foreground shadow-sm space-y-2 min-w-0 p-3 sm:p-4 relative border-2 transition-all duration-300 hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
                   <Label htmlFor="eventType" className="text-sm sm:text-base text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>
                     Project Type <span className="text-red-500">*</span>
                   </Label>
@@ -2906,7 +2906,7 @@ export default function NewProjectPage() {
 
               {/* Client Name, Email, and Phone Row */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div className="rounded-lg bg-card text-card-foreground shadow-sm space-y-2 min-w-0 p-3 sm:p-4 relative border-2 transition-all duration-300 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(59,130,246,0.4)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
+                <div className="rounded-lg bg-card text-card-foreground shadow-sm space-y-2 min-w-0 p-3 sm:p-4 relative border-2 transition-all duration-300 hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
                   <Label htmlFor="clientFullName" className="text-sm sm:text-base text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Client Name:</Label>
                   <Input
                     id="clientFullName"
@@ -2917,7 +2917,7 @@ export default function NewProjectPage() {
                     style={{ backgroundColor: 'transparent', borderColor: '#ffffff', color: '#ffffff' }}
                   />
                 </div>
-                <div className="rounded-lg bg-card text-card-foreground shadow-sm space-y-2 min-w-0 p-3 sm:p-4 relative border-2 transition-all duration-300 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(59,130,246,0.4)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
+                <div className="rounded-lg bg-card text-card-foreground shadow-sm space-y-2 min-w-0 p-3 sm:p-4 relative border-2 transition-all duration-300 hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
                   <Label htmlFor="clientEmail" className="text-sm sm:text-base text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Client Email:</Label>
                   <Input
                     id="clientEmail"
@@ -2937,7 +2937,7 @@ export default function NewProjectPage() {
                     </p>
                   )}
                 </div>
-                <div className="rounded-lg bg-card text-card-foreground shadow-sm space-y-2 min-w-0 p-3 sm:p-4 relative border-2 transition-all duration-300 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(59,130,246,0.4)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
+                <div className="rounded-lg bg-card text-card-foreground shadow-sm space-y-2 min-w-0 p-3 sm:p-4 relative border-2 transition-all duration-300 hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
                   <Label htmlFor="clientPhone" className="text-sm sm:text-base text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>
                     Client Ph: <span className="text-red-500">*</span>
                   </Label>
@@ -2964,7 +2964,7 @@ export default function NewProjectPage() {
               </div>
 
               {/* Start Date & Time */}
-              <div className="rounded-lg bg-card text-card-foreground shadow-sm space-y-2 p-3 sm:p-4 relative border-2 transition-all duration-300 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(59,130,246,0.4)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
+              <div className="rounded-lg bg-card text-card-foreground shadow-sm space-y-2 p-3 sm:p-4 relative border-2 transition-all duration-300 hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
                 <Label className="text-sm sm:text-base text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Project Start Date & Time <span className="text-red-500">*</span></Label>
                 <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-1 items-end" style={{ backgroundColor: 'transparent' }}>
                   {/* Date Selection - Narrower */}
@@ -3062,7 +3062,7 @@ export default function NewProjectPage() {
               </div>
 
               {/* End Date & Time */}
-              <div className="rounded-lg bg-card text-card-foreground shadow-sm space-y-2 p-3 sm:p-4 relative border-2 transition-all duration-300 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(59,130,246,0.4)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
+              <div className="rounded-lg bg-card text-card-foreground shadow-sm space-y-2 p-3 sm:p-4 relative border-2 transition-all duration-300 hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
                 <Label className="text-sm sm:text-base text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Project End Date & Time</Label>
                 <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-1 items-end" style={{ backgroundColor: 'transparent' }}>
                   {/* Date Selection - Narrower */}
@@ -3320,7 +3320,7 @@ export default function NewProjectPage() {
                         return (
                           <Card 
                             key={pkg.id} 
-                            className="rounded-lg bg-card text-card-foreground shadow-sm p-3 sm:p-4 w-full sm:w-[45%] relative border-2 transition-all duration-300 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(59,130,246,0.4)] hover:border-blue-400/60 hover:scale-[1.02]"
+                            className="rounded-lg bg-card text-card-foreground shadow-sm p-3 sm:p-4 w-full sm:w-[45%] relative border-2 transition-all duration-300 hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60 hover:scale-[1.02]"
                             style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}
                             onClick={(e) => {
                               // Only save if clicking on the card itself (white space), not on interactive elements
@@ -4118,7 +4118,7 @@ export default function NewProjectPage() {
 
                   {/* Price Summary - Bottom left, same width as event cards */}
                   <div className="w-full mt-4">
-                    <Card className="rounded-lg bg-card text-card-foreground shadow-sm p-3 sm:p-4 w-full sm:w-[45%] relative border-2 transition-all duration-300 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(59,130,246,0.4)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
+                    <Card className="rounded-lg bg-card text-card-foreground shadow-sm p-3 sm:p-4 w-full sm:w-[45%] relative border-2 transition-all duration-300 hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
                       <div className="flex justify-between items-center mb-4">
                         <h3 className="font-semibold text-white">Price</h3>
                         <div className="flex items-center gap-2">
@@ -4309,7 +4309,7 @@ export default function NewProjectPage() {
                         <div className="mt-4 pt-4 border-t space-y-3" style={{ borderColor: '#ffffff' }}>
                           <h4 className="font-semibold text-sm mb-3 text-white">Event-wise Cost Estimates</h4>
                           {calculateEventWiseCosts().map((eventCost, index) => (
-                            <div key={index} className="rounded-lg bg-card text-card-foreground shadow-sm p-3 sm:p-4 space-y-2 relative border-2 transition-all duration-300 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(59,130,246,0.4)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
+                            <div key={index} className="rounded-lg bg-card text-card-foreground shadow-sm p-3 sm:p-4 space-y-2 relative border-2 transition-all duration-300 hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
                               <div className="flex justify-between items-start">
                                 <div>
                                   <p className="font-medium text-sm text-white">{eventCost.eventName}</p>
@@ -4438,7 +4438,7 @@ export default function NewProjectPage() {
                     </div>
 
                     {/* PDF Viewer Area */}
-                    <div className="rounded-lg bg-card text-card-foreground shadow-sm min-h-[600px] flex flex-col p-3 sm:p-4 relative border-2 transition-all duration-300 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(59,130,246,0.4)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
+                    <div className="rounded-lg bg-card text-card-foreground shadow-sm min-h-[600px] flex flex-col p-3 sm:p-4 relative border-2 transition-all duration-300 hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
                       {isEditingPdf ? (
                         <div className="flex flex-col h-full">
                           {/* PDF Viewer */}
@@ -4454,7 +4454,7 @@ export default function NewProjectPage() {
                           <div className="p-6 border-t max-h-[400px] overflow-y-auto" style={{ backgroundColor: 'transparent', borderColor: '#ffffff' }}>
                             <div className="space-y-6">
                               {/* Price Table Editor */}
-                              <div className="rounded-lg bg-card text-card-foreground shadow-sm p-3 sm:p-4 relative border-2 transition-all duration-300 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(59,130,246,0.4)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
+                              <div className="rounded-lg bg-card text-card-foreground shadow-sm p-3 sm:p-4 relative border-2 transition-all duration-300 hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
                                 <h3 className="font-semibold text-lg mb-4 text-white">Edit Price Summary</h3>
                                 <div className="grid grid-cols-2 gap-4">
                                   <div className="space-y-2">
@@ -4521,7 +4521,7 @@ export default function NewProjectPage() {
                               </div>
                               
                               {/* Additional Notes Editor */}
-                              <div className="rounded-lg bg-card text-card-foreground shadow-sm p-3 sm:p-4 relative border-2 transition-all duration-300 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(59,130,246,0.4)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
+                              <div className="rounded-lg bg-card text-card-foreground shadow-sm p-3 sm:p-4 relative border-2 transition-all duration-300 hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
                                 <Label htmlFor="pdf-edit-text" className="mb-2 block font-semibold text-white">
                                   Edit Additional Notes:
                                 </Label>
@@ -4577,7 +4577,7 @@ export default function NewProjectPage() {
                           />
                         </div>
                       ) : (
-                        <div className="rounded-lg bg-card text-card-foreground shadow-sm flex flex-col items-center justify-center p-12 min-h-[500px] relative border-2 transition-all duration-300 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(59,130,246,0.4)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
+                        <div className="rounded-lg bg-card text-card-foreground shadow-sm flex flex-col items-center justify-center p-12 min-h-[500px] relative border-2 transition-all duration-300 hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
                           <div className="text-center space-y-4 mb-6">
                             <p className="text-lg font-semibold text-white">
                               Your quotation will appear here
