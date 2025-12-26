@@ -37,14 +37,17 @@ export function InvoiceItemsCard({ items, onItemsChange }: InvoiceItemsCardProps
   };
 
   return (
-    <Card className="p-4">
-      <h3 className="font-medium mb-4">Invoice Items</h3>
+    <Card 
+      className="p-4"
+      style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}
+    >
+      <h3 className="font-medium mb-4 text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Invoice Items</h3>
       <div className="space-y-4">
         {items.map((item, index) => (
           <div key={index} className="space-y-4">
             <div className="flex gap-4 items-start">
               <div className="flex-1">
-                <Label htmlFor={`description-${index}`}>Description</Label>
+                <Label htmlFor={`description-${index}`} className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Description</Label>
                 <Select
                   onValueChange={(value) => {
                     const template = serviceTemplates.find(t => t.label === value);
@@ -53,12 +56,15 @@ export function InvoiceItemsCard({ items, onItemsChange }: InvoiceItemsCardProps
                     }
                   }}
                 >
-                  <SelectTrigger className="mt-2">
+                  <SelectTrigger 
+                    className="mt-2 text-white"
+                    style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
+                  >
                     <SelectValue placeholder="Select service or type custom" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
                     {serviceTemplates.map((template) => (
-                      <SelectItem key={template.label} value={template.label}>
+                      <SelectItem key={template.label} value={template.label} className="text-white hover:bg-[#1a0f3d]">
                         {template.label}
                       </SelectItem>
                     ))}
@@ -67,35 +73,38 @@ export function InvoiceItemsCard({ items, onItemsChange }: InvoiceItemsCardProps
                 <Input
                   id={`description-${index}`}
                   placeholder="Or type custom service description"
-                  className="mt-2"
+                  className="mt-2 text-white placeholder:text-gray-400"
                   value={item.description}
                   onChange={(e) => {
                     const newItems = [...items];
                     newItems[index].description = e.target.value;
                     onItemsChange(newItems);
                   }}
+                  style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
                 />
               </div>
               <div className="w-32">
-                <Label htmlFor={`amount-${index}`}>Amount</Label>
+                <Label htmlFor={`amount-${index}`} className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Amount</Label>
                 <Input
                   id={`amount-${index}`}
                   placeholder="₹0.00"
-                  className="mt-2"
+                  className="mt-2 text-white placeholder:text-gray-400 text-center"
                   value={item.amount}
                   onChange={(e) => {
                     const newItems = [...items];
                     newItems[index].amount = e.target.value;
                     onItemsChange(newItems);
                   }}
+                  style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid', textAlign: 'center' }}
                 />
               </div>
               {items.length > 1 && (
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="mt-8"
+                  className="mt-8 text-white hover:bg-white/10"
                   onClick={() => removeItem(index)}
+                  style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', color: '#ffffff' }}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -107,8 +116,9 @@ export function InvoiceItemsCard({ items, onItemsChange }: InvoiceItemsCardProps
       <Button
         type="button"
         variant="outline"
-        className="mt-4 w-full"
+        className="mt-4 w-full text-white border-[#5a4a7a] hover:bg-[#1a0f3d]"
         onClick={addItem}
+        style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
       >
         <Plus className="h-4 w-4 mr-2" />
         Add Item
