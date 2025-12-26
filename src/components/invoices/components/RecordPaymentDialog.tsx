@@ -11,6 +11,7 @@ import { Invoice } from "../types";
 import { useRecordPayment } from "@/hooks/invoices/useRecordPayment";
 import { PaymentForm } from "./PaymentForm";
 import { useInvoicePaymentTransaction } from "@/hooks/finances/useInvoicePaymentTransaction";
+import { PaymentHistory } from "./PaymentHistory";
 
 interface RecordPaymentDialogProps {
   open: boolean;
@@ -38,7 +39,8 @@ export function RecordPaymentDialog({
     setCollectedBy,
     amountError,
     maxAllowedPayment,
-    handleSubmit
+    handleSubmit,
+    paymentHistory
   } = useRecordPayment(invoice, onSave, onClose, recordPaymentAsTransaction);
 
   return (
@@ -48,7 +50,10 @@ export function RecordPaymentDialog({
         style={{ backgroundColor: 'rgba(26, 15, 61, 0.98)', backdropFilter: 'blur(10px)', borderColor: '#3d2a5f', maxWidth: '360px' }}
       >
         <DialogHeader className="text-center relative">
-          <DialogTitle className="text-white text-center absolute top-2 left-1/2 -translate-x-1/2" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>
+          <div className="absolute -top-2 left-2">
+            <PaymentHistory paymentHistory={paymentHistory} />
+          </div>
+          <DialogTitle className="text-white text-center absolute top-0 left-1/2 -translate-x-1/2" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>
             Record Payment
           </DialogTitle>
           <DialogDescription className="text-white/80 text-left pt-10" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
