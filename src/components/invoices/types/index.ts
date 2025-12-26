@@ -34,4 +34,13 @@ export interface Invoice {
   
   // Store full invoice form data for editing (optional, populated when fetched from DB)
   invoiceFormData?: any;
+  
+  // Version history from database
+  versionHistory?: Array<{
+    version: number;
+    invoice_form_data: any;
+    updated_at: string;
+    updated_by?: string;
+  }>;
+  currentVersion?: number;
 }

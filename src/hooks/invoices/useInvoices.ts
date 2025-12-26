@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Invoice } from "@/components/invoices/types";
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -80,6 +80,32 @@ export function useInvoices() {
     filterInvoices(invoices, searchQuery, statusFilter),
     sortBy
   );
+
+  // Sync selectedInvoice with updated invoices list after refetch
+  // This ensures InvoiceDetails shows the latest data after updates
+  useEffect(() => {
+    if (selectedInvoice && invoices.length > 0) {
+      // Find the updated invoice in the refetched list
+      const updatedInvoice = invoices.find(inv => inv.id === selectedInvoice.id);
+      if (updatedInvoice) {
+        // Only update if the invoice data has actually changed
+        // Compare key fields to avoid unnecessary re-renders
+        const hasChanged = 
+          updatedInvoice.amount !== selectedInvoice.amount ||
+          updatedInvoice.paidAmount !== selectedInvoice.paidAmount ||
+          updatedInvoice.balanceAmount !== selectedInvoice.balanceAmount ||
+          updatedInvoice.status !== selectedInvoice.status ||
+          JSON.stringify(updatedInvoice.items) !== JSON.stringify(selectedInvoice.items);
+        
+        if (hasChanged) {
+          // Update selectedInvoice with the latest data from the refetched list
+          // This keeps InvoiceDetails in sync with the database
+          setSelectedInvoice(updatedInvoice);
+        }
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [invoices]); // Only depend on invoices array to avoid infinite loops
 
   const addInvoice = (invoice: Invoice, invoiceFormData: any) => {
     addInvoiceMutation.mutate({ invoice, invoiceFormData }, {

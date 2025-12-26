@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Receipt, ArrowUpDown, Wallet, ChevronDown, Edit } from "lucide-react";
+import { Receipt, ArrowUpDown, Wallet, ChevronDown, Edit, Eye, DollarSign } from "lucide-react";
 import { useState } from "react";
 import { Invoice } from "../types";
 import { RecordPaymentDialog } from "./RecordPaymentDialog";
@@ -142,12 +142,7 @@ export function InvoicesList({
                 {invoices.map((invoice: Invoice) => (
                   <TableRow key={invoice.id} className="hover:bg-white/5" style={{ borderColor: '#3d2a5f' }}>
                     <TableCell className="font-medium text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
-                      <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-full bg-primary/20 flex items-center justify-center" style={{ backgroundColor: 'rgba(90, 74, 122, 0.3)' }}>
-                          <Receipt className="h-4 w-4" style={{ color: '#ffffff' }} />
-                        </div>
-                        <span>{invoice.client}</span>
-                      </div>
+                      <span>{invoice.client}</span>
                     </TableCell>
                     <TableCell className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>{invoice.displayNumber || invoice.id.substring(0, 8)}</TableCell>
                     <TableCell className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>{invoice.date}</TableCell>
@@ -162,37 +157,38 @@ export function InvoicesList({
                       <div className="flex items-center justify-end gap-2">
                         <Button 
                           variant="outline" 
-                          size="sm" 
-                          className="text-xs h-8 text-white border-[#5a4a7a] hover:bg-[#1a0f3d]"
+                          size="icon" 
+                          className="h-8 w-8 text-white border-[#5a4a7a] hover:bg-[#1a0f3d]"
                           style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
                           onClick={() => onViewDetails(invoice)}
+                          title="View Invoice"
                         >
-                          View
+                          <Eye className="h-4 w-4" />
                         </Button>
                         
                         {onEdit && (
                           <Button 
                             variant="outline" 
-                            size="sm" 
-                            className="text-xs h-8 gap-1 text-white border-[#5a4a7a] hover:bg-[#1a0f3d]"
+                            size="icon" 
+                            className="h-8 w-8 text-white border-[#5a4a7a] hover:bg-[#1a0f3d]"
                             style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
                             onClick={() => onEdit(invoice)}
+                            title="Edit Invoice"
                           >
                             <Edit className="h-4 w-4" />
-                            Edit
                           </Button>
                         )}
                         
                         {onRecordPayment && invoice.status !== "paid" && (
                           <Button 
                             variant="secondary" 
-                            size="sm" 
-                            className="text-xs h-8 gap-1 text-white border-[#5a4a7a] hover:bg-[#1a0f3d]"
+                            size="icon" 
+                            className="h-8 w-8 text-white border-[#5a4a7a] hover:bg-[#1a0f3d]"
                             style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
                             onClick={() => handleRecordPayment(invoice)}
+                            title="Record Payment"
                           >
-                            <Wallet className="h-3 w-3" />
-                            Payment
+                            <DollarSign className="h-4 w-4" />
                           </Button>
                         )}
                       </div>

@@ -6,7 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Download, Send, Edit } from "lucide-react";
+import { Download, Send, Edit, History } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { Card } from "../ui/card";
 import { Invoice } from "./types";
@@ -15,6 +15,7 @@ import { useState, useRef } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
 interface InvoiceDetailsProps {
   invoice: Invoice | null;
@@ -114,20 +115,103 @@ export function InvoiceDetails({ invoice, open, onClose, onEdit }: InvoiceDetail
         style={{ backgroundColor: 'rgba(26, 15, 61, 0.98)', backdropFilter: 'blur(10px)', borderColor: '#3d2a5f' }}
       >
         <DialogHeader>
-          <DialogTitle className="flex justify-between items-center text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>
+          <DialogTitle className="flex justify-between items-center text-white pr-10" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>
             <span>Invoice {invoice.displayNumber || `#${invoice.id.substring(0, 8)}`}</span>
-            {onEdit && (
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={onEdit} 
-                className="gap-1 text-white border-[#5a4a7a] hover:bg-[#1a0f3d]"
-                style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
-              >
-                <Edit className="h-4 w-4" />
-                Edit
-              </Button>
-            )}
+            <div className="flex items-center gap-2">
+              {invoice.versionHistory && invoice.versionHistory.length > 0 && (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="gap-1 text-white border-[#5a4a7a] hover:bg-[#1a0f3d]"
+                      style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
+                    >
+                      <History className="h-4 w-4" />
+                      History
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent 
+                    className="w-80 max-h-96 overflow-y-auto"
+                    style={{ backgroundColor: 'rgba(26, 15, 61, 0.98)', backdropFilter: 'blur(10px)', borderColor: '#3d2a5f' }}
+                  >
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-white mb-3" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>
+                        Version History
+                        {invoice.currentVersion && (
+                          <span className="text-sm font-normal text-white/70 ml-2">
+                            (Current: v{invoice.currentVersion})
+                          </span>
+                        )}
+                      </h4>
+                      <div className="space-y-2">
+                        {invoice.versionHistory
+                          .slice()
+                          .reverse()
+                          .map((version, index) => {
+                            const versionData = version.invoice_form_data || {};
+                            const paymentTracking = versionData.paymentTracking || {};
+                            const totals = versionData.totals || {};
+                            const totalAmount = paymentTracking.totalAmount || totals.total || "0";
+                            
+                            return (
+                              <div
+                                key={index}
+                                className="p-3 rounded-md border"
+                                style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a' }}
+                              >
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="text-sm font-medium text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>
+                                    Version {version.version}
+                                  </span>
+                                  <span className="text-xs text-white/70" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
+                                    {format(new Date(version.updated_at), 'MMM dd, yyyy HH:mm')}
+                                  </span>
+                                </div>
+                                <div className="text-sm text-white/80" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
+                                  <div>Total: ₹{totalAmount}</div>
+                                  {version.updated_by && (
+                                    <div className="text-xs text-white/60 mt-1">
+                                      Updated by: {version.updated_by}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        {invoice.currentVersion && (
+                          <div
+                            className="p-3 rounded-md border"
+                            style={{ backgroundColor: 'rgba(0, 136, 254, 0.2)', borderColor: '#0088FE' }}
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-sm font-medium text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>
+                                Version {invoice.currentVersion} (Current)
+                              </span>
+                            </div>
+                            <div className="text-sm text-white/80" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
+                              <div>Total: ₹{invoice.amount}</div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              )}
+              {onEdit && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={onEdit} 
+                  className="gap-1 text-white border-[#5a4a7a] hover:bg-[#1a0f3d]"
+                  style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
+                >
+                  <Edit className="h-4 w-4" />
+                  Edit
+                </Button>
+              )}
+            </div>
           </DialogTitle>
         </DialogHeader>
         

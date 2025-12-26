@@ -26,26 +26,29 @@ export const mapSupabaseInvoiceToInvoice = (item: any): Invoice => {
     amount: invoiceItem.amount || ""
   }));
 
-  return {
-    id: item.invoice_uuid,
-    displayNumber: item.invoice_number,
-    client: clientDetails.name || "",
-    clientEmail: clientDetails.email || "",
-    date: item.invoice_date || formData.invoiceDate || "",
-    amount: paymentTracking.totalAmount || totals.total || "0",
-    paidAmount: paymentTracking.paidAmount || "0",
-    balanceAmount: paymentTracking.balanceAmount || paymentTracking.totalAmount || "0",
-    status: status,
-    items: mappedItems,
-    estimateId: item.project_estimate_uuid,
-    notes: paymentTracking.notes || "",
-    paymentDate: paymentDetails.paymentDate || paymentTracking.paymentDate || "",
-    paymentMethod: paymentDetails.paymentMethod || "",
-    gstRate: totals.gstRate || formData.gstRate || "0",
-    payments: formData.payments || [],
-    // Store the full form data for editing
-    invoiceFormData: formData
-  };
+    return {
+      id: item.invoice_uuid,
+      displayNumber: item.invoice_number,
+      client: clientDetails.name || "",
+      clientEmail: clientDetails.email || "",
+      date: item.invoice_date || formData.invoiceDate || "",
+      amount: paymentTracking.totalAmount || totals.total || "0",
+      paidAmount: paymentTracking.paidAmount || "0",
+      balanceAmount: paymentTracking.balanceAmount || paymentTracking.totalAmount || "0",
+      status: status,
+      items: mappedItems,
+      estimateId: item.project_estimate_uuid,
+      notes: paymentTracking.notes || "",
+      paymentDate: paymentDetails.paymentDate || paymentTracking.paymentDate || "",
+      paymentMethod: paymentDetails.paymentMethod || "",
+      gstRate: totals.gstRate || formData.gstRate || "0",
+      payments: formData.payments || [],
+      // Store the full form data for editing
+      invoiceFormData: formData,
+      // Store version history
+      versionHistory: item.version_history || [],
+      currentVersion: item.current_version || 1
+    };
 };
 
 // Helper function to reconstruct invoice form data from Invoice object

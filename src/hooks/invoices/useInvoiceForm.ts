@@ -41,7 +41,7 @@ export function useInvoiceForm(editingInvoice?: Invoice | null, estimateData?: a
   const [items, setItems] = useState<InvoiceItem[]>([{ description: "", amount: "" }]);
   const [gstRate, setGstRate] = useState("18");
   const [amount, setAmount] = useState("");
-  const [paidAmount, setPaidAmount] = useState("0");
+  const [paidAmount, setPaidAmount] = useState("₹0.00");
   const [balanceAmount, setBalanceAmount] = useState("0");
   const [notes, setNotes] = useState("");
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
@@ -70,7 +70,7 @@ export function useInvoiceForm(editingInvoice?: Invoice | null, estimateData?: a
       setItems([{ description: "", amount: "" }]);
       setGstRate("18");
       setAmount("");
-      setPaidAmount("0");
+      setPaidAmount("₹0.00");
       setBalanceAmount("0");
       setNotes("");
       setValidationErrors({});
@@ -151,30 +151,67 @@ export function useInvoiceForm(editingInvoice?: Invoice | null, estimateData?: a
           setItems([{ description: "", amount: "" }]);
         }
         
-        // Format amounts for display
+        // Format amounts for display - handles numbers, strings with/without ₹
         const formatAmount = (amt: string | number | undefined) => {
-          if (!amt) return "";
-          const numValue = typeof amt === 'string' ? amt.replace(/[₹,]/g, "") : amt.toString();
-          if (numValue && !isNaN(parseFloat(numValue))) {
-            return `₹${numValue}`;
+          if (!amt && amt !== 0) return "";
+          
+          // Convert to string and remove any existing ₹ or commas
+          let numValue: string;
+          if (typeof amt === 'number') {
+            numValue = amt.toString();
+          } else {
+            numValue = amt.replace(/[₹,]/g, "").trim();
           }
-          return amt.toString();
+          
+          // Check if it's a valid number
+          if (numValue && !isNaN(parseFloat(numValue)) && parseFloat(numValue) >= 0) {
+            // Format with ₹ and ensure 2 decimal places
+            const parsed = parseFloat(numValue);
+            return `₹${parsed.toFixed(2)}`;
+          }
+          
+          // If not a valid number, return empty string or original if it already has ₹
+          if (typeof amt === 'string' && amt.includes('₹')) {
+            return amt;
+          }
+          return "";
         };
         
         setGstRate(totals.gstRate || formData.gstRate || "18");
-        setAmount(formatAmount(paymentTracking.totalAmount || totals.total || editingInvoice.amount));
-        setPaidAmount(formatAmount(paymentTracking.paidAmount || editingInvoice.paidAmount || "0"));
-        setBalanceAmount(formatAmount(paymentTracking.balanceAmount || editingInvoice.balanceAmount || "0"));
+        
+        // Get raw values from form data
+        const rawTotalAmount = paymentTracking.totalAmount || totals.total;
+        const rawPaidAmount = paymentTracking.paidAmount;
+        const rawBalanceAmount = paymentTracking.balanceAmount;
+        
+        // Format and set amounts
+        setAmount(formatAmount(rawTotalAmount || editingInvoice.amount || "0"));
+        setPaidAmount(formatAmount(rawPaidAmount || editingInvoice.paidAmount || "0"));
+        setBalanceAmount(formatAmount(rawBalanceAmount || editingInvoice.balanceAmount || "0"));
         setNotes(paymentTracking.notes || editingInvoice.notes || "");
       } else {
         // Fallback: reconstruct from Invoice object (incomplete data)
         const isPaid = editingInvoice.status === "paid";
         
-        // Format amounts helper
+        // Format amounts helper - handles strings with/without ₹
         const formatAmount = (amt: string | undefined) => {
-          if (!amt) return "";
-          if (amt.includes('₹')) return amt;
-          return `₹${amt}`;
+          if (!amt && amt !== "0") return "";
+          
+          // Remove any existing ₹ or commas
+          const numValue = amt.replace(/[₹,]/g, "").trim();
+          
+          // Check if it's a valid number
+          if (numValue && !isNaN(parseFloat(numValue)) && parseFloat(numValue) >= 0) {
+            // Format with ₹ and ensure 2 decimal places
+            const parsed = parseFloat(numValue);
+            return `₹${parsed.toFixed(2)}`;
+          }
+          
+          // If already has ₹, return as is
+          if (amt.includes('₹')) {
+            return amt;
+          }
+          return "";
         };
         
         setClientDetails(prevState => ({
@@ -246,31 +283,25 @@ export function useInvoiceForm(editingInvoice?: Invoice | null, estimateData?: a
       
       // Only update if the calculated total actually changed
       if (calculatedTotal && calculatedTotal !== "₹0.00" && calculatedTotal !== "" && calculatedTotal !== prevCalculatedTotalRef.current) {
-        const calculatedValue = parseFloat(calculatedTotal.replace(/[₹,]/g, "")) || 0;
-        
-        // Only auto-update if amount field is empty or very close to calculated total
-        // This prevents overwriting manual entries
-        if (!amount || amount.trim() === "") {
-          isUpdatingAmountRef.current = true;
-          setAmount(calculatedTotal);
-          prevCalculatedTotalRef.current = calculatedTotal;
-          // Reset flag after state update
-          requestAnimationFrame(() => {
-            isUpdatingAmountRef.current = false;
-          });
-        } else {
-          const currentAmount = parseFloat(amount.replace(/[₹,]/g, "")) || 0;
-          // If the difference is less than 0.01, update to match calculated total
-          if (Math.abs(currentAmount - calculatedValue) < 0.01 && calculatedTotal !== amount) {
-            isUpdatingAmountRef.current = true;
-            setAmount(calculatedTotal);
-            prevCalculatedTotalRef.current = calculatedTotal;
-            // Reset flag after state update
-            requestAnimationFrame(() => {
-              isUpdatingAmountRef.current = false;
-            });
-          }
-        }
+        // Always update the amount to match the calculated total from items
+        // This ensures PaymentTrackingCard's Total Amount stays in sync with invoice items
+        isUpdatingAmountRef.current = true;
+        setAmount(calculatedTotal);
+        prevCalculatedTotalRef.current = calculatedTotal;
+        // Reset flag after state update
+        requestAnimationFrame(() => {
+          isUpdatingAmountRef.current = false;
+        });
+      }
+    } else if (items.length === 0 || !items.some(item => item.amount && item.amount.trim() !== "")) {
+      // If no items or all items are empty, reset amount to ₹0.00
+      if (amount !== "₹0.00") {
+        isUpdatingAmountRef.current = true;
+        setAmount("₹0.00");
+        prevCalculatedTotalRef.current = "₹0.00";
+        requestAnimationFrame(() => {
+          isUpdatingAmountRef.current = false;
+        });
       }
     }
   }, [items, clientDetails.invoiceType, gstRate]); // Note: amount is intentionally not in dependencies to avoid loops
@@ -282,7 +313,7 @@ export function useInvoiceForm(editingInvoice?: Invoice | null, estimateData?: a
   useEffect(() => {
     if (amount) {
       const total = parseFloat(amount.replace(/[₹,]/g, "")) || 0;
-      const paid = parseFloat((paidAmount || "0").replace(/[₹,]/g, "")) || 0;
+      const paid = parseFloat((paidAmount || "₹0.00").replace(/[₹,]/g, "")) || 0;
       const balance = Math.max(0, total - paid);
       const formattedBalance = `₹${balance.toFixed(2)}`;
       

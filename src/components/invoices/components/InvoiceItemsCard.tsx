@@ -102,10 +102,97 @@ export function InvoiceItemsCard({ items, onItemsChange, errors = {} }: InvoiceI
                   placeholder="₹0.00"
                   className="mt-2 text-white placeholder:text-gray-400 text-center"
                   value={item.amount}
+                  onFocus={(e) => {
+                    // Position cursor in the integer part (after ₹, at end of integer digits)
+                    const input = e.target as HTMLInputElement;
+                    const value = input.value;
+                    
+                    // Find position at end of integer part (before decimal point)
+                    if (value.includes('.')) {
+                      const decimalIndex = value.indexOf('.');
+                      // Position cursor at end of integer part (just before decimal)
+                      setTimeout(() => {
+                        input.setSelectionRange(decimalIndex, decimalIndex);
+                      }, 0);
+                    } else {
+                      // If no decimal, position at end (after all digits)
+                      setTimeout(() => {
+                        input.setSelectionRange(value.length, value.length);
+                      }, 0);
+                    }
+                  }}
+                  onClick={(e) => {
+                    // Position cursor in the integer part when clicking
+                    const input = e.target as HTMLInputElement;
+                    const value = input.value;
+                    
+                    // Find position at end of integer part (before decimal point)
+                    if (value.includes('.')) {
+                      const decimalIndex = value.indexOf('.');
+                      // Position cursor at end of integer part (just before decimal)
+                      setTimeout(() => {
+                        input.setSelectionRange(decimalIndex, decimalIndex);
+                      }, 0);
+                    } else {
+                      // If no decimal, position at end (after all digits)
+                      setTimeout(() => {
+                        input.setSelectionRange(value.length, value.length);
+                      }, 0);
+                    }
+                  }}
                   onChange={(e) => {
+                    const value = e.target.value;
+                    const cursorPosition = e.target.selectionStart || 0;
+                    
+                    // Remove all ₹ symbols first
+                    let cleaned = value.replace(/₹/g, '');
+                    
+                    // If user tries to delete everything, keep ₹0.00
+                    if (cleaned.trim() === '' || cleaned === '0' || cleaned === '0.') {
+                      const newItems = [...items];
+                      newItems[index].amount = '₹0.00';
+                      onItemsChange(newItems);
+                      return;
+                    }
+                    
+                    // Remove any non-numeric characters except decimal point
+                    cleaned = cleaned.replace(/[^0-9.]/g, '');
+                    
+                    // Ensure only one decimal point
+                    const parts = cleaned.split('.');
+                    if (parts.length > 2) {
+                      cleaned = parts[0] + '.' + parts.slice(1).join('');
+                    }
+                    
+                    // Limit to 2 decimal places
+                    if (parts.length === 2 && parts[1].length > 2) {
+                      cleaned = parts[0] + '.' + parts[1].substring(0, 2);
+                    }
+                    
+                    // Always prepend ₹ symbol
+                    const newValue = '₹' + cleaned;
                     const newItems = [...items];
-                    newItems[index].amount = e.target.value;
+                    newItems[index].amount = newValue;
                     onItemsChange(newItems);
+                    
+                    // Restore cursor position in integer part
+                    setTimeout(() => {
+                      const input = e.target as HTMLInputElement;
+                      if (newValue.includes('.')) {
+                        const decimalIndex = newValue.indexOf('.');
+                        // Position cursor just before decimal point
+                        input.setSelectionRange(decimalIndex, decimalIndex);
+                      } else {
+                        // Position at end of integer part (after ₹)
+                        input.setSelectionRange(newValue.length, newValue.length);
+                      }
+                    }, 0);
+                  }}
+                  onKeyDown={(e) => {
+                    // Prevent deletion if only ₹ symbol remains
+                    if (e.key === 'Backspace' && item.amount === '₹') {
+                      e.preventDefault();
+                    }
                   }}
                   style={{ 
                     backgroundColor: 'rgba(45, 27, 78, 0.95)', 

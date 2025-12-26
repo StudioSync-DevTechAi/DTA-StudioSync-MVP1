@@ -43,11 +43,19 @@ export function RecordPaymentDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Record Payment</DialogTitle>
-          <DialogDescription>
-            Record a payment for invoice #{invoice.id.slice(0, 8)} for {invoice.client}
+      <DialogContent 
+        className="max-w-xs"
+        style={{ backgroundColor: 'rgba(26, 15, 61, 0.98)', backdropFilter: 'blur(10px)', borderColor: '#3d2a5f', maxWidth: '360px' }}
+      >
+        <DialogHeader className="text-center relative">
+          <DialogTitle className="text-white text-center absolute top-2 left-1/2 -translate-x-1/2" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>
+            Record Payment
+          </DialogTitle>
+          <DialogDescription className="text-white/80 text-left pt-10" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
+            <div className="flex flex-col space-y-1 items-start">
+              <span>#Invoice: {invoice.displayNumber || invoice.id.slice(0, 8)}</span>
+              <span>#Client: {invoice.client}</span>
+            </div>
           </DialogDescription>
         </DialogHeader>
         
