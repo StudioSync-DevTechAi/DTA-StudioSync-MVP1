@@ -46,6 +46,13 @@ const SIDEBAR_DEFAULT_WIDTH = 256; // w-64 = 256px
 const SIDEBAR_COLLAPSED_WIDTH = 64; // Icon-only width
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+  // Call ALL hooks unconditionally before any conditional returns
+  // This ensures hooks are always called in the same order on every render
+  const { user, signOut, hasRole } = useAuth();
+  const { hasPermission } = useRBAC();
+  const location = useLocation();
+  const navigate = useNavigate();
+  
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [sidebarWidth, setSidebarWidth] = useState(() => {
     // Load from localStorage or use default
@@ -65,10 +72,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const navRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const mainContentRef = useRef<HTMLElement>(null);
   const [focusedNavIndex, setFocusedNavIndex] = useState<number | null>(null);
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { user, signOut, hasRole } = useAuth();
-  const { hasPermission } = useRBAC();
   const [isNavigating, setIsNavigating] = useState(false);
   const previousPathname = useRef(location.pathname);
   
@@ -137,7 +140,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     };
   }, [isResizing, handleMouseMove, handleMouseUp]);
   
-  // If user not authenticated, don't render the layout
+  // If user not authenticated, return early AFTER all hooks are called
+  // This ensures hooks are always called in the same order on every render
   if (!user) {
     return null;
   }

@@ -29,15 +29,17 @@ export default function InvoicesPage() {
     isLoading
   } = useInvoices();
 
-  const handleSaveInvoice = (invoice: any) => {
+  const handleSaveInvoice = (invoice: any, invoiceFormData: any) => {
     if (selectedInvoice) {
-      updateInvoice(invoice);
+      updateInvoice(invoice, invoiceFormData);
     } else {
-      addInvoice(invoice);
+      addInvoice(invoice, invoiceFormData);
     }
   };
 
   const handleRecordPayment = (updatedInvoice: any) => {
+    // For payment recording, we need to reconstruct the form data
+    // The updated invoice should have the new payment amounts
     updateInvoice(updatedInvoice);
   };
 
@@ -86,8 +88,25 @@ export default function InvoicesPage() {
               Manage your client invoices and payments
             </p>
           </div>
-          <Button className="gap-2 w-full sm:w-auto" onClick={() => setShowNewInvoice(true)}>
-            <Plus className="h-4 w-4" />
+          <Button 
+            onClick={() => setShowNewInvoice(true)} 
+            className="animated-border w-full sm:w-auto"
+            variant="outline"
+            style={{
+              backgroundColor: 'transparent',
+              color: '#ffffff',
+              borderColor: '#ffffff'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(26, 8, 61, 0.3)';
+              e.currentTarget.style.borderColor = '#ffffff';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.borderColor = '#ffffff';
+            }}
+          >
+            <Plus className="h-4 w-4 mr-2" />
             New Invoice
           </Button>
         </div>
@@ -109,6 +128,10 @@ export default function InvoicesPage() {
           sortBy={sortBy}
           setSortBy={setSortBy}
           onViewDetails={setSelectedInvoice}
+          onEdit={(invoice) => {
+            setSelectedInvoice(invoice);
+            setShowNewInvoice(true);
+          }}
           onRecordPayment={handleRecordPayment}
         />
       </div>

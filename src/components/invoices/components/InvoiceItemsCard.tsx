@@ -16,9 +16,10 @@ import {
 interface InvoiceItemsCardProps {
   items: { description: string; amount: string }[];
   onItemsChange: (items: { description: string; amount: string }[]) => void;
+  errors?: Record<string, string>;
 }
 
-export function InvoiceItemsCard({ items, onItemsChange }: InvoiceItemsCardProps) {
+export function InvoiceItemsCard({ items, onItemsChange, errors = {} }: InvoiceItemsCardProps) {
   const addItem = () => {
     onItemsChange([...items, { description: "", amount: "" }]);
   };
@@ -80,8 +81,19 @@ export function InvoiceItemsCard({ items, onItemsChange }: InvoiceItemsCardProps
                     newItems[index].description = e.target.value;
                     onItemsChange(newItems);
                   }}
-                  style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
+                  style={{ 
+                    backgroundColor: 'rgba(45, 27, 78, 0.95)', 
+                    borderColor: errors[`items.${index}.description`] ? '#ef4444' : '#5a4a7a', 
+                    color: '#ffffff', 
+                    borderWidth: '1.5px', 
+                    borderStyle: 'solid' 
+                  }}
                 />
+                {errors[`items.${index}.description`] && (
+                  <p className="text-sm text-red-400 mt-1" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
+                    {errors[`items.${index}.description`]}
+                  </p>
+                )}
               </div>
               <div className="w-32">
                 <Label htmlFor={`amount-${index}`} className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Amount</Label>
@@ -95,8 +107,20 @@ export function InvoiceItemsCard({ items, onItemsChange }: InvoiceItemsCardProps
                     newItems[index].amount = e.target.value;
                     onItemsChange(newItems);
                   }}
-                  style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid', textAlign: 'center' }}
+                  style={{ 
+                    backgroundColor: 'rgba(45, 27, 78, 0.95)', 
+                    borderColor: errors[`items.${index}.amount`] ? '#ef4444' : '#5a4a7a', 
+                    color: '#ffffff', 
+                    borderWidth: '1.5px', 
+                    borderStyle: 'solid', 
+                    textAlign: 'center' 
+                  }}
                 />
+                {errors[`items.${index}.amount`] && (
+                  <p className="text-sm text-red-400 mt-1" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
+                    {errors[`items.${index}.amount`]}
+                  </p>
+                )}
               </div>
               {items.length > 1 && (
                 <Button
@@ -113,6 +137,11 @@ export function InvoiceItemsCard({ items, onItemsChange }: InvoiceItemsCardProps
           </div>
         ))}
       </div>
+      {errors.items && (
+        <p className="text-sm text-red-400 mt-2" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
+          {errors.items}
+        </p>
+      )}
       <Button
         type="button"
         variant="outline"

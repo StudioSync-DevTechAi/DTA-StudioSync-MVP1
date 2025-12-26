@@ -31,4 +31,7 @@ export interface Invoice {
   
   // Making sure payments is properly typed
   payments?: InvoicePayment[];
+  
+  // Store full invoice form data for editing (optional, populated when fetched from DB)
+  invoiceFormData?: any;
 }

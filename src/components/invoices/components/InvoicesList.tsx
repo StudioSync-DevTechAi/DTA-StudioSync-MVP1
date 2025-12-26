@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Receipt, ArrowUpDown, Wallet, ChevronDown } from "lucide-react";
+import { Receipt, ArrowUpDown, Wallet, ChevronDown, Edit } from "lucide-react";
 import { useState } from "react";
 import { Invoice } from "../types";
 import { RecordPaymentDialog } from "./RecordPaymentDialog";
@@ -25,6 +25,7 @@ interface InvoicesListProps {
   sortBy: "date" | "amount" | "balanceHighToLow" | "balanceLowToHigh";
   setSortBy: (sortBy: "date" | "amount" | "balanceHighToLow" | "balanceLowToHigh") => void;
   onViewDetails: (invoice: Invoice) => void;
+  onEdit?: (invoice: Invoice) => void;
   onRecordPayment?: (invoice: Invoice) => void;
 }
 
@@ -33,6 +34,7 @@ export function InvoicesList({
   sortBy,
   setSortBy,
   onViewDetails,
+  onEdit,
   onRecordPayment,
 }: InvoicesListProps) {
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
@@ -42,11 +44,11 @@ export function InvoicesList({
   const getStatusStyle = (status: string) => {
     switch (status) {
       case 'paid':
-        return 'bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs';
+        return 'bg-green-600/30 text-green-300 px-2 py-1 rounded-full text-xs border border-green-500/50';
       case 'partial':
-        return 'bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs';
+        return 'bg-yellow-600/30 text-yellow-300 px-2 py-1 rounded-full text-xs border border-yellow-500/50';
       default:
-        return 'bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs';
+        return 'bg-gray-600/30 text-gray-300 px-2 py-1 rounded-full text-xs border border-gray-500/50';
     }
   };
 
@@ -123,36 +125,36 @@ export function InvoicesList({
             <p className="text-white/80" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>No invoices found</p>
           </div>
         ) : (
-          <div className="rounded-md border">
+          <div className="rounded-md border" style={{ borderColor: '#3d2a5f' }}>
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Invoice #</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Balance</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                <TableRow style={{ borderColor: '#3d2a5f' }}>
+                  <TableHead className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Client</TableHead>
+                  <TableHead className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Invoice #</TableHead>
+                  <TableHead className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Date</TableHead>
+                  <TableHead className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Amount</TableHead>
+                  <TableHead className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Balance</TableHead>
+                  <TableHead className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Status</TableHead>
+                  <TableHead className="text-right text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {invoices.map((invoice: Invoice) => (
-                  <TableRow key={invoice.id} className="hover:bg-muted/50">
-                    <TableCell className="font-medium">
+                  <TableRow key={invoice.id} className="hover:bg-white/5" style={{ borderColor: '#3d2a5f' }}>
+                    <TableCell className="font-medium text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
                       <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
-                          <Receipt className="h-4 w-4 text-primary" />
+                        <div className="h-9 w-9 rounded-full bg-primary/20 flex items-center justify-center" style={{ backgroundColor: 'rgba(90, 74, 122, 0.3)' }}>
+                          <Receipt className="h-4 w-4" style={{ color: '#ffffff' }} />
                         </div>
                         <span>{invoice.client}</span>
                       </div>
                     </TableCell>
-                    <TableCell>{invoice.displayNumber || invoice.id.substring(0, 8)}</TableCell>
-                    <TableCell>{invoice.date}</TableCell>
-                    <TableCell>{invoice.amount}</TableCell>
-                    <TableCell>{invoice.balanceAmount}</TableCell>
+                    <TableCell className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>{invoice.displayNumber || invoice.id.substring(0, 8)}</TableCell>
+                    <TableCell className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>{invoice.date}</TableCell>
+                    <TableCell className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>{invoice.amount}</TableCell>
+                    <TableCell className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>{invoice.balanceAmount}</TableCell>
                     <TableCell>
-                      <span className={getStatusStyle(invoice.status)}>
+                      <span className={getStatusStyle(invoice.status)} style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
                         {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
                       </span>
                     </TableCell>
@@ -161,17 +163,32 @@ export function InvoicesList({
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          className="text-xs h-8"
+                          className="text-xs h-8 text-white border-[#5a4a7a] hover:bg-[#1a0f3d]"
+                          style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
                           onClick={() => onViewDetails(invoice)}
                         >
                           View
                         </Button>
                         
+                        {onEdit && (
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="text-xs h-8 gap-1 text-white border-[#5a4a7a] hover:bg-[#1a0f3d]"
+                            style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
+                            onClick={() => onEdit(invoice)}
+                          >
+                            <Edit className="h-4 w-4" />
+                            Edit
+                          </Button>
+                        )}
+                        
                         {onRecordPayment && invoice.status !== "paid" && (
                           <Button 
                             variant="secondary" 
                             size="sm" 
-                            className="text-xs h-8 gap-1"
+                            className="text-xs h-8 gap-1 text-white border-[#5a4a7a] hover:bg-[#1a0f3d]"
+                            style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
                             onClick={() => handleRecordPayment(invoice)}
                           >
                             <Wallet className="h-3 w-3" />

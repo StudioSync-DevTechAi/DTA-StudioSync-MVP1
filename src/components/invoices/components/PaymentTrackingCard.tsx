@@ -58,7 +58,8 @@ export function PaymentTrackingCard({
               id="balanceAmount" 
               value={balanceAmount}
               readOnly
-              className="text-white text-center"
+              placeholder="₹0.00"
+              className="text-white text-center placeholder:text-gray-400"
               style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid', textAlign: 'center' }}
             />
           </div>

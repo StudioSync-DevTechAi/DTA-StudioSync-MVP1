@@ -11,6 +11,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { Card } from "../ui/card";
 import { Invoice } from "./types";
 import { format } from "date-fns";
+import { useState, useRef } from "react";
+import { useToast } from "@/components/ui/use-toast";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 interface InvoiceDetailsProps {
   invoice: Invoice | null;
@@ -22,15 +26,19 @@ interface InvoiceDetailsProps {
 export function InvoiceDetails({ invoice, open, onClose, onEdit }: InvoiceDetailsProps) {
   if (!invoice) return null;
 
+  const { toast } = useToast();
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const invoiceRef = useRef<HTMLDivElement>(null);
+
   // Format payment status with appropriate styling
   const getStatusStyle = (status: string) => {
     switch (status) {
       case 'paid':
-        return 'bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs';
+        return 'bg-green-600/30 text-green-300 px-2 py-1 rounded-full text-xs border border-green-500/50';
       case 'partial':
-        return 'bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs';
+        return 'bg-yellow-600/30 text-yellow-300 px-2 py-1 rounded-full text-xs border border-yellow-500/50';
       default:
-        return 'bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs';
+        return 'bg-gray-600/30 text-gray-300 px-2 py-1 rounded-full text-xs border border-gray-500/50';
     }
   };
 
@@ -43,14 +51,79 @@ export function InvoiceDetails({ invoice, open, onClose, onEdit }: InvoiceDetail
     }
   };
 
+  const handleDownloadPDF = async () => {
+    if (!invoiceRef.current || isGeneratingPDF) return;
+
+    setIsGeneratingPDF(true);
+    try {
+      // Capture the invoice details as canvas
+      const canvas = await html2canvas(invoiceRef.current, {
+        scale: 2, // Increase scale for better quality
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#1a0f3d', // Match the background of the invoice
+        windowWidth: invoiceRef.current.scrollWidth,
+        windowHeight: invoiceRef.current.scrollHeight,
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+
+      // Calculate PDF dimensions in mm
+      const pxToMm = 0.264583; // Standard conversion for 96dpi
+      const scaleFactor = 2; // We used scale: 2 in html2canvas
+      const actualPxToMm = pxToMm / scaleFactor; // Adjust for the scale
+
+      const pdfWidth = (canvas.width * actualPxToMm);
+      const pdfHeight = (canvas.height * actualPxToMm);
+
+      const pdf = new jsPDF({
+        orientation: pdfHeight > pdfWidth ? 'portrait' : 'landscape',
+        unit: 'mm',
+        format: [pdfWidth, pdfHeight] // Custom format to fit content on one page
+      });
+
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+
+      const clientName = (invoice?.client || 'Invoice').replace(/[^a-zA-Z0-9]/g, '_'); // Sanitize filename
+      const invoiceNumber = invoice.displayNumber || invoice.id.substring(0, 8);
+      const date = new Date().toISOString().split('T')[0];
+      const filename = `Invoice_${invoiceNumber}_${clientName}_${date}.pdf`;
+
+      pdf.save(filename);
+
+      toast({
+        title: "PDF Downloaded",
+        description: "Your invoice PDF has been downloaded successfully.",
+      });
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate PDF. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent 
+        className="max-w-3xl max-h-[90vh] overflow-y-auto"
+        style={{ backgroundColor: 'rgba(26, 15, 61, 0.98)', backdropFilter: 'blur(10px)', borderColor: '#3d2a5f' }}
+      >
         <DialogHeader>
-          <DialogTitle className="flex justify-between items-center">
+          <DialogTitle className="flex justify-between items-center text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>
             <span>Invoice {invoice.displayNumber || `#${invoice.id.substring(0, 8)}`}</span>
             {onEdit && (
-              <Button variant="outline" size="sm" onClick={onEdit} className="gap-1">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={onEdit} 
+                className="gap-1 text-white border-[#5a4a7a] hover:bg-[#1a0f3d]"
+                style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
+              >
                 <Edit className="h-4 w-4" />
                 Edit
               </Button>
@@ -58,32 +131,32 @@ export function InvoiceDetails({ invoice, open, onClose, onEdit }: InvoiceDetail
           </DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-6">
+        <div ref={invoiceRef} className="space-y-6">
           <div className="grid gap-6 md:grid-cols-2">
             {/* Client & Invoice Info */}
-            <Card className="p-4 space-y-4">
+            <Card className="p-4 space-y-4" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
               <div>
-                <h3 className="font-medium">Client Details</h3>
+                <h3 className="font-medium text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Client Details</h3>
                 <div className="mt-2 space-y-1">
-                  <p className="font-medium">{invoice.client}</p>
-                  {invoice.clientEmail && <p className="text-sm text-muted-foreground">{invoice.clientEmail}</p>}
+                  <p className="font-medium text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>{invoice.client}</p>
+                  {invoice.clientEmail && <p className="text-sm text-white/80" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>{invoice.clientEmail}</p>}
                 </div>
               </div>
               
               <div>
-                <h3 className="font-medium">Invoice Details</h3>
+                <h3 className="font-medium text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Invoice Details</h3>
                 <div className="mt-2 space-y-1">
                   <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Invoice Number:</span>
-                    <span>{invoice.displayNumber || `#${invoice.id.substring(0, 8)}`}</span>
+                    <span className="text-sm text-white/80" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>Invoice Number:</span>
+                    <span className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>{invoice.displayNumber || `#${invoice.id.substring(0, 8)}`}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Date:</span>
-                    <span>{formatDate(invoice.date)}</span>
+                    <span className="text-sm text-white/80" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>Date:</span>
+                    <span className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>{formatDate(invoice.date)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Status:</span>
-                    <span className={getStatusStyle(invoice.status)}>
+                    <span className="text-sm text-white/80" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>Status:</span>
+                    <span className={getStatusStyle(invoice.status)} style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
                       {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
                     </span>
                   </div>
@@ -92,38 +165,38 @@ export function InvoiceDetails({ invoice, open, onClose, onEdit }: InvoiceDetail
             </Card>
             
             {/* Payment Summary */}
-            <Card className="p-4 space-y-4">
+            <Card className="p-4 space-y-4" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
               <div>
-                <h3 className="font-medium">Payment Summary</h3>
+                <h3 className="font-medium text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Payment Summary</h3>
                 <div className="mt-2 space-y-1">
                   <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Total Amount:</span>
-                    <span className="font-medium">₹{invoice.amount}</span>
+                    <span className="text-sm text-white/80" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>Total Amount:</span>
+                    <span className="font-medium text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>₹{invoice.amount}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Paid Amount:</span>
-                    <span className="text-green-600">₹{invoice.paidAmount}</span>
+                    <span className="text-sm text-white/80" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>Paid Amount:</span>
+                    <span className="text-green-300" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>₹{invoice.paidAmount}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Balance Due:</span>
-                    <span className="text-red-600">₹{invoice.balanceAmount}</span>
+                    <span className="text-sm text-white/80" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>Balance Due:</span>
+                    <span className="text-red-300" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>₹{invoice.balanceAmount}</span>
                   </div>
                 </div>
               </div>
               
               {invoice.paymentMethod && (
                 <div>
-                  <h3 className="font-medium">Payment Details</h3>
+                  <h3 className="font-medium text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Payment Details</h3>
                   <div className="mt-2 space-y-1">
                     {invoice.paymentDate && (
                       <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Payment Date:</span>
-                        <span>{formatDate(invoice.paymentDate)}</span>
+                        <span className="text-sm text-white/80" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>Payment Date:</span>
+                        <span className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>{formatDate(invoice.paymentDate)}</span>
                       </div>
                     )}
                     <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Payment Method:</span>
-                      <span className="capitalize">{invoice.paymentMethod}</span>
+                      <span className="text-sm text-white/80" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>Payment Method:</span>
+                      <span className="capitalize text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>{invoice.paymentMethod}</span>
                     </div>
                   </div>
                 </div>
@@ -133,83 +206,96 @@ export function InvoiceDetails({ invoice, open, onClose, onEdit }: InvoiceDetail
           
           {/* Invoice Items */}
           <div>
-            <h3 className="font-medium mb-2">Invoice Items</h3>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[70%]">Description</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {invoice.items.map((item, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{item.description}</TableCell>
-                    <TableCell className="text-right">₹{item.amount}</TableCell>
+            <h3 className="font-medium mb-2 text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Invoice Items</h3>
+            <div className="rounded-md border" style={{ borderColor: '#3d2a5f' }}>
+              <Table>
+                <TableHeader>
+                  <TableRow style={{ borderColor: '#3d2a5f' }}>
+                    <TableHead className="w-[70%] text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Description</TableHead>
+                    <TableHead className="text-right text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Amount</TableHead>
                   </TableRow>
-                ))}
-                
-                {/* GST row if applicable */}
-                {invoice.gstRate && parseInt(invoice.gstRate) > 0 && (
-                  <TableRow>
-                    <TableCell>GST ({invoice.gstRate}%)</TableCell>
-                    <TableCell className="text-right">
-                      ₹{(parseFloat(invoice.amount) - invoice.items.reduce((sum, item) => 
-                        sum + (parseFloat(item.amount.replace(/[₹,]/g, "")) || 0), 0)).toFixed(2)}
-                    </TableCell>
+                </TableHeader>
+                <TableBody>
+                  {invoice.items.map((item, index) => (
+                    <TableRow key={index} style={{ borderColor: '#3d2a5f' }} className="hover:bg-white/5">
+                      <TableCell className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>{item.description}</TableCell>
+                      <TableCell className="text-right text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>₹{item.amount}</TableCell>
+                    </TableRow>
+                  ))}
+                  
+                  {/* GST row if applicable */}
+                  {invoice.gstRate && parseInt(invoice.gstRate) > 0 && (
+                    <TableRow style={{ borderColor: '#3d2a5f' }} className="hover:bg-white/5">
+                      <TableCell className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>GST ({invoice.gstRate}%)</TableCell>
+                      <TableCell className="text-right text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
+                        ₹{(parseFloat(invoice.amount) - invoice.items.reduce((sum, item) => 
+                          sum + (parseFloat(item.amount.replace(/[₹,]/g, "")) || 0), 0)).toFixed(2)}
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  
+                  {/* Total row */}
+                  <TableRow style={{ borderColor: '#3d2a5f' }} className="hover:bg-white/5">
+                    <TableCell className="font-medium text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>Total</TableCell>
+                    <TableCell className="text-right font-medium text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>₹{invoice.amount}</TableCell>
                   </TableRow>
-                )}
-                
-                {/* Total row */}
-                <TableRow>
-                  <TableCell className="font-medium">Total</TableCell>
-                  <TableCell className="text-right font-medium">₹{invoice.amount}</TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
+                </TableBody>
+              </Table>
+            </div>
           </div>
           
           {/* Payment History */}
           {invoice.payments && invoice.payments.length > 0 && (
             <div>
-              <h3 className="font-medium mb-2">Payment History</h3>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Method</TableHead>
-                    <TableHead>Collected By</TableHead>
-                    <TableHead className="text-right">Amount</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {invoice.payments.map((payment) => (
-                    <TableRow key={payment.id}>
-                      <TableCell>{formatDate(payment.date)}</TableCell>
-                      <TableCell className="capitalize">{payment.method}</TableCell>
-                      <TableCell>{payment.collected_by}</TableCell>
-                      <TableCell className="text-right text-green-600">₹{payment.amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+              <h3 className="font-medium mb-2 text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Payment History</h3>
+              <div className="rounded-md border" style={{ borderColor: '#3d2a5f' }}>
+                <Table>
+                  <TableHeader>
+                    <TableRow style={{ borderColor: '#3d2a5f' }}>
+                      <TableHead className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Date</TableHead>
+                      <TableHead className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Method</TableHead>
+                      <TableHead className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Collected By</TableHead>
+                      <TableHead className="text-right text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Amount</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {invoice.payments.map((payment) => (
+                      <TableRow key={payment.id} style={{ borderColor: '#3d2a5f' }} className="hover:bg-white/5">
+                        <TableCell className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>{formatDate(payment.date)}</TableCell>
+                        <TableCell className="capitalize text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>{payment.method}</TableCell>
+                        <TableCell className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>{payment.collected_by}</TableCell>
+                        <TableCell className="text-right text-green-300" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>₹{payment.amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </div>
           )}
           
           {/* Notes */}
           {invoice.notes && (
             <div>
-              <h3 className="font-medium mb-2">Notes</h3>
-              <p className="text-sm text-muted-foreground">{invoice.notes}</p>
+              <h3 className="font-medium mb-2 text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Notes</h3>
+              <p className="text-sm text-white/80" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>{invoice.notes}</p>
             </div>
           )}
 
           <div className="flex justify-end gap-4">
-            <Button variant="outline" className="gap-2">
+            <Button 
+              variant="outline" 
+              className="gap-2 text-white border-[#5a4a7a] hover:bg-[#1a0f3d]"
+              style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
+              onClick={handleDownloadPDF}
+              disabled={isGeneratingPDF}
+            >
               <Download className="h-4 w-4" />
-              Download PDF
+              {isGeneratingPDF ? "Generating..." : "Download PDF"}
             </Button>
-            <Button className="gap-2">
+            <Button 
+              className="gap-2 text-white hover:bg-[#1a0f3d]"
+              style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
+            >
               <Send className="h-4 w-4" />
               Send to Client
             </Button>

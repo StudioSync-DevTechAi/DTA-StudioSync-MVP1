@@ -43,7 +43,8 @@ export function useInvoices() {
 
   // Add invoice mutation
   const addInvoiceMutation = useMutation({
-    mutationFn: apiAddInvoice,
+    mutationFn: ({ invoice, invoiceFormData }: { invoice: Invoice; invoiceFormData: any }) => 
+      apiAddInvoice(invoice, invoiceFormData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
     },
@@ -59,7 +60,8 @@ export function useInvoices() {
 
   // Update invoice mutation
   const updateInvoiceMutation = useMutation({
-    mutationFn: apiUpdateInvoice,
+    mutationFn: ({ invoice, invoiceFormData }: { invoice: Invoice; invoiceFormData: any }) => 
+      apiUpdateInvoice(invoice, invoiceFormData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
     },
@@ -79,8 +81,8 @@ export function useInvoices() {
     sortBy
   );
 
-  const addInvoice = (invoice: Invoice) => {
-    addInvoiceMutation.mutate(invoice, {
+  const addInvoice = (invoice: Invoice, invoiceFormData: any) => {
+    addInvoiceMutation.mutate({ invoice, invoiceFormData }, {
       onSuccess: () => {
         toast({
           title: "Invoice Created",
@@ -90,8 +92,8 @@ export function useInvoices() {
     });
   };
 
-  const updateInvoice = (updatedInvoice: Invoice) => {
-    updateInvoiceMutation.mutate(updatedInvoice, {
+  const updateInvoice = (updatedInvoice: Invoice, invoiceFormData?: any) => {
+    updateInvoiceMutation.mutate({ invoice: updatedInvoice, invoiceFormData }, {
       onSuccess: () => {
         toast({
           title: "Invoice Updated",

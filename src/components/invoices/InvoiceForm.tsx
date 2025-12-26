@@ -34,7 +34,8 @@ export function InvoiceForm({ open, onClose, onSave, editingInvoice }: InvoiceFo
     notes,
     setNotes,
     calculateTotal,
-    handleSubmit
+    handleSubmit,
+    validationErrors
   } = useInvoiceForm(editingInvoice, estimateData);
 
   const submitForm = (event: React.FormEvent<HTMLFormElement>) => {
@@ -74,9 +75,10 @@ export function InvoiceForm({ open, onClose, onSave, editingInvoice }: InvoiceFo
             onCompanyAddressChange={(value) => updateClientDetail('companyAddress', value)}
             onCompanyGstChange={(value) => updateClientDetail('companyGst', value)}
             onInvoiceDateChange={(value) => updateClientDetail('invoiceDate', value)}
+            errors={validationErrors}
           />
           
-          <InvoiceItemsCard items={items} onItemsChange={setItems} />
+          <InvoiceItemsCard items={items} onItemsChange={setItems} errors={validationErrors} />
           
           {clientDetails.invoiceType === "paid" ? (
             <TotalCard

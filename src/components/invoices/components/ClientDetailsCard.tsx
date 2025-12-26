@@ -48,6 +48,9 @@ interface ClientDetailsCardProps {
   // Invoice details
   invoiceDate: string;
   onInvoiceDateChange: (date: string) => void;
+  
+  // Validation errors
+  errors?: Record<string, string>;
 }
 
 export function ClientDetailsCard({ 
@@ -80,7 +83,8 @@ export function ClientDetailsCard({
   companyGst,
   onCompanyGstChange,
   invoiceDate,
-  onInvoiceDateChange
+  onInvoiceDateChange,
+  errors = {}
 }: ClientDetailsCardProps) {
   return (
     <Card 
@@ -113,8 +117,19 @@ export function ClientDetailsCard({
               value={invoiceDate}
               onChange={(e) => onInvoiceDateChange(e.target.value)}
               className="text-white"
-              style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
+              style={{ 
+                backgroundColor: 'rgba(45, 27, 78, 0.95)', 
+                borderColor: errors.invoiceDate ? '#ef4444' : '#5a4a7a', 
+                color: '#ffffff', 
+                borderWidth: '1.5px', 
+                borderStyle: 'solid' 
+              }}
             />
+            {errors.invoiceDate && (
+              <p className="text-sm text-red-400 mt-1" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
+                {errors.invoiceDate}
+              </p>
+            )}
           </div>
         </div>
 
@@ -141,8 +156,19 @@ export function ClientDetailsCard({
                       value={paymentDate}
                       onChange={(e) => onPaymentDateChange(e.target.value)}
                       className="text-white"
-                      style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
+                      style={{ 
+                        backgroundColor: 'rgba(45, 27, 78, 0.95)', 
+                        borderColor: errors.paymentDate ? '#ef4444' : '#5a4a7a', 
+                        color: '#ffffff', 
+                        borderWidth: '1.5px', 
+                        borderStyle: 'solid' 
+                      }}
                     />
+                    {errors.paymentDate && (
+                      <p className="text-sm text-red-400 mt-1" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
+                        {errors.paymentDate}
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-2 md:col-span-2">
                     <Label htmlFor="paymentMethod" className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Payment Method</Label>
@@ -180,8 +206,19 @@ export function ClientDetailsCard({
                 value={clientName}
                 onChange={(e) => onClientNameChange(e.target.value)}
                 className="text-white placeholder:text-gray-400"
-                style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
+                style={{ 
+                  backgroundColor: 'rgba(45, 27, 78, 0.95)', 
+                  borderColor: errors.clientName ? '#ef4444' : '#5a4a7a', 
+                  color: '#ffffff', 
+                  borderWidth: '1.5px', 
+                  borderStyle: 'solid' 
+                }}
               />
+              {errors.clientName && (
+                <p className="text-sm text-red-400 mt-1" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
+                  {errors.clientName}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="email" className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Email</Label>
@@ -192,8 +229,19 @@ export function ClientDetailsCard({
                 value={clientEmail}
                 onChange={(e) => onClientEmailChange(e.target.value)}
                 className="text-white placeholder:text-gray-400"
-                style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
+                style={{ 
+                  backgroundColor: 'rgba(45, 27, 78, 0.95)', 
+                  borderColor: errors.clientEmail ? '#ef4444' : '#5a4a7a', 
+                  color: '#ffffff', 
+                  borderWidth: '1.5px', 
+                  borderStyle: 'solid' 
+                }}
               />
+              {errors.clientEmail && (
+                <p className="text-sm text-red-400 mt-1" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
+                  {errors.clientEmail}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="phone" className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Phone Number</Label>
