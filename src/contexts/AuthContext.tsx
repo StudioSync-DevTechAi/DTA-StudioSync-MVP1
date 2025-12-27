@@ -148,9 +148,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Set loading state to prevent multiple sign-in attempts
       setLoading(true);
       
-      // Store current location for redirect after OAuth
+      // Store current location for redirect after OAuth (only if not already set)
+      // Landing page sets this to '/dashboard' explicitly
       const currentPath = window.location.pathname;
-      if (currentPath !== '/auth' && currentPath !== '/auth/callback') {
+      if (currentPath !== '/auth' && currentPath !== '/auth/callback' && !sessionStorage.getItem('auth_redirect')) {
         sessionStorage.setItem('auth_redirect', currentPath);
       }
       

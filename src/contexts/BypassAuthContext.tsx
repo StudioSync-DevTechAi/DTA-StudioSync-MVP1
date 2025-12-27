@@ -50,7 +50,7 @@ const createMockUser = (role: string): User => {
   } as unknown as User;
 };
 
-const createMockProfile = (user: User): Profile => {
+const createMockProfile = (user: User, role: string): Profile => {
   return {
     id: user.uid,
     email: user.email || "",
@@ -59,6 +59,7 @@ const createMockProfile = (user: User): Profile => {
     storage_used: 0,
     storage_limit: 5368709120, // 5GB
     plan_type: "pilot",
+    primary_role: role,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };
@@ -85,7 +86,7 @@ export const BypassAuthProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     if (bypassEnabled) {
       const user = createMockUser(currentRole);
       setMockUser(user);
-      setMockProfile(createMockProfile(user));
+      setMockProfile(createMockProfile(user, currentRole));
       localStorage.setItem("mockRole", currentRole);
     } else {
       setMockUser(null);
