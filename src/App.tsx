@@ -47,7 +47,7 @@ function AppContent() {
   const isLandingPage = location.pathname === "/";
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className={`min-h-screen flex flex-col ${!isLandingPage ? "bg-background" : ""}`}>
       {!isLandingPage && <Header />}
       <div className={!isLandingPage ? "flex-1 pt-16" : "flex-1"}>
         <Suspense fallback={<LoadingSpinner />}>
