@@ -10,9 +10,10 @@ interface EstimateFormProps {
   open: boolean;
   onClose: () => void;
   editingEstimate?: any;
+  onSave?: (estimate: any) => void;
 }
 
-export function EstimateForm({ open, onClose, editingEstimate }: EstimateFormProps) {
+export function EstimateForm({ open, onClose, editingEstimate, onSave }: EstimateFormProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
   const {
@@ -25,7 +26,7 @@ export function EstimateForm({ open, onClose, editingEstimate }: EstimateFormPro
     handlePreviousPage,
     handleUpdateFormData,
     handleSaveEstimate,
-  } = useEstimateForm(editingEstimate);
+  } = useEstimateForm(editingEstimate, onSave);
 
   const handleCloseAndReset = () => {
     if (!editingEstimate) {

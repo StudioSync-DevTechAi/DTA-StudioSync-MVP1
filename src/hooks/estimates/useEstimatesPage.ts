@@ -2,10 +2,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function useEstimatesPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [showNewEstimateForm, setShowNewEstimateForm] = useState(false);
   const [selectedEstimate, setSelectedEstimate] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
@@ -15,6 +18,8 @@ export function useEstimatesPage() {
     const savedEstimates = localStorage.getItem("estimates");
     return savedEstimates ? JSON.parse(savedEstimates) : [];
   });
+  const [approvedEstimatesFromDB, setApprovedEstimatesFromDB] = useState<any[]>([]);
+  const [isLoadingApproved, setIsLoadingApproved] = useState(false);
 
   useEffect(() => {
     localStorage.setItem("estimates", JSON.stringify(estimates));
@@ -31,7 +36,160 @@ export function useEstimatesPage() {
     setShowPreview(true);
   };
 
-  const handleStatusChange = (estimateId: string, newStatus: string, negotiatedAmount?: string, selectedPackageIndex?: number) => {
+  // Function to save approved estimate to both project_estimation_table and invoice_items_table
+  const saveApprovedEstimateToDatabase = async (estimateId: string, estimate: any) => {
+    try {
+      // Get photography owner phone number
+      const { data: ownerData, error: ownerError } = await supabase
+        .from("photography_owner_table")
+        .select("photography_owner_phno")
+        .limit(1)
+        .maybeSingle();
+      
+      if (ownerError) {
+        console.warn("Error fetching photography owner:", ownerError);
+      }
+
+      const photographyOwnerPhno = ownerData?.photography_owner_phno;
+      if (!photographyOwnerPhno) {
+        throw new Error("Photography owner not found. Please ensure you are enrolled as a photography owner.");
+      }
+
+      // Get or create project_estimate_uuid
+      let projectEstimateUuid = estimate.project_estimate_uuid;
+      
+      // Step 1: Update or create in project_estimation_table
+      if (projectEstimateUuid) {
+        // Update existing project status to APPROVED
+        const { data: updateData, error: updateError } = await supabase.rpc('update_project_status', {
+          p_project_estimate_uuid: projectEstimateUuid,
+          p_project_status: 'APPROVED'
+        });
+
+        if (updateError) {
+          console.error("Error updating project status:", updateError);
+          // Try direct update as fallback
+          const { error: directUpdateError } = await supabase
+            .from('project_estimation_table')
+            .update({
+              project_status: 'APPROVED',
+              updated_at: new Date().toISOString()
+            })
+            .eq('project_estimate_uuid', projectEstimateUuid);
+
+          if (directUpdateError) {
+            throw directUpdateError;
+          }
+        }
+      } else {
+        // Create new project estimation record if it doesn't exist
+        const { data: projectData, error: projectError } = await supabase.rpc('create_project_estimation', {
+          p_project_name: estimate.clientName || estimate.projectName || '',
+          p_project_type: estimate.projectType || '',
+          p_start_date: estimate.startDate || null,
+          p_start_time: estimate.startTime || null,
+          p_start_datetime_confirmed: false,
+          p_end_date: estimate.endDate || null,
+          p_end_time: estimate.endTime || null,
+          p_end_datetime_confirmed: false,
+          p_photography_owner_phno: photographyOwnerPhno,
+          p_client_name: estimate.clientName || '',
+          p_client_email: estimate.clientEmail || '',
+          p_client_phno: estimate.clientPhone || '',
+          p_is_drafted: false
+        });
+
+        if (projectError) {
+          console.error("Error creating project estimation:", projectError);
+          throw projectError;
+        }
+
+        projectEstimateUuid = projectData?.project_estimate_uuid;
+        
+        // Update status to APPROVED
+        if (projectEstimateUuid) {
+          const { error: statusError } = await supabase.rpc('update_project_status', {
+            p_project_estimate_uuid: projectEstimateUuid,
+            p_project_status: 'APPROVED'
+          });
+
+          if (statusError) {
+            console.warn("Error setting status to APPROVED:", statusError);
+          }
+        }
+      }
+
+      // Step 2: Create/update in invoice_items_table
+      const clientPhno = estimate.clientPhone?.replace(/\s/g, '') || '';
+      if (!clientPhno) {
+        console.warn("No client phone number found, skipping invoice creation");
+        return;
+      }
+
+      const invoiceFormData = {
+        clientDetails: {
+          name: estimate.clientName || '',
+          email: estimate.clientEmail || '',
+          phone: clientPhno
+        },
+        invoiceDate: new Date().toISOString().split('T')[0],
+        invoiceType: 'proforma',
+        items: estimate.items || [],
+        totals: {
+          subtotal: estimate.amount || '0',
+          gst: '0',
+          total: estimate.amount || '0'
+        },
+        paymentTracking: {
+          totalAmount: estimate.amount || '0',
+          paidAmount: '0',
+          balanceAmount: estimate.amount || '0'
+        },
+        // Store estimate data for reference
+        estimateData: {
+          ...estimate,
+          status: 'approved',
+          project_estimate_uuid: projectEstimateUuid
+        }
+      };
+
+      const { data: invoiceData, error: invoiceError } = await supabase.rpc('save_invoice_items_form_data', {
+        p_photography_owner_phno: photographyOwnerPhno,
+        p_client_phno: clientPhno,
+        p_invoice_form_data: invoiceFormData,
+        p_project_estimate_uuid: projectEstimateUuid,
+        p_cost_items_uuid: null,
+        p_invoice_uuid: null // Create new invoice
+      });
+
+      if (invoiceError) {
+        console.error("Error saving invoice:", invoiceError);
+        throw invoiceError;
+      }
+
+      console.log("Approved estimate saved to database successfully", {
+        projectEstimateUuid,
+        invoiceUuid: invoiceData?.invoice_uuid
+      });
+
+      // Update local estimate with project_estimate_uuid if it was created
+      if (projectEstimateUuid && !estimate.project_estimate_uuid) {
+        setEstimates(prevEstimates => 
+          prevEstimates.map(est => 
+            est.id === estimateId 
+              ? { ...est, project_estimate_uuid: projectEstimateUuid }
+              : est
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error saving approved estimate to database:", error);
+      throw error;
+    }
+  };
+
+  const handleStatusChange = async (estimateId: string, newStatus: string, negotiatedAmount?: string, selectedPackageIndex?: number) => {
+    // Update local state first (optimistic update)
     const updatedEstimates = estimates.map(est => {
       if (est.id === estimateId) {
         const updatedEstimate = {
@@ -72,7 +230,23 @@ export function useEstimatesPage() {
     });
     
     setEstimates(updatedEstimates);
-    setSelectedEstimate(updatedEstimates.find(est => est.id === estimateId));
+    const updatedEstimate = updatedEstimates.find(est => est.id === estimateId);
+    setSelectedEstimate(updatedEstimate);
+    
+    // If status is "approved", persist to database
+    if (newStatus === "approved" && updatedEstimate) {
+      try {
+        await saveApprovedEstimateToDatabase(estimateId, updatedEstimate);
+      } catch (error) {
+        console.error("Error saving approved estimate to database:", error);
+        // Show error toast but don't revert the UI change
+        toast({
+          title: "Warning",
+          description: "Estimate approved locally but failed to save to database. Please try again or contact support.",
+          variant: "destructive"
+        });
+      }
+    }
     
     const toastMessages = {
       approved: "Estimate has been approved! Proceeding to next steps.",
@@ -113,10 +287,185 @@ export function useEstimatesPage() {
     setShowPreview(false);
   };
 
+  const handleEstimateSaved = (savedEstimate: any) => {
+    // Add the saved estimate to the estimates list
+    setEstimates(prevEstimates => {
+      // Check if estimate already exists (in case of edit)
+      const existingIndex = prevEstimates.findIndex(est => est.id === savedEstimate.id);
+      if (existingIndex >= 0) {
+        // Update existing estimate
+        const updated = [...prevEstimates];
+        updated[existingIndex] = savedEstimate;
+        return updated;
+      } else {
+        // Add new estimate at the beginning
+        return [savedEstimate, ...prevEstimates];
+      }
+    });
+    
+    // Switch to pending tab for new estimates, or appropriate tab for edited estimates
+    if (isEditing) {
+      // For edited estimates, switch to the appropriate tab based on status
+      if (savedEstimate.status === "approved") {
+        setCurrentTab("approved");
+      } else if (savedEstimate.status === "declined") {
+        setCurrentTab("declined");
+      } else {
+        setCurrentTab("pending");
+      }
+    } else {
+      // For new estimates, always switch to pending tab
+      setCurrentTab("pending");
+    }
+    
+    // Close the form
+    setShowNewEstimateForm(false);
+    setIsEditing(false);
+    setSelectedEstimate(null);
+  };
+
+  // Fetch approved estimates from database when Approved tab is selected
+  useEffect(() => {
+    const fetchApprovedEstimates = async () => {
+      if (currentTab !== "approved") {
+        setApprovedEstimatesFromDB([]);
+        return;
+      }
+
+      setIsLoadingApproved(true);
+      try {
+        // First, fetch from project_estimation_table with APPROVED status
+        const { data: projectsData, error: projectsError } = await supabase
+          .from('project_estimation_table')
+          .select('*')
+          .eq('project_status', 'APPROVED')
+          .order('created_at', { ascending: false });
+
+        if (projectsError) {
+          console.error("Error fetching approved projects:", projectsError);
+        }
+
+        // Then fetch from invoice_items_table (as per your URL pattern)
+        const { data: invoicesData, error: invoicesError } = await supabase
+          .from('invoice_items_table')
+          .select('*')
+          .order('invoice_date', { ascending: false })
+          .order('created_at', { ascending: false });
+
+        if (invoicesError) {
+          console.error("Error fetching approved estimates from invoice_items_table:", invoicesError);
+          // If we have project data, use that; otherwise fallback to localStorage
+          if (projectsData && projectsData.length > 0) {
+            const mappedFromProjects = projectsData.map(project => {
+              const estimateData = project.estimate_form_data || {};
+              return {
+                id: project.project_estimate_uuid,
+                project_estimate_uuid: project.project_estimate_uuid,
+                status: "approved",
+                clientName: estimateData.clientName,
+                clientEmail: estimateData.clientEmail,
+                clientPhone: project.clientid_phno,
+                amount: estimateData.amount,
+                projectName: project.project_name || estimateData.projectName,
+                projectType: project.project_type || estimateData.projectType,
+                packages: estimateData.packages,
+                items: estimateData.items,
+                ...estimateData
+              };
+            });
+            setApprovedEstimatesFromDB(mappedFromProjects);
+            setIsLoadingApproved(false);
+            return;
+          }
+          setApprovedEstimatesFromDB([]);
+          setIsLoadingApproved(false);
+          return;
+        }
+
+        // Combine data from both sources, prioritizing invoice_items_table
+        const invoiceMap = new Map();
+        (invoicesData || []).forEach(item => {
+          if (item.project_estimate_uuid) {
+            invoiceMap.set(item.project_estimate_uuid, item);
+          }
+        });
+
+        // Map invoice_items_table data to estimate format
+        const mappedFromInvoices = (invoicesData || [])
+          .filter(item => {
+            // Include if it has project_estimate_uuid (linked to approved estimate)
+            // or if estimateData has approved status
+            const estimateData = item.invoice_form_data?.estimateData;
+            return item.project_estimate_uuid || estimateData?.status === "approved";
+          })
+          .map(item => {
+            const estimateData = item.invoice_form_data?.estimateData || {};
+            return {
+              id: item.project_estimate_uuid || item.invoice_uuid,
+              project_estimate_uuid: item.project_estimate_uuid,
+              invoice_uuid: item.invoice_uuid,
+              status: "approved",
+              clientName: estimateData.clientName || item.invoice_form_data?.clientDetails?.name,
+              clientEmail: estimateData.clientEmail || item.invoice_form_data?.clientDetails?.email,
+              clientPhone: item.clientid_phno,
+              amount: estimateData.amount || item.invoice_form_data?.totals?.total,
+              projectName: estimateData.projectName,
+              projectType: estimateData.projectType,
+              packages: estimateData.packages,
+              items: estimateData.items || item.invoice_form_data?.items,
+              ...estimateData,
+              // Store reference to invoice
+              invoiceData: item
+            };
+          });
+
+        // Also include approved projects that don't have invoices yet
+        const projectsWithoutInvoices = (projectsData || [])
+          .filter(project => !invoiceMap.has(project.project_estimate_uuid))
+          .map(project => {
+            const estimateData = project.estimate_form_data || {};
+            return {
+              id: project.project_estimate_uuid,
+              project_estimate_uuid: project.project_estimate_uuid,
+              status: "approved",
+              clientName: estimateData.clientName,
+              clientEmail: estimateData.clientEmail,
+              clientPhone: project.clientid_phno,
+              amount: estimateData.amount,
+              projectName: project.project_name || estimateData.projectName,
+              projectType: project.project_type || estimateData.projectType,
+              packages: estimateData.packages,
+              items: estimateData.items,
+              ...estimateData
+            };
+          });
+
+        // Combine both sources
+        const allApprovedEstimates = [...mappedFromInvoices, ...projectsWithoutInvoices];
+        setApprovedEstimatesFromDB(allApprovedEstimates);
+      } catch (error) {
+        console.error("Error fetching approved estimates:", error);
+        setApprovedEstimatesFromDB([]);
+      } finally {
+        setIsLoadingApproved(false);
+      }
+    };
+
+    fetchApprovedEstimates();
+  }, [currentTab]);
+
   const getFilteredEstimates = () => {
+    if (currentTab === "approved") {
+      // Prioritize DB data, fallback to localStorage
+      if (approvedEstimatesFromDB.length > 0) {
+        return approvedEstimatesFromDB;
+      }
+      // Fallback to localStorage
+      return estimates.filter(estimate => estimate.status === "approved");
+    }
+    
     return estimates.filter(estimate => {
       if (currentTab === "pending") return estimate.status === "pending" || estimate.status === "negotiating";
-      if (currentTab === "approved") return estimate.status === "approved";
       if (currentTab === "declined") return estimate.status === "declined";
       return true;
     });
@@ -130,6 +479,7 @@ export function useEstimatesPage() {
     currentTab,
     estimates,
     filteredEstimates: getFilteredEstimates(),
+    isLoadingApproved,
     setCurrentTab,
     handleEditEstimate,
     handleOpenPreview,
@@ -138,6 +488,7 @@ export function useEstimatesPage() {
     handleGoToScheduling,
     handleCreateNewEstimate,
     handleCloseForm,
-    handleClosePreview
+    handleClosePreview,
+    handleEstimateSaved
   };
 }

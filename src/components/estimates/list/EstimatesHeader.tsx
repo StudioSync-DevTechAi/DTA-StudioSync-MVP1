@@ -31,10 +31,6 @@ export function EstimatesHeader({
 }: EstimatesHeaderProps) {
   const navigate = useNavigate();
 
-  const handleNewProject = () => {
-    navigate("/estimates/projects/new");
-  };
-
   const handleHeaderClick = () => {
     navigate(headerNavigationPath);
   };
@@ -53,12 +49,33 @@ export function EstimatesHeader({
             <DraftsBox />
           </div>
           {showDashboardTitle && (
-            <div className="flex-1 flex justify-center items-center w-full xs:w-auto">
+            <div className="flex-1 flex justify-center items-center w-full xs:w-auto gap-2 xs:gap-2.5 sm:gap-3 relative">
               <div className="text-center">
                 <h2 className="text-base xs:text-lg sm:text-xl md:text-2xl font-semibold text-white">
                   {dashboardTitle}
                 </h2>
               </div>
+              <Button 
+                variant="outline" 
+                onClick={() => navigate("/estimates/projects/new")} 
+                className="animated-border shrink-0 absolute right-0"
+                style={{
+                  backgroundColor: 'transparent',
+                  color: '#ffffff',
+                  borderColor: '#ffffff'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(26, 8, 61, 0.3)';
+                  e.currentTarget.style.borderColor = '#ffffff';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.borderColor = '#ffffff';
+                }}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                New Project
+              </Button>
             </div>
           )}
         </div>
@@ -68,27 +85,6 @@ export function EstimatesHeader({
       </div>
       {showActions && (
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-          <Button 
-            variant="outline" 
-            onClick={handleNewProject} 
-            className="animated-border w-full sm:w-auto"
-            style={{
-              backgroundColor: 'transparent',
-              color: '#ffffff',
-              borderColor: '#ffffff'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(26, 8, 61, 0.3)';
-              e.currentTarget.style.borderColor = '#ffffff';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
-              e.currentTarget.style.borderColor = '#ffffff';
-            }}
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            New Project
-          </Button>
           <PermissionGuard permission={PERMISSIONS.ESTIMATES_CREATE}>
             <Button 
               onClick={onNewEstimate} 

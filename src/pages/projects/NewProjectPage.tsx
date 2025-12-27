@@ -125,6 +125,8 @@ export default function NewProjectPage() {
     photography_owner_name: string;
   } | null>(null);
   const [loadingOwner, setLoadingOwner] = useState(false);
+  const [isSavingProjectName, setIsSavingProjectName] = useState(false);
+  const [originalProjectName, setOriginalProjectName] = useState<string>("");
   // Initialize projectEstimateUuid from URL or sessionStorage
   const [projectEstimateUuid, setProjectEstimateUuid] = useState<string | null>(
     projectUuidFromUrl || sessionStorage.getItem("newProjectEstimateUuid")
@@ -224,9 +226,10 @@ export default function NewProjectPage() {
           });
           
           // Populate formData with project details when loading from URL
+          const loadedProjectName = projectRecord.project_name || '';
           setFormData(prev => ({
             ...prev,
-            projectName: projectRecord.project_name || prev.projectName,
+            projectName: loadedProjectName || prev.projectName,
             eventType: projectRecord.project_type || prev.eventType,
             clientFullName: clientName || prev.clientFullName,
             clientPhone: projectRecord.clientid_phno || prev.clientPhone,
@@ -239,6 +242,11 @@ export default function NewProjectPage() {
             endMinute: projectRecord.end_time ? projectRecord.end_time.split(':')[1] : prev.endMinute,
             endConfirmationStatus: projectRecord.enddatetime_confirmed || prev.endConfirmationStatus,
           }));
+          
+          // Set original project name for change tracking
+          if (loadedProjectName) {
+            setOriginalProjectName(loadedProjectName);
+          }
           
           // Set the projectEstimateUuid
           setProjectEstimateUuid(projectUuidFromUrl);
@@ -416,9 +424,10 @@ export default function NewProjectPage() {
           const endTime = projectRecord.end_time ? projectRecord.end_time.split(':') : null;
 
           // Populate form data
+          const loadedProjectNameFromName = projectRecord.project_name || '';
           setFormData(prev => ({
             ...prev,
-            projectName: projectRecord.project_name || prev.projectName,
+            projectName: loadedProjectNameFromName || prev.projectName,
             eventType: projectRecord.project_type || prev.eventType,
             clientFullName: clientName || prev.clientFullName,
             clientPhone: projectRecord.clientid_phno ? `+91 ${projectRecord.clientid_phno}` : prev.clientPhone,
@@ -431,6 +440,11 @@ export default function NewProjectPage() {
             endMinute: endTime ? endTime[1] : prev.endMinute,
             endConfirmationStatus: projectRecord.enddatetime_confirmed || prev.endConfirmationStatus,
           }));
+
+          // Set original project name for change tracking
+          if (loadedProjectNameFromName) {
+            setOriginalProjectName(loadedProjectNameFromName);
+          }
 
           // Update sessionStorage
           try {
@@ -555,9 +569,10 @@ export default function NewProjectPage() {
           console.log('Parsed End Time:', endTime);
 
           // Populate form data with fetched project information
+          const loadedProjectNameFromUuid = projectRecord.project_name || '';
           setFormData(prev => ({
             ...prev,
-            projectName: projectRecord.project_name || prev.projectName,
+            projectName: loadedProjectNameFromUuid || prev.projectName,
             eventType: projectRecord.project_type || prev.eventType,
             clientFullName: clientName || prev.clientFullName,
             clientPhone: projectRecord.clientid_phno ? `+91 ${projectRecord.clientid_phno}` : prev.clientPhone,
@@ -570,6 +585,11 @@ export default function NewProjectPage() {
             endMinute: endTime ? endTime[1] : prev.endMinute,
             endConfirmationStatus: projectRecord.enddatetime_confirmed || prev.endConfirmationStatus,
           }));
+
+          // Set original project name for change tracking
+          if (loadedProjectNameFromUuid) {
+            setOriginalProjectName(loadedProjectNameFromUuid);
+          }
 
           // Update sessionStorage
           try {
@@ -1978,6 +1998,93 @@ export default function NewProjectPage() {
     setEditingPackageNameId(null);
   };
 
+  // Save project name to both local storage and remote database
+  const handleSaveProjectName = async () => {
+    if (!formData.projectName.trim()) {
+      alert("Project name cannot be empty");
+      return;
+    }
+
+    if (!projectEstimateUuid) {
+      // If no project UUID exists, just save to sessionStorage
+      sessionStorage.setItem('newProjectName', formData.projectName);
+      setOriginalProjectName(formData.projectName);
+      alert("Project name saved locally. Project will be saved to database when you click Next.");
+      return;
+    }
+
+    setIsSavingProjectName(true);
+    try {
+      console.log('Saving project name to database:', {
+        projectEstimateUuid,
+        newProjectName: formData.projectName.trim()
+      });
+
+      // Update remote database
+      const { data: updateData, error: updateError } = await supabase
+        .from('project_estimation_table')
+        .update({
+          project_name: formData.projectName.trim(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('project_estimate_uuid', projectEstimateUuid)
+        .select('project_name, updated_at'); // Select to verify update
+
+      if (updateError) {
+        console.error("Error updating project name:", updateError);
+        alert(`Error saving project name: ${updateError.message}`);
+        return;
+      }
+
+      // Verify that the update actually happened
+      if (!updateData || updateData.length === 0) {
+        console.warn("Update returned no rows. Project may not exist or RLS may be blocking the update.");
+        alert("Warning: Project name update may not have been saved. Please check if you have permission to update this project.");
+        return;
+      }
+
+      console.log('Project name successfully updated in database:', updateData[0]);
+
+      // Verify the updated value matches what we sent
+      if (updateData[0].project_name !== formData.projectName.trim()) {
+        console.warn("Updated project name doesn't match expected value:", {
+          expected: formData.projectName.trim(),
+          actual: updateData[0].project_name
+        });
+      }
+
+      // Update local storage
+      sessionStorage.setItem('newProjectName', formData.projectName.trim());
+      setOriginalProjectName(formData.projectName.trim());
+
+      // Update projectDetails state if it exists
+      if (projectDetails) {
+        setProjectDetails({
+          ...projectDetails,
+          project_name: formData.projectName.trim()
+        });
+      }
+
+      // Show success message
+      alert("Project name saved successfully to database!");
+    } catch (error: any) {
+      console.error("Error saving project name:", error);
+      alert(`Error saving project name: ${error.message || 'Unknown error'}`);
+    } finally {
+      setIsSavingProjectName(false);
+    }
+  };
+
+  // Track original project name when component loads or project is loaded
+  useEffect(() => {
+    if (formData.projectName && !originalProjectName) {
+      setOriginalProjectName(formData.projectName);
+    }
+  }, [formData.projectName, originalProjectName]);
+
+  // Check if project name has been changed
+  const hasProjectNameChanged = formData.projectName !== originalProjectName && formData.projectName.trim() !== "";
+
   // Save event card data to sessionStorage
   const saveEventCardToSessionStorage = (eventPackage: EventPackage) => {
     try {
@@ -2813,7 +2920,7 @@ export default function NewProjectPage() {
 
   return (
     <Layout>
-      <div className="space-y-6 p-6">
+      <div className="space-y-3 xs:space-y-4 sm:space-y-5 md:space-y-6 p-2 xs:p-3 sm:p-4 md:p-5 lg:p-6 w-full max-w-full overflow-x-hidden">
         <EstimatesHeader 
           onNewEstimate={handleNewEstimate}
           canCreate={true}
@@ -2824,59 +2931,82 @@ export default function NewProjectPage() {
         />
         
         <Card className="w-full max-w-full shadow-lg" style={{ backgroundColor: 'rgba(26, 15, 61, 0.98)', backdropFilter: 'blur(10px)', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)' }}>
-          <CardContent className="p-2 xs:p-3 sm:p-4 md:p-6" style={{ backgroundColor: 'rgba(26, 15, 61, 0.98)', backdropFilter: 'blur(10px)' }}>
+          <CardContent className="p-2 xs:p-3 sm:p-4 md:p-5 lg:p-6" style={{ backgroundColor: 'rgba(26, 15, 61, 0.98)', backdropFilter: 'blur(10px)' }}>
               {currentPage === 1 ? (
                 <>
                   {/* Project Owner Information */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-3 sm:p-4 rounded-lg mb-4 sm:mb-6" style={{ backgroundColor: 'rgba(45, 27, 78, 0.98)', backdropFilter: 'blur(10px)' }}>
-                    <div className="space-y-2">
-                      <Label className="text-center block text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Project Owner</Label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 xs:gap-3 sm:gap-4 p-2 xs:p-3 sm:p-4 rounded-lg mb-3 xs:mb-4 sm:mb-5 md:mb-6" style={{ backgroundColor: 'rgba(45, 27, 78, 0.98)', backdropFilter: 'blur(10px)' }}>
+                    <div className="space-y-1.5 xs:space-y-2">
+                      <Label className="text-center block text-white text-xs xs:text-sm sm:text-base" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Project Owner</Label>
                       <Input
                         value={loadingOwner ? "Loading..." : (photographyOwner?.photography_owner_name || "Not available")}
                         disabled
-                        className="bg-background text-white text-center"
+                        className="bg-background text-white text-center text-xs xs:text-sm sm:text-base h-8 xs:h-9 sm:h-10"
                         style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label className="text-center block text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Project Owner PhNo</Label>
+                    <div className="space-y-1.5 xs:space-y-2">
+                      <Label className="text-center block text-white text-xs xs:text-sm sm:text-base" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Project Owner PhNo</Label>
                       <Input
                         value={loadingOwner ? "Loading..." : (photographyOwner?.photography_owner_phno || "Not available")}
                         disabled
-                        className="bg-background text-white text-center"
+                        className="bg-background text-white text-center text-xs xs:text-sm sm:text-base h-8 xs:h-9 sm:h-10"
                         style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label className="text-center block text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Project Owner Email Id</Label>
+                    <div className="space-y-1.5 xs:space-y-2">
+                      <Label className="text-center block text-white text-xs xs:text-sm sm:text-base" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Project Owner Email Id</Label>
                       <Input
                         value={loadingOwner ? "Loading..." : (photographyOwner?.photography_owner_email || "Not available")}
                         disabled
-                        className="bg-background text-white text-center"
+                        className="bg-background text-white text-center text-xs xs:text-sm sm:text-base h-8 xs:h-9 sm:h-10"
                         style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                       />
                     </div>
                   </div>
-                  <div className="space-y-4 sm:space-y-6" style={{ backgroundColor: 'rgba(26, 15, 61, 0.98)', backdropFilter: 'blur(10px)', padding: '1rem', borderRadius: '0.5rem' }}>
+                  <div className="space-y-3 xs:space-y-4 sm:space-y-5 md:space-y-6 p-2 xs:p-3 sm:p-4" style={{ backgroundColor: 'rgba(26, 15, 61, 0.98)', backdropFilter: 'blur(10px)', borderRadius: '0.5rem' }}>
 
               {/* Project Name and Project Type Row */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2 min-w-0" style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', padding: '0.5rem', borderRadius: '0.25rem' }}>
-                  <Label htmlFor="projectName" className="text-sm sm:text-base text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 xs:gap-4">
+                <div className="space-y-1.5 xs:space-y-2 min-w-0" style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', padding: '0.5rem', borderRadius: '0.25rem' }}>
+                  <Label htmlFor="projectName" className="text-xs xs:text-sm sm:text-base text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>
                     Project Name <span className="text-red-500">*</span>
                   </Label>
-                  <Input
-                    id="projectName"
-                    placeholder="Enter project name"
-                    value={formData.projectName}
-                    onChange={(e) => handleInputChange("projectName", e.target.value)}
-                    required
-                    className={`w-full text-white placeholder:text-gray-400 ${formData.projectName.trim() === "" ? "border-red-300" : ""}`}
-                    style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
-                  />
+                  <div className="flex items-center gap-1.5 xs:gap-2">
+                    <Input
+                      id="projectName"
+                      placeholder="Enter project name"
+                      value={formData.projectName}
+                      onChange={(e) => handleInputChange("projectName", e.target.value)}
+                      required
+                      className={`flex-1 text-white placeholder:text-gray-400 text-xs xs:text-sm sm:text-base h-8 xs:h-9 sm:h-10 ${formData.projectName.trim() === "" ? "border-red-300" : ""}`}
+                      style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
+                    />
+                    {hasProjectNameChanged && (
+                      <Button
+                        type="button"
+                        onClick={handleSaveProjectName}
+                        disabled={isSavingProjectName || !formData.projectName.trim()}
+                        size="icon"
+                        variant="ghost"
+                        className={`h-8 w-8 xs:h-9 xs:w-9 sm:h-10 sm:w-10 shrink-0 ${
+                          isSavingProjectName 
+                            ? 'text-gray-400 cursor-not-allowed' 
+                            : 'text-green-400 hover:text-green-300 hover:bg-[#1a0f3d]'
+                        }`}
+                        title="Save project name"
+                      >
+                        {isSavingProjectName ? (
+                          <Loader2 className="h-3 w-3 xs:h-3.5 xs:w-3.5 sm:h-4 sm:w-4 animate-spin" />
+                        ) : (
+                          <Save className="h-3 w-3 xs:h-3.5 xs:w-3.5 sm:h-4 sm:w-4" />
+                        )}
+                      </Button>
+                    )}
+                  </div>
                 </div>
-                <div className="space-y-2 min-w-0" style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', padding: '0.5rem', borderRadius: '0.25rem' }}>
-                  <Label htmlFor="eventType" className="text-sm sm:text-base text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>
+                <div className="space-y-1.5 xs:space-y-2 min-w-0" style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', padding: '0.5rem', borderRadius: '0.25rem' }}>
+                  <Label htmlFor="eventType" className="text-xs xs:text-sm sm:text-base text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>
                     Project Type <span className="text-red-500">*</span>
                   </Label>
                   <Select
@@ -2886,7 +3016,7 @@ export default function NewProjectPage() {
                   >
                     <SelectTrigger 
                       id="eventType"
-                      className={`text-white placeholder:text-gray-400 ${formData.eventType === "" ? "border-red-300" : ""}`}
+                      className={`text-white placeholder:text-gray-400 text-xs xs:text-sm sm:text-base h-8 xs:h-9 sm:h-10 ${formData.eventType === "" ? "border-red-300" : ""}`}
                       style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
                     >
                       <SelectValue placeholder="Select Event Type" className="text-white" />
@@ -2904,20 +3034,20 @@ export default function NewProjectPage() {
               </div>
 
               {/* Client Name, Email, and Phone Row */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div className="space-y-2 min-w-0" style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', padding: '0.5rem', borderRadius: '0.25rem' }}>
-                  <Label htmlFor="clientFullName" className="text-sm sm:text-base text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Client Name:</Label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 xs:gap-4">
+                <div className="space-y-1.5 xs:space-y-2 min-w-0" style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', padding: '0.5rem', borderRadius: '0.25rem' }}>
+                  <Label htmlFor="clientFullName" className="text-xs xs:text-sm sm:text-base text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Client Name:</Label>
                   <Input
                     id="clientFullName"
                     placeholder="Enter client name"
                     value={formData.clientFullName}
                     onChange={(e) => handleInputChange("clientFullName", e.target.value)}
-                    className="w-full text-white placeholder:text-gray-400"
+                    className="w-full text-white placeholder:text-gray-400 text-xs xs:text-sm sm:text-base h-8 xs:h-9 sm:h-10"
                     style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
                   />
                 </div>
-                <div className="space-y-2 min-w-0" style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', padding: '0.5rem', borderRadius: '0.25rem' }}>
-                  <Label htmlFor="clientEmail" className="text-sm sm:text-base text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Client Email:</Label>
+                <div className="space-y-1.5 xs:space-y-2 min-w-0" style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', padding: '0.5rem', borderRadius: '0.25rem' }}>
+                  <Label htmlFor="clientEmail" className="text-xs xs:text-sm sm:text-base text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Client Email:</Label>
                   <Input
                     id="clientEmail"
                     type="email"
@@ -2925,19 +3055,19 @@ export default function NewProjectPage() {
                     value={formData.clientEmail}
                     onChange={(e) => handleInputChange("clientEmail", e.target.value)}
                     className={cn(
-                      "w-full text-white placeholder:text-gray-400",
+                      "w-full text-white placeholder:text-gray-400 text-xs xs:text-sm sm:text-base h-8 xs:h-9 sm:h-10",
                       formData.clientEmail && !isValidEmail(formData.clientEmail) ? "border-red-300" : ""
                     )}
                     style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
                   />
                   {formData.clientEmail && !isValidEmail(formData.clientEmail) && (
-                    <p className="text-xs text-red-400">
+                    <p className="text-[10px] xs:text-xs text-red-400">
                       Email must contain '@' symbol and a valid domain name (e.g., example@domain.com)
                     </p>
                   )}
                 </div>
-                <div className="space-y-2 min-w-0" style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', padding: '0.5rem', borderRadius: '0.25rem' }}>
-                  <Label htmlFor="clientPhone" className="text-sm sm:text-base text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>
+                <div className="space-y-1.5 xs:space-y-2 min-w-0" style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', padding: '0.5rem', borderRadius: '0.25rem' }}>
+                  <Label htmlFor="clientPhone" className="text-xs xs:text-sm sm:text-base text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>
                     Client Ph: <span className="text-red-500">*</span>
                   </Label>
                   <Input
@@ -2948,14 +3078,14 @@ export default function NewProjectPage() {
                     onChange={(e) => handleClientPhoneChange(e.target.value)}
                     required
                     className={cn(
-                      "w-full text-white placeholder:text-gray-400",
+                      "w-full text-white placeholder:text-gray-400 text-xs xs:text-sm sm:text-base h-8 xs:h-9 sm:h-10",
                       !isPage1Valid() && formData.clientPhone.length < 14 ? "border-red-300" : ""
                     )}
                     style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
                     maxLength={14}
                   />
                   {formData.clientPhone.length < 14 && formData.clientPhone.length > 4 && (
-                    <p className="text-xs text-gray-300">
+                    <p className="text-[10px] xs:text-xs text-gray-300">
                       {10 - (formData.clientPhone.length - 4)} digits remaining
                     </p>
                   )}
@@ -2964,10 +3094,10 @@ export default function NewProjectPage() {
 
               {/* Start Date & Time */}
               <div className="space-y-2" style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', padding: '0.5rem', borderRadius: '0.25rem' }}>
-                <Label className="text-sm sm:text-base text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Project Start Date & Time <span className="text-red-500">*</span></Label>
+                <Label className="text-xs xs:text-sm sm:text-base text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Project Start Date & Time <span className="text-red-500">*</span></Label>
                 <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-1 items-end" style={{ backgroundColor: '#2d1b4e', padding: '0.5rem', borderRadius: '0.25rem' }}>
                   {/* Date Selection - Narrower */}
-                  <div className="col-span-1 sm:col-span-3 w-full sm:max-w-[70%]" style={{ backgroundColor: '#1a0f3d', padding: '0.5rem', borderRadius: '0.25rem' }}>
+                  <div className="col-span-1 sm:col-span-3 w-full sm:max-w-[70%] p-1.5 xs:p-2" style={{ backgroundColor: '#1a0f3d', borderRadius: '0.25rem' }}>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
@@ -3002,7 +3132,7 @@ export default function NewProjectPage() {
                   </div>
 
                   {/* Time Picker Clock */}
-                  <div className="col-span-1 sm:col-span-3 w-full sm:max-w-[70%]" style={{ backgroundColor: '#1a0f3d', padding: '0.5rem', borderRadius: '0.25rem' }}>
+                  <div className="col-span-1 sm:col-span-3 w-full sm:max-w-[70%] p-1.5 xs:p-2" style={{ backgroundColor: '#1a0f3d', borderRadius: '0.25rem' }}>
                     <TimePickerClock
                       hour={formData.startHour || "00"}
                       minute={formData.startMinute || "00"}
@@ -3012,12 +3142,12 @@ export default function NewProjectPage() {
                   </div>
 
                   {/* Confirmation Status */}
-                  <div className="col-span-6 flex items-end gap-2 sm:gap-3 -ml-8 md:-ml-6 sm:-ml-4">
+                  <div className="col-span-1 sm:col-span-6 flex items-end justify-start sm:justify-center gap-2 sm:gap-3 mt-2 sm:mt-0">
                     <div className="flex items-center gap-2 sm:gap-3 pb-0.5 sm:pb-1">
                       <Label 
                         htmlFor="confirmationStatus" 
                         className={cn(
-                          "font-normal cursor-pointer whitespace-nowrap text-xs sm:text-sm md:text-base transition-colors",
+                          "font-normal cursor-pointer whitespace-nowrap text-[10px] xs:text-xs sm:text-sm md:text-base transition-colors",
                           formData.confirmationStatus ? "text-green-400" : "text-gray-300"
                         )}
                       >
@@ -3038,10 +3168,10 @@ export default function NewProjectPage() {
 
               {/* End Date & Time */}
               <div className="space-y-2" style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', padding: '0.5rem', borderRadius: '0.25rem' }}>
-                <Label className="text-sm sm:text-base text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Project End Date & Time</Label>
+                <Label className="text-xs xs:text-sm sm:text-base text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Project End Date & Time</Label>
                 <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-1 items-end" style={{ backgroundColor: '#2d1b4e', padding: '0.5rem', borderRadius: '0.25rem' }}>
                   {/* Date Selection - Narrower */}
-                  <div className="col-span-1 sm:col-span-3 w-full sm:max-w-[70%]" style={{ backgroundColor: '#1a0f3d', padding: '0.5rem', borderRadius: '0.25rem' }}>
+                  <div className="col-span-1 sm:col-span-3 w-full sm:max-w-[70%] p-1.5 xs:p-2" style={{ backgroundColor: '#1a0f3d', borderRadius: '0.25rem' }}>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
@@ -3107,7 +3237,7 @@ export default function NewProjectPage() {
                   </div>
 
                   {/* Time Picker Clock */}
-                  <div className="col-span-1 sm:col-span-3 w-full sm:max-w-[70%]" style={{ backgroundColor: '#1a0f3d', padding: '0.5rem', borderRadius: '0.25rem' }}>
+                  <div className="col-span-1 sm:col-span-3 w-full sm:max-w-[70%] p-1.5 xs:p-2" style={{ backgroundColor: '#1a0f3d', borderRadius: '0.25rem' }}>
                     <TimePickerClock
                       hour={formData.endHour || "00"}
                       minute={formData.endMinute || "00"}
@@ -3117,12 +3247,12 @@ export default function NewProjectPage() {
                   </div>
 
                   {/* Confirmation Status */}
-                  <div className="col-span-6 flex items-end gap-2 sm:gap-3 -ml-8 md:-ml-6 sm:-ml-4">
+                  <div className="col-span-1 sm:col-span-6 flex items-end justify-start sm:justify-center gap-2 sm:gap-3 mt-2 sm:mt-0">
                     <div className="flex items-center gap-2 sm:gap-3 pb-0.5 sm:pb-1">
                       <Label 
                         htmlFor="endConfirmationStatus" 
                         className={cn(
-                          "font-normal cursor-pointer whitespace-nowrap text-xs sm:text-sm md:text-base transition-colors",
+                          "font-normal cursor-pointer whitespace-nowrap text-[10px] xs:text-xs sm:text-sm md:text-base transition-colors",
                           formData.endConfirmationStatus ? "text-green-400" : "text-gray-300"
                         )}
                       >
@@ -3142,18 +3272,18 @@ export default function NewProjectPage() {
               </div>
 
               {/* Next Button */}
-              <div className="flex flex-col items-center pt-4 gap-2">
+              <div className="flex flex-col items-center pt-3 xs:pt-4 gap-2">
                 <Button
                   onClick={handleNext}
                   disabled={!isPage1Valid() || isSubmitting}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 xs:px-6 sm:px-8 h-9 xs:h-10 sm:h-11 text-xs xs:text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
                 >
                   {isSubmitting ? 'Creating Project...' : 'Next'}
-                  {!isSubmitting && <ArrowRight className="ml-2 h-4 w-4" />}
+                  {!isSubmitting && <ArrowRight className="ml-1 xs:ml-2 h-3 w-3 xs:h-4 xs:w-4" />}
                 </Button>
                 {/* Debug info - shows why button might be disabled */}
                 {process.env.NODE_ENV === 'development' && (
-                  <div className="text-xs text-gray-500 text-center">
+                  <div className="text-[10px] xs:text-xs text-gray-500 text-center">
                     <div>Valid: {isPage1Valid() ? '✓' : '✗'} | Submitting: {isSubmitting ? 'Yes' : 'No'}</div>
                     <div>Disabled: {(!isPage1Valid() || isSubmitting) ? 'Yes' : 'No'}</div>
                   </div>
