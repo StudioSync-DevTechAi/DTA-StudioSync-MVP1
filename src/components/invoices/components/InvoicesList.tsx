@@ -1,10 +1,12 @@
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Receipt, ArrowUpDown, Wallet, ChevronDown, Edit, Eye, DollarSign } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Receipt, ArrowUpDown, Wallet, Edit, Eye, DollarSign, Filter, ArrowUp, ArrowDown, Search } from "lucide-react";
 import { useState } from "react";
 import { Invoice } from "../types";
 import { RecordPaymentDialog } from "./RecordPaymentDialog";
+import type { SortOption } from "@/hooks/invoices/utils/invoiceFilters";
 import {
   Table,
   TableBody,
@@ -22,8 +24,12 @@ import {
 
 interface InvoicesListProps {
   invoices: Invoice[];
-  sortBy: "date" | "amount" | "balanceHighToLow" | "balanceLowToHigh";
-  setSortBy: (sortBy: "date" | "amount" | "balanceHighToLow" | "balanceLowToHigh") => void;
+  sortBy: SortOption;
+  setSortBy: (sortBy: SortOption) => void;
+  statusFilter?: string | null;
+  setStatusFilter?: (status: string | null) => void;
+  searchQuery?: string;
+  setSearchQuery?: (query: string) => void;
   onViewDetails: (invoice: Invoice) => void;
   onEdit?: (invoice: Invoice) => void;
   onRecordPayment?: (invoice: Invoice) => void;
@@ -33,6 +39,10 @@ export function InvoicesList({
   invoices,
   sortBy,
   setSortBy,
+  statusFilter,
+  setStatusFilter,
+  searchQuery = "",
+  setSearchQuery,
   onViewDetails,
   onEdit,
   onRecordPayment,
@@ -63,58 +73,82 @@ export function InvoicesList({
     }
   };
 
-  const getSortLabel = () => {
-    switch (sortBy) {
-      case "date": return "Date";
-      case "amount": return "Amount";
-      case "balanceHighToLow": return "Balance (High to Low)";
-      case "balanceLowToHigh": return "Balance (Low to High)";
-      default: return "Date";
+  const handleColumnSort = (column: "client" | "invoiceNumber" | "date" | "amount" | "balance" | "status") => {
+    const currentSort = sortBy;
+    const isAscending = currentSort === `${column}_asc`;
+    const isDescending = currentSort === `${column}_desc`;
+    
+    // Toggle between ascending and descending
+    if (isAscending) {
+      setSortBy(`${column}_desc` as SortOption);
+    } else if (isDescending) {
+      setSortBy(`${column}_asc` as SortOption);
+    } else {
+      // If not currently sorted by this column, start with ascending
+      setSortBy(`${column}_asc` as SortOption);
     }
+  };
+
+  const getSortIcon = (column: "client" | "invoiceNumber" | "date" | "amount" | "balance" | "status") => {
+    const currentSort = sortBy;
+    if (currentSort === `${column}_asc`) {
+      return <ArrowUp className="h-3 w-3 ml-1" />;
+    } else if (currentSort === `${column}_desc`) {
+      return <ArrowDown className="h-3 w-3 ml-1" />;
+    }
+    return <ArrowUpDown className="h-3 w-3 ml-1 opacity-50" />;
   };
 
   return (
     <Card style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
       <div className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Recent Invoices</h2>
+        <div className="flex items-center gap-4 mb-4">
+          <h2 className="text-lg font-semibold text-white flex-shrink-0" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Recent Invoices</h2>
+          <div className="relative flex-1 min-w-0">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/70" />
+            <Input
+              placeholder="Search invoices..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery && setSearchQuery(e.target.value)}
+              className="pl-9 text-white placeholder:text-gray-400"
+              style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff' }}
+            />
+          </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button 
-                variant="ghost" 
-                size="sm" 
-                className="gap-2 text-white hover:bg-white/10"
-                style={{ color: '#ffffff' }}
+                variant="outline" 
+                className="gap-2 text-white border-[#3d2a5f] hover:bg-[#1a0f3d] flex-shrink-0"
+                style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
               >
-                <ArrowUpDown className="h-4 w-4" />
-                Sort by {getSortLabel()}
-                <ChevronDown className="h-4 w-4 ml-1" />
+                <Filter className="h-4 w-4" />
+                {statusFilter ? statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1) : "All Status"}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-[#2d1b4e] border-[#3d2a5f]">
+            <DropdownMenuContent className="bg-[#2d1b4e] border-[#3d2a5f]">
               <DropdownMenuItem 
-                onClick={() => setSortBy("date")}
+                onClick={() => setStatusFilter && setStatusFilter(null)}
                 className="text-white hover:bg-white/10"
               >
-                Date
+                All Status
               </DropdownMenuItem>
               <DropdownMenuItem 
-                onClick={() => setSortBy("amount")}
+                onClick={() => setStatusFilter && setStatusFilter("paid")}
                 className="text-white hover:bg-white/10"
               >
-                Amount
+                Paid
               </DropdownMenuItem>
               <DropdownMenuItem 
-                onClick={() => setSortBy("balanceHighToLow")}
+                onClick={() => setStatusFilter && setStatusFilter("partial")}
                 className="text-white hover:bg-white/10"
               >
-                Balance (High to Low)
+                Partial
               </DropdownMenuItem>
               <DropdownMenuItem 
-                onClick={() => setSortBy("balanceLowToHigh")}
+                onClick={() => setStatusFilter && setStatusFilter("pending")}
                 className="text-white hover:bg-white/10"
               >
-                Balance (Low to High)
+                Pending
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -128,33 +162,87 @@ export function InvoicesList({
           <div className="rounded-md border" style={{ borderColor: '#3d2a5f' }}>
             <Table>
               <TableHeader>
-                <TableRow style={{ borderColor: '#3d2a5f' }}>
-                  <TableHead className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Client</TableHead>
-                  <TableHead className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Invoice #</TableHead>
-                  <TableHead className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Date</TableHead>
-                  <TableHead className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Amount</TableHead>
-                  <TableHead className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Balance</TableHead>
-                  <TableHead className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Status</TableHead>
-                  <TableHead className="text-right text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Actions</TableHead>
+                <TableRow className="hover:bg-transparent" style={{ borderColor: '#3d2a5f' }}>
+                  <TableHead 
+                    className="text-white text-left cursor-pointer hover:bg-white/5 select-none transition-colors" 
+                    style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}
+                    onClick={() => handleColumnSort("client")}
+                  >
+                    <div className="flex items-center">
+                      Client
+                      {getSortIcon("client")}
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="text-white text-center cursor-pointer hover:bg-white/5 select-none transition-colors" 
+                    style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}
+                    onClick={() => handleColumnSort("invoiceNumber")}
+                  >
+                    <div className="flex items-center justify-center">
+                      Invoice #
+                      {getSortIcon("invoiceNumber")}
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="text-white text-center cursor-pointer hover:bg-white/5 select-none transition-colors" 
+                    style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}
+                    onClick={() => handleColumnSort("date")}
+                  >
+                    <div className="flex items-center justify-center">
+                      Date
+                      {getSortIcon("date")}
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="text-white text-center cursor-pointer hover:bg-white/5 select-none transition-colors" 
+                    style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}
+                    onClick={() => handleColumnSort("amount")}
+                  >
+                    <div className="flex items-center justify-center">
+                      Amount
+                      {getSortIcon("amount")}
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="text-white text-center cursor-pointer hover:bg-white/5 select-none transition-colors" 
+                    style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}
+                    onClick={() => handleColumnSort("balance")}
+                  >
+                    <div className="flex items-center justify-center">
+                      Balance
+                      {getSortIcon("balance")}
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="text-white text-center cursor-pointer hover:bg-white/5 select-none transition-colors" 
+                    style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}
+                    onClick={() => handleColumnSort("status")}
+                  >
+                    <div className="flex items-center justify-center">
+                      Status
+                      {getSortIcon("status")}
+                    </div>
+                  </TableHead>
+                  <TableHead className="text-center text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {invoices.map((invoice: Invoice) => (
                   <TableRow key={invoice.id} className="hover:bg-white/5" style={{ borderColor: '#3d2a5f' }}>
-                    <TableCell className="font-medium text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
+                    <TableCell className="font-medium text-white text-left" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
                       <span>{invoice.client}</span>
                     </TableCell>
-                    <TableCell className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>{invoice.displayNumber || invoice.id.substring(0, 8)}</TableCell>
-                    <TableCell className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>{invoice.date}</TableCell>
-                    <TableCell className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>{invoice.amount}</TableCell>
-                    <TableCell className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>{invoice.balanceAmount}</TableCell>
-                    <TableCell>
+                    <TableCell className="text-white text-center" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>{invoice.displayNumber || invoice.id.substring(0, 8)}</TableCell>
+                    <TableCell className="text-white text-center" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>{invoice.date}</TableCell>
+                    <TableCell className="text-white text-center" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>{invoice.amount}</TableCell>
+                    <TableCell className="text-white text-center" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>{invoice.balanceAmount}</TableCell>
+                    <TableCell className="text-center">
                       <span className={getStatusStyle(invoice.status)} style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
                         {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
                       </span>
                     </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
+                    <TableCell className="text-center">
+                      <div className="flex items-center justify-center gap-2">
                         <Button 
                           variant="outline" 
                           size="icon" 
@@ -179,7 +267,7 @@ export function InvoicesList({
                           </Button>
                         )}
                         
-                        {onRecordPayment && invoice.status !== "paid" && (
+                        {onRecordPayment && (
                           <Button 
                             variant="secondary" 
                             size="icon" 

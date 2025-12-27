@@ -8,7 +8,7 @@ import { InvoiceStats } from "@/components/invoices/components/InvoiceStats";
 import { InvoiceFilters } from "@/components/invoices/components/InvoiceFilters";
 import { InvoicesList } from "@/components/invoices/components/InvoicesList";
 import { useInvoices } from "@/hooks/invoices/useInvoices";
-import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 export default function InvoicesPage() {
   const {
@@ -46,30 +46,11 @@ export default function InvoicesPage() {
   if (isLoading) {
     return (
       <Layout>
-        <div className="space-y-8 animate-in">
-          <div className="flex items-center justify-between">
-            <div>
-              <Skeleton className="h-8 w-48" />
-              <Skeleton className="h-4 w-64 mt-2" />
-            </div>
-            <Skeleton className="h-10 w-32" />
-          </div>
-          
-          {/* Statistics Cards Skeleton */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {[...Array(4)].map((_, i) => (
-              <Skeleton key={i} className="h-32 w-full" />
-            ))}
-          </div>
-          
-          {/* Search and Filter Skeleton */}
-          <div className="flex gap-4 items-center">
-            <Skeleton className="h-10 flex-1" />
-            <Skeleton className="h-10 w-32" />
-          </div>
-          
-          {/* Table Skeleton */}
-          <Skeleton className="h-[400px] w-full" />
+        <div 
+          className="space-y-4 sm:space-y-6 lg:space-y-8 p-3 sm:p-4 md:p-6 animate-in"
+          style={{ backgroundColor: 'rgba(26, 15, 61, 0.98)', backdropFilter: 'blur(10px)', minHeight: '100vh' }}
+        >
+          <LoadingSpinner text="Loading invoices..." fullScreen={false} />
         </div>
       </Layout>
     );
@@ -81,8 +62,8 @@ export default function InvoicesPage() {
         className="space-y-4 sm:space-y-6 lg:space-y-8 p-3 sm:p-4 md:p-6 animate-in"
         style={{ backgroundColor: 'rgba(26, 15, 61, 0.98)', backdropFilter: 'blur(10px)', minHeight: '100vh' }}
       >
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex-1 min-w-0 text-white">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex-1 min-w-0 text-white text-center ml-8 sm:ml-12 md:ml-16">
             <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold tracking-tight">Invoices</h1>
             <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">
               Manage your client invoices and payments
@@ -114,19 +95,15 @@ export default function InvoicesPage() {
         {/* Statistics Cards */}
         <InvoiceStats invoices={filteredInvoices} />
 
-        {/* Search and Filter Bar */}
-        <InvoiceFilters 
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          statusFilter={statusFilter}
-          setStatusFilter={setStatusFilter}
-        />
-
         {/* Invoices List */}
         <InvoicesList 
           invoices={filteredInvoices}
           sortBy={sortBy}
           setSortBy={setSortBy}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
           onViewDetails={setSelectedInvoice}
           onEdit={(invoice) => {
             setSelectedInvoice(invoice);
