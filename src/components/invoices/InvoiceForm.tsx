@@ -34,7 +34,8 @@ export function InvoiceForm({ open, onClose, onSave, editingInvoice }: InvoiceFo
     notes,
     setNotes,
     calculateTotal,
-    handleSubmit
+    handleSubmit,
+    validationErrors
   } = useInvoiceForm(editingInvoice, estimateData);
 
   const submitForm = (event: React.FormEvent<HTMLFormElement>) => {
@@ -44,12 +45,15 @@ export function InvoiceForm({ open, onClose, onSave, editingInvoice }: InvoiceFo
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent 
+        className="max-w-2xl max-h-[90vh] overflow-y-auto"
+        style={{ backgroundColor: 'rgba(26, 15, 61, 0.98)', backdropFilter: 'blur(10px)', borderColor: '#3d2a5f' }}
+      >
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>
             {editingInvoice ? "Edit" : "Create New"} {clientDetails.invoiceType === "proforma" ? "Proforma" : "Paid"} Invoice
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-white/80" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
             {editingInvoice ? "Update" : "Create a new"} {clientDetails.invoiceType.toLowerCase()} invoice for your photography services.
           </DialogDescription>
         </DialogHeader>
@@ -71,9 +75,10 @@ export function InvoiceForm({ open, onClose, onSave, editingInvoice }: InvoiceFo
             onCompanyAddressChange={(value) => updateClientDetail('companyAddress', value)}
             onCompanyGstChange={(value) => updateClientDetail('companyGst', value)}
             onInvoiceDateChange={(value) => updateClientDetail('invoiceDate', value)}
+            errors={validationErrors}
           />
           
-          <InvoiceItemsCard items={items} onItemsChange={setItems} />
+          <InvoiceItemsCard items={items} onItemsChange={setItems} errors={validationErrors} />
           
           {clientDetails.invoiceType === "paid" ? (
             <TotalCard
@@ -101,10 +106,20 @@ export function InvoiceForm({ open, onClose, onSave, editingInvoice }: InvoiceFo
           />
           
           <div className="flex justify-end gap-4">
-            <Button variant="outline" type="button" onClick={onClose}>
+            <Button 
+              variant="outline" 
+              type="button" 
+              onClick={onClose}
+              className="text-white border-[#5a4a7a] hover:bg-[#1a0f3d]"
+              style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
+            >
               Cancel
             </Button>
-            <Button type="submit">
+            <Button 
+              type="submit"
+              className="text-white hover:bg-[#1a0f3d]"
+              style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
+            >
               {editingInvoice ? "Update" : "Create"} {clientDetails.invoiceType === "proforma" ? "Proforma" : "Paid"} Invoice
             </Button>
           </div>

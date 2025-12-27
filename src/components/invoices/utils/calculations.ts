@@ -1,6 +1,10 @@
 
 export const calculateSubtotal = (items: { amount: string }[]) => {
-  return items.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+  return items.reduce((sum, item) => {
+    // Strip ₹ symbol and commas, then parse as number
+    const numericValue = parseFloat(item.amount.replace(/[₹,]/g, "")) || 0;
+    return sum + numericValue;
+  }, 0);
 };
 
 export const calculateGST = (subtotal: number, gstRate: string) => {

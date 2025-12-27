@@ -48,6 +48,9 @@ interface ClientDetailsCardProps {
   // Invoice details
   invoiceDate: string;
   onInvoiceDateChange: (date: string) => void;
+  
+  // Validation errors
+  errors?: Record<string, string>;
 }
 
 export function ClientDetailsCard({ 
@@ -80,43 +83,63 @@ export function ClientDetailsCard({
   companyGst,
   onCompanyGstChange,
   invoiceDate,
-  onInvoiceDateChange
+  onInvoiceDateChange,
+  errors = {}
 }: ClientDetailsCardProps) {
   return (
-    <Card className="p-4">
-      <h3 className="font-medium mb-4">Client & Company Details</h3>
+    <Card 
+      className="p-4"
+      style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}
+    >
+      <h3 className="font-medium mb-4 text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Client & Company Details</h3>
       <div className="space-y-4">
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="invoiceType">Invoice Type</Label>
+            <Label htmlFor="invoiceType" className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Invoice Type</Label>
             <Select value={invoiceType} onValueChange={onInvoiceTypeChange}>
-              <SelectTrigger>
+              <SelectTrigger 
+                className="text-white"
+                style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
+              >
                 <SelectValue placeholder="Select invoice type" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="proforma">Proforma Invoice</SelectItem>
-                <SelectItem value="paid">Paid Invoice</SelectItem>
+              <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
+                <SelectItem value="proforma" className="text-white hover:bg-[#1a0f3d]">Proforma Invoice</SelectItem>
+                <SelectItem value="paid" className="text-white hover:bg-[#1a0f3d]">Paid Invoice</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="date">Invoice Date</Label>
+            <Label htmlFor="date" className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Invoice Date</Label>
             <Input 
               id="date" 
               type="date" 
               value={invoiceDate}
               onChange={(e) => onInvoiceDateChange(e.target.value)}
+              className="text-white"
+              style={{ 
+                backgroundColor: 'rgba(45, 27, 78, 0.95)', 
+                borderColor: errors.invoiceDate ? '#ef4444' : '#5a4a7a', 
+                color: '#ffffff', 
+                borderWidth: '1.5px', 
+                borderStyle: 'solid' 
+              }}
             />
+            {errors.invoiceDate && (
+              <p className="text-sm text-red-400 mt-1" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
+                {errors.invoiceDate}
+              </p>
+            )}
           </div>
         </div>
 
         {/* Payment Details Section - for paid invoices */}
         {invoiceType === "paid" && (
-          <div className="border-t pt-4">
-            <h4 className="text-sm font-medium mb-4">Payment Details</h4>
+          <div className="border-t pt-4" style={{ borderColor: '#3d2a5f' }}>
+            <h4 className="text-sm font-medium mb-4 text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Payment Details</h4>
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2 flex items-center justify-between">
-                <Label htmlFor="paymentReceived">Payment Received</Label>
+                <Label htmlFor="paymentReceived" className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Payment Received</Label>
                 <Switch 
                   id="paymentReceived" 
                   checked={paymentReceived}
@@ -126,26 +149,42 @@ export function ClientDetailsCard({
               {paymentReceived && (
                 <>
                   <div className="space-y-2">
-                    <Label htmlFor="paymentDate">Payment Date</Label>
+                    <Label htmlFor="paymentDate" className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Payment Date</Label>
                     <Input 
                       id="paymentDate" 
                       type="date" 
                       value={paymentDate}
                       onChange={(e) => onPaymentDateChange(e.target.value)}
+                      className="text-white"
+                      style={{ 
+                        backgroundColor: 'rgba(45, 27, 78, 0.95)', 
+                        borderColor: errors.paymentDate ? '#ef4444' : '#5a4a7a', 
+                        color: '#ffffff', 
+                        borderWidth: '1.5px', 
+                        borderStyle: 'solid' 
+                      }}
                     />
+                    {errors.paymentDate && (
+                      <p className="text-sm text-red-400 mt-1" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
+                        {errors.paymentDate}
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="paymentMethod">Payment Method</Label>
+                    <Label htmlFor="paymentMethod" className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Payment Method</Label>
                     <Select value={paymentMethod} onValueChange={onPaymentMethodChange}>
-                      <SelectTrigger>
+                      <SelectTrigger 
+                        className="text-white"
+                        style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
+                      >
                         <SelectValue placeholder="Select payment method" />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="bank">Bank Transfer</SelectItem>
-                        <SelectItem value="cash">Cash</SelectItem>
-                        <SelectItem value="upi">UPI</SelectItem>
-                        <SelectItem value="cheque">Cheque</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
+                      <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
+                        <SelectItem value="bank" className="text-white hover:bg-[#1a0f3d]">Bank Transfer</SelectItem>
+                        <SelectItem value="cash" className="text-white hover:bg-[#1a0f3d]">Cash</SelectItem>
+                        <SelectItem value="upi" className="text-white hover:bg-[#1a0f3d]">UPI</SelectItem>
+                        <SelectItem value="cheque" className="text-white hover:bg-[#1a0f3d]">Cheque</SelectItem>
+                        <SelectItem value="other" className="text-white hover:bg-[#1a0f3d]">Other</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -156,56 +195,87 @@ export function ClientDetailsCard({
         )}
 
         {/* Client Details Section */}
-        <div className="border-t pt-4">
-          <h4 className="text-sm font-medium mb-4">Client Details</h4>
+        <div className="border-t pt-4" style={{ borderColor: '#3d2a5f' }}>
+          <h4 className="text-sm font-medium mb-4 text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Client Details</h4>
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="client">Client Name</Label>
+              <Label htmlFor="client" className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Client Name</Label>
               <Input 
                 id="client" 
                 placeholder="Enter client name"
                 value={clientName}
                 onChange={(e) => onClientNameChange(e.target.value)}
+                className="text-white placeholder:text-gray-400"
+                style={{ 
+                  backgroundColor: 'rgba(45, 27, 78, 0.95)', 
+                  borderColor: errors.clientName ? '#ef4444' : '#5a4a7a', 
+                  color: '#ffffff', 
+                  borderWidth: '1.5px', 
+                  borderStyle: 'solid' 
+                }}
               />
+              {errors.clientName && (
+                <p className="text-sm text-red-400 mt-1" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
+                  {errors.clientName}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Email</Label>
               <Input 
                 id="email" 
                 type="email" 
                 placeholder="client@example.com"
                 value={clientEmail}
                 onChange={(e) => onClientEmailChange(e.target.value)}
+                className="text-white placeholder:text-gray-400"
+                style={{ 
+                  backgroundColor: 'rgba(45, 27, 78, 0.95)', 
+                  borderColor: errors.clientEmail ? '#ef4444' : '#5a4a7a', 
+                  color: '#ffffff', 
+                  borderWidth: '1.5px', 
+                  borderStyle: 'solid' 
+                }}
               />
+              {errors.clientEmail && (
+                <p className="text-sm text-red-400 mt-1" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
+                  {errors.clientEmail}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number</Label>
+              <Label htmlFor="phone" className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Phone Number</Label>
               <Input 
                 id="phone" 
                 type="tel" 
                 placeholder="+91 98765 43210"
                 value={clientPhone}
                 onChange={(e) => onClientPhoneChange(e.target.value)}
+                className="text-white placeholder:text-gray-400"
+                style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="clientAddress">Address</Label>
+              <Label htmlFor="clientAddress" className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Address</Label>
               <Input 
                 id="clientAddress" 
                 placeholder="Enter client's address"
                 value={clientAddress}
                 onChange={(e) => onClientAddressChange(e.target.value)}
+                className="text-white placeholder:text-gray-400"
+                style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
               />
             </div>
             {invoiceType === "paid" && (
               <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="clientGst">Client GST Number</Label>
+                <Label htmlFor="clientGst" className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Client GST Number</Label>
                 <Input 
                   id="clientGst" 
                   placeholder="Enter client's GST number"
-                  className="uppercase"
+                  className="uppercase text-white placeholder:text-gray-400"
                   value={clientGst}
                   onChange={(e) => onClientGstChange(e.target.value)}
+                  style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
                 />
               </div>
             )}
@@ -213,56 +283,65 @@ export function ClientDetailsCard({
         </div>
 
         {/* Company Details Section */}
-        <div className="border-t pt-4">
-          <h4 className="text-sm font-medium mb-4">Company Details</h4>
+        <div className="border-t pt-4" style={{ borderColor: '#3d2a5f' }}>
+          <h4 className="text-sm font-medium mb-4 text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Company Details</h4>
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="companyName">Company Name</Label>
+              <Label htmlFor="companyName" className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Company Name</Label>
               <Input 
                 id="companyName" 
                 placeholder="Enter company name"
                 value={companyName}
                 onChange={(e) => onCompanyNameChange(e.target.value)}
+                className="text-white placeholder:text-gray-400"
+                style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="companyEmail">Company Email</Label>
+              <Label htmlFor="companyEmail" className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Company Email</Label>
               <Input 
                 id="companyEmail" 
                 type="email" 
                 placeholder="company@example.com"
                 value={companyEmail}
                 onChange={(e) => onCompanyEmailChange(e.target.value)}
+                className="text-white placeholder:text-gray-400"
+                style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="companyPhone">Company Phone</Label>
+              <Label htmlFor="companyPhone" className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Company Phone</Label>
               <Input 
                 id="companyPhone" 
                 type="tel" 
                 placeholder="+91 98765 43210"
                 value={companyPhone}
                 onChange={(e) => onCompanyPhoneChange(e.target.value)}
+                className="text-white placeholder:text-gray-400"
+                style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="companyAddress">Company Address</Label>
+              <Label htmlFor="companyAddress" className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Company Address</Label>
               <Input 
                 id="companyAddress" 
                 placeholder="Enter company address"
                 value={companyAddress}
                 onChange={(e) => onCompanyAddressChange(e.target.value)}
+                className="text-white placeholder:text-gray-400"
+                style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
               />
             </div>
             {invoiceType === "paid" && (
               <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="companyGst">Company GST Number</Label>
+                <Label htmlFor="companyGst" className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Company GST Number</Label>
                 <Input 
                   id="companyGst" 
                   placeholder="Enter company's GST number"
-                  className="uppercase"
+                  className="uppercase text-white placeholder:text-gray-400"
                   value={companyGst}
                   onChange={(e) => onCompanyGstChange(e.target.value)}
+                  style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
                 />
               </div>
             )}

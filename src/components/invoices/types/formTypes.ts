@@ -4,7 +4,7 @@ import { Invoice, InvoiceItem } from "./index";
 export interface InvoiceFormProps {
   open: boolean;
   onClose: () => void;
-  onSave: (invoice: Invoice) => void;
+  onSave: (invoice: Invoice, invoiceFormData: any) => void;
   editingInvoice?: Invoice | null;
 }
 
