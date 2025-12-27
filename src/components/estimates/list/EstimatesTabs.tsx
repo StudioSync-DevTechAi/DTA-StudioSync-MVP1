@@ -50,7 +50,7 @@ export function EstimatesTabs({
         </TabsTrigger>
       </TabsList>
 
-      <TabsContent value={currentTab} className="space-y-4">
+      <TabsContent value={currentTab} className="rounded-lg bg-card text-card-foreground shadow-sm space-y-4 p-3 sm:p-4 relative border-2 transition-all duration-300 hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
         {filteredEstimates.length > 0 ? (
           filteredEstimates.map((estimate) => (
             <EstimateCard

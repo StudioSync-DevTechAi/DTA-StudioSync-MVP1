@@ -2824,19 +2824,19 @@ export default function NewProjectPage() {
         />
         
         <div className="flex items-center justify-center px-2 sm:px-4">
-          <Card className="w-full max-w-6xl shadow-lg" style={{ backgroundColor: 'rgba(26, 15, 61, 0.98)', backdropFilter: 'blur(10px)', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)' }}>
-            <CardContent className="p-4 sm:p-6 md:p-8" style={{ backgroundColor: 'rgba(26, 15, 61, 0.98)', backdropFilter: 'blur(10px)' }}>
+          <Card className="rounded-lg bg-card text-card-foreground shadow-sm w-full max-w-6xl relative border-2 transition-all duration-300 hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
+            <CardContent className="p-4 sm:p-6 md:p-8" style={{ backgroundColor: 'transparent' }}>
               {currentPage === 1 ? (
                 <>
                   {/* Project Owner Information */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-3 sm:p-4 rounded-lg mb-4 sm:mb-6" style={{ backgroundColor: 'rgba(45, 27, 78, 0.98)', backdropFilter: 'blur(10px)' }}>
+                  <div className="rounded-lg bg-card text-card-foreground shadow-sm grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-3 sm:p-4 mb-4 sm:mb-6 relative border-2 transition-all duration-300 hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
                     <div className="space-y-2">
                       <Label className="text-center block text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Project Owner</Label>
                       <Input
                         value={loadingOwner ? "Loading..." : (photographyOwner?.photography_owner_name || "Not available")}
                         disabled
                         className="bg-background text-white text-center"
-                        style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
+                        style={{ backgroundColor: 'transparent', borderColor: '#ffffff', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                       />
                     </div>
                     <div className="space-y-2">
@@ -2845,7 +2845,7 @@ export default function NewProjectPage() {
                         value={loadingOwner ? "Loading..." : (photographyOwner?.photography_owner_phno || "Not available")}
                         disabled
                         className="bg-background text-white text-center"
-                        style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
+                        style={{ backgroundColor: 'transparent', borderColor: '#ffffff', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                       />
                     </div>
                     <div className="space-y-2">
@@ -2854,15 +2854,15 @@ export default function NewProjectPage() {
                         value={loadingOwner ? "Loading..." : (photographyOwner?.photography_owner_email || "Not available")}
                         disabled
                         className="bg-background text-white text-center"
-                        style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
+                        style={{ backgroundColor: 'transparent', borderColor: '#ffffff', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                       />
                     </div>
                   </div>
-                  <div className="space-y-4 sm:space-y-6" style={{ backgroundColor: 'rgba(26, 15, 61, 0.98)', backdropFilter: 'blur(10px)', padding: '1rem', borderRadius: '0.5rem' }}>
+                  <div className="rounded-lg bg-card text-card-foreground shadow-sm space-y-4 sm:space-y-6 p-3 sm:p-4 relative border-2 transition-all duration-300 hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
 
               {/* Project Name and Project Type Row */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2 min-w-0" style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', padding: '0.5rem', borderRadius: '0.25rem' }}>
+                <div className="rounded-lg bg-card text-card-foreground shadow-sm space-y-2 min-w-0 p-3 sm:p-4 relative border-2 transition-all duration-300 hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
                   <Label htmlFor="projectName" className="text-sm sm:text-base text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>
                     Project Name <span className="text-red-500">*</span>
                   </Label>
@@ -2873,10 +2873,10 @@ export default function NewProjectPage() {
                     onChange={(e) => handleInputChange("projectName", e.target.value)}
                     required
                     className={`w-full text-white placeholder:text-gray-400 ${formData.projectName.trim() === "" ? "border-red-300" : ""}`}
-                    style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
+                    style={{ backgroundColor: 'transparent', borderColor: '#ffffff', color: '#ffffff' }}
                   />
                 </div>
-                <div className="space-y-2 min-w-0" style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', padding: '0.5rem', borderRadius: '0.25rem' }}>
+                <div className="rounded-lg bg-card text-card-foreground shadow-sm space-y-2 min-w-0 p-3 sm:p-4 relative border-2 transition-all duration-300 hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
                   <Label htmlFor="eventType" className="text-sm sm:text-base text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>
                     Project Type <span className="text-red-500">*</span>
                   </Label>
@@ -2888,11 +2888,11 @@ export default function NewProjectPage() {
                     <SelectTrigger 
                       id="eventType"
                       className={`text-white placeholder:text-gray-400 ${formData.eventType === "" ? "border-red-300" : ""}`}
-                      style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
+                      style={{ backgroundColor: 'transparent', borderColor: '#ffffff', color: '#ffffff' }}
                     >
                       <SelectValue placeholder="Select Event Type" className="text-white" />
                     </SelectTrigger>
-                    <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
+                    <SelectContent style={{ backgroundColor: 'transparent', borderColor: '#ffffff' }}>
                       <SelectItem value="wedding" className="text-white hover:bg-[#1a0f3d]">Wedding</SelectItem>
                       <SelectItem value="corporate" className="text-white hover:bg-[#1a0f3d]">Corporate</SelectItem>
                       <SelectItem value="portrait" className="text-white hover:bg-[#1a0f3d]">Portrait</SelectItem>
@@ -2906,7 +2906,7 @@ export default function NewProjectPage() {
 
               {/* Client Name, Email, and Phone Row */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div className="space-y-2 min-w-0" style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', padding: '0.5rem', borderRadius: '0.25rem' }}>
+                <div className="rounded-lg bg-card text-card-foreground shadow-sm space-y-2 min-w-0 p-3 sm:p-4 relative border-2 transition-all duration-300 hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
                   <Label htmlFor="clientFullName" className="text-sm sm:text-base text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Client Name:</Label>
                   <Input
                     id="clientFullName"
@@ -2914,10 +2914,10 @@ export default function NewProjectPage() {
                     value={formData.clientFullName}
                     onChange={(e) => handleInputChange("clientFullName", e.target.value)}
                     className="w-full text-white placeholder:text-gray-400"
-                    style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
+                    style={{ backgroundColor: 'transparent', borderColor: '#ffffff', color: '#ffffff' }}
                   />
                 </div>
-                <div className="space-y-2 min-w-0" style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', padding: '0.5rem', borderRadius: '0.25rem' }}>
+                <div className="rounded-lg bg-card text-card-foreground shadow-sm space-y-2 min-w-0 p-3 sm:p-4 relative border-2 transition-all duration-300 hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
                   <Label htmlFor="clientEmail" className="text-sm sm:text-base text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Client Email:</Label>
                   <Input
                     id="clientEmail"
@@ -2929,7 +2929,7 @@ export default function NewProjectPage() {
                       "w-full text-white placeholder:text-gray-400",
                       formData.clientEmail && !isValidEmail(formData.clientEmail) ? "border-red-300" : ""
                     )}
-                    style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
+                    style={{ backgroundColor: 'transparent', borderColor: '#ffffff', color: '#ffffff' }}
                   />
                   {formData.clientEmail && !isValidEmail(formData.clientEmail) && (
                     <p className="text-xs text-red-400">
@@ -2937,7 +2937,7 @@ export default function NewProjectPage() {
                     </p>
                   )}
                 </div>
-                <div className="space-y-2 min-w-0" style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', padding: '0.5rem', borderRadius: '0.25rem' }}>
+                <div className="rounded-lg bg-card text-card-foreground shadow-sm space-y-2 min-w-0 p-3 sm:p-4 relative border-2 transition-all duration-300 hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
                   <Label htmlFor="clientPhone" className="text-sm sm:text-base text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>
                     Client Ph: <span className="text-red-500">*</span>
                   </Label>
@@ -2952,7 +2952,7 @@ export default function NewProjectPage() {
                       "w-full text-white placeholder:text-gray-400",
                       !isPage1Valid() && formData.clientPhone.length < 14 ? "border-red-300" : ""
                     )}
-                    style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
+                    style={{ backgroundColor: 'transparent', borderColor: '#ffffff', color: '#ffffff' }}
                     maxLength={14}
                   />
                   {formData.clientPhone.length < 14 && formData.clientPhone.length > 4 && (
@@ -2964,21 +2964,21 @@ export default function NewProjectPage() {
               </div>
 
               {/* Start Date & Time */}
-              <div className="space-y-2" style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', padding: '0.5rem', borderRadius: '0.25rem' }}>
+              <div className="rounded-lg bg-card text-card-foreground shadow-sm space-y-2 p-3 sm:p-4 relative border-2 transition-all duration-300 hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
                 <Label className="text-sm sm:text-base text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Project Start Date & Time <span className="text-red-500">*</span></Label>
-                <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-1 items-end" style={{ backgroundColor: '#2d1b4e', padding: '0.5rem', borderRadius: '0.25rem' }}>
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-1 items-end" style={{ backgroundColor: 'transparent' }}>
                   {/* Date Selection - Narrower */}
-                  <div className="col-span-1 sm:col-span-3 w-full sm:max-w-[70%]" style={{ backgroundColor: '#1a0f3d', padding: '0.5rem', borderRadius: '0.25rem' }}>
+                  <div className="col-span-1 sm:col-span-3 w-full sm:max-w-[70%] rounded-lg border-2" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
                           id="startDate"
                           variant="outline"
                           className={cn(
-                            "inline-flex items-center gap-1 sm:gap-2 whitespace-nowrap rounded-md text-xs sm:text-sm md:text-base ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:h-3 [&_svg]:w-3 sm:[&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 sm:h-9 md:h-10 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 w-full justify-start text-left font-normal text-white",
+                            "inline-flex items-center gap-1 sm:gap-2 whitespace-nowrap rounded-md text-xs sm:text-sm md:text-base ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:h-3 [&_svg]:w-3 sm:[&_svg]:size-4 [&_svg]:shrink-0 border-0 bg-background hover:bg-accent hover:text-accent-foreground h-8 sm:h-9 md:h-10 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 w-full justify-start text-left font-normal text-white",
                             !formData.startDate && "text-gray-400"
                           )}
-                          style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
+                          style={{ backgroundColor: 'transparent', borderColor: 'transparent', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                         >
                           <CalendarIcon className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                           {formData.startDate ? (
@@ -2989,21 +2989,45 @@ export default function NewProjectPage() {
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent 
-                        className="w-auto p-0 bg-[#2d1b4e] border-[#3d2a5f]" 
+                        className="w-auto p-0 rounded-lg"
+                        style={{ backgroundColor: '#1a0f3d', borderColor: '#ffffff', borderWidth: '2px', borderStyle: 'solid' }} 
                         align="start"
-                        style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}
                       >
                         <Calendar
                           mode="single"
                           selected={formData.startDate}
                           onSelect={(date) => handleInputChange("startDate", date)}
+                          className="text-white"
+                          classNames={{
+                            months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+                            month: "space-y-4 w-full",
+                            caption: "flex justify-center pt-1 relative items-center",
+                            caption_label: "text-sm font-medium uppercase text-white text-center",
+                            nav: "space-x-1 flex items-center",
+                            nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 border-0 text-white",
+                            nav_button_previous: "absolute left-1",
+                            nav_button_next: "absolute right-1",
+                            table: "w-full border-collapse space-y-1",
+                            head_row: "flex justify-center",
+                            head_cell: "text-white rounded-md w-9 font-normal text-[0.8rem] uppercase font-medium opacity-80 text-center",
+                            row: "flex w-full mt-2 justify-center",
+                            cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+                            day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-accent/50 text-sm rounded-md text-white text-center flex items-center justify-center",
+                            day_range_end: "day-range-end",
+                            day_selected: "bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary focus:bg-primary/20 focus:text-primary",
+                            day_today: "border border-primary/50 text-primary font-medium",
+                            day_outside: "day-outside text-white opacity-50 aria-selected:bg-accent/50 aria-selected:text-white aria-selected:opacity-30",
+                            day_disabled: "text-white opacity-50",
+                            day_range_middle: "aria-selected:bg-accent aria-selected:text-white",
+                            day_hidden: "invisible",
+                          }}
                         />
                       </PopoverContent>
                     </Popover>
                   </div>
 
                   {/* Time Picker Clock */}
-                  <div className="col-span-1 sm:col-span-3 w-full sm:max-w-[70%]" style={{ backgroundColor: '#1a0f3d', padding: '0.5rem', borderRadius: '0.25rem' }}>
+                  <div className="col-span-1 sm:col-span-3 w-full sm:max-w-[70%] rounded-lg border-2" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
                     <TimePickerClock
                       hour={formData.startHour || "00"}
                       minute={formData.startMinute || "00"}
@@ -3038,18 +3062,18 @@ export default function NewProjectPage() {
               </div>
 
               {/* End Date & Time */}
-              <div className="space-y-2" style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', padding: '0.5rem', borderRadius: '0.25rem' }}>
+              <div className="rounded-lg bg-card text-card-foreground shadow-sm space-y-2 p-3 sm:p-4 relative border-2 transition-all duration-300 hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
                 <Label className="text-sm sm:text-base text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Project End Date & Time</Label>
-                <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-1 items-end" style={{ backgroundColor: '#2d1b4e', padding: '0.5rem', borderRadius: '0.25rem' }}>
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-1 items-end" style={{ backgroundColor: 'transparent' }}>
                   {/* Date Selection - Narrower */}
-                  <div className="col-span-1 sm:col-span-3 w-full sm:max-w-[70%]" style={{ backgroundColor: '#1a0f3d', padding: '0.5rem', borderRadius: '0.25rem' }}>
+                  <div className="col-span-1 sm:col-span-3 w-full sm:max-w-[70%] rounded-lg border-2" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
                           id="endDate"
                           variant="outline"
                           className={cn(
-                            "inline-flex items-center gap-1 sm:gap-2 whitespace-nowrap rounded-md text-xs sm:text-sm md:text-base ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:h-3 [&_svg]:w-3 sm:[&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 sm:h-9 md:h-10 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 w-full justify-start text-left font-normal text-white",
+                            "inline-flex items-center gap-1 sm:gap-2 whitespace-nowrap rounded-md text-xs sm:text-sm md:text-base ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:h-3 [&_svg]:w-3 sm:[&_svg]:size-4 [&_svg]:shrink-0 border-0 bg-background hover:bg-accent hover:text-accent-foreground h-8 sm:h-9 md:h-10 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 w-full justify-start text-left font-normal text-white",
                             !formData.endDate && "text-gray-400",
                             (() => {
                               if (!formData.endDate || !formData.startDate) return false;
@@ -3060,7 +3084,7 @@ export default function NewProjectPage() {
                               return endDateOnly < startDateOnly;
                             })() && "border-red-300"
                           )}
-                          style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
+                          style={{ backgroundColor: 'transparent', borderColor: 'transparent', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                         >
                           <CalendarIcon className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                           {formData.endDate ? (
@@ -3071,9 +3095,9 @@ export default function NewProjectPage() {
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent 
-                        className="w-auto p-0 bg-[#2d1b4e] border-[#3d2a5f]" 
+                        className="w-auto p-0 rounded-lg"
+                        style={{ backgroundColor: '#1a0f3d', borderColor: '#ffffff', borderWidth: '2px', borderStyle: 'solid' }} 
                         align="start"
-                        style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}
                       >
                         <Calendar
                           mode="single"
@@ -3086,6 +3110,30 @@ export default function NewProjectPage() {
                             const checkDate = new Date(date);
                             checkDate.setHours(0, 0, 0, 0);
                             return checkDate < startDateOnly;
+                          }}
+                          className="text-white"
+                          classNames={{
+                            months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+                            month: "space-y-4 w-full",
+                            caption: "flex justify-center pt-1 relative items-center",
+                            caption_label: "text-sm font-medium uppercase text-white text-center",
+                            nav: "space-x-1 flex items-center",
+                            nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 border-0 text-white",
+                            nav_button_previous: "absolute left-1",
+                            nav_button_next: "absolute right-1",
+                            table: "w-full border-collapse space-y-1",
+                            head_row: "flex justify-center",
+                            head_cell: "text-white rounded-md w-9 font-normal text-[0.8rem] uppercase font-medium opacity-80 text-center",
+                            row: "flex w-full mt-2 justify-center",
+                            cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+                            day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-accent/50 text-sm rounded-md text-white text-center flex items-center justify-center",
+                            day_range_end: "day-range-end",
+                            day_selected: "bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary focus:bg-primary/20 focus:text-primary",
+                            day_today: "border border-primary/50 text-primary font-medium",
+                            day_outside: "day-outside text-white opacity-50 aria-selected:bg-accent/50 aria-selected:text-white aria-selected:opacity-30",
+                            day_disabled: "text-white opacity-50",
+                            day_range_middle: "aria-selected:bg-accent aria-selected:text-white",
+                            day_hidden: "invisible",
                           }}
                         />
                       </PopoverContent>
@@ -3108,7 +3156,7 @@ export default function NewProjectPage() {
                   </div>
 
                   {/* Time Picker Clock */}
-                  <div className="col-span-1 sm:col-span-3 w-full sm:max-w-[70%]" style={{ backgroundColor: '#1a0f3d', padding: '0.5rem', borderRadius: '0.25rem' }}>
+                  <div className="col-span-1 sm:col-span-3 w-full sm:max-w-[70%] rounded-lg border-2" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
                     <TimePickerClock
                       hour={formData.endHour || "00"}
                       minute={formData.endMinute || "00"}
@@ -3191,7 +3239,7 @@ export default function NewProjectPage() {
                               }}
                               className="p-2 hover:bg-accent rounded-md transition-colors"
                               title="Revert changes"
-                              style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}
+                              style={{ backgroundColor: 'transparent', borderColor: '#ffffff' }}
                             >
                               <RotateCcw className="h-5 w-5 text-gray-300 hover:text-white" />
                             </button>
@@ -3272,8 +3320,8 @@ export default function NewProjectPage() {
                         return (
                           <Card 
                             key={pkg.id} 
-                            className="p-3 sm:p-4 w-full sm:w-[45%] relative border-2 transition-all duration-300 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(59,130,246,0.4)] hover:border-blue-400/60 hover:scale-[1.02]"
-                            style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', borderWidth: '2px', borderStyle: 'solid' }}
+                            className="rounded-lg bg-card text-card-foreground shadow-sm p-3 sm:p-4 w-full sm:w-[45%] relative border-2 transition-all duration-300 hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60 hover:scale-[1.02]"
+                            style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}
                             onClick={(e) => {
                               // Only save if clicking on the card itself (white space), not on interactive elements
                               const target = e.target as HTMLElement;
@@ -3309,7 +3357,7 @@ export default function NewProjectPage() {
                                     }}
                                     autoFocus
                                     className="font-medium h-8 w-auto min-w-[150px] text-white placeholder:text-gray-400"
-                                    style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
+                                    style={{ backgroundColor: 'transparent', borderColor: 'transparent', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                   />
                                 ) : (
                                   <h3 
@@ -3335,7 +3383,7 @@ export default function NewProjectPage() {
                                           ? 'opacity-50 cursor-not-allowed' 
                                           : 'hover:bg-accent'
                                       }`}
-                                      style={{ backgroundColor: isExpanded ? 'transparent' : '#2d1b4e' }}
+                                      style={{ backgroundColor: 'transparent' }}
                                       aria-label="Edit event"
                                       title={isExpanded ? "Save changes first" : "Edit event"}
                                     >
@@ -3408,10 +3456,10 @@ export default function NewProjectPage() {
                                           handleEventPackageChange(pkg.id, "eventType", value)
                                         }
                                       >
-                                        <SelectTrigger id={`eventType-${pkg.id}`} className="text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff' }}>
+                                        <SelectTrigger id={`eventType-${pkg.id}`} className="text-white placeholder:text-gray-400" style={{ backgroundColor: 'transparent', borderColor: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff' }}>
                                           <SelectValue placeholder="Select an event type" className="text-white" />
                                         </SelectTrigger>
-                                        <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
+                                        <SelectContent style={{ backgroundColor: 'transparent', borderColor: '#ffffff' }}>
                                           <SelectItem value="wedding" className="text-white hover:bg-[#1a0f3d]">Wedding</SelectItem>
                                           <SelectItem value="engagement" className="text-white hover:bg-[#1a0f3d]">Engagement</SelectItem>
                                           <SelectItem value="corporate" className="text-white hover:bg-[#1a0f3d]">Corporate</SelectItem>
@@ -3433,7 +3481,7 @@ export default function NewProjectPage() {
                                             handleEventPackageChange(pkg.id, "customEventTypeName", e.target.value)
                                           }
                                           className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm text-white"
-                                          style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#5a4a7a', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
+                                          style={{ backgroundColor: 'transparent', borderColor: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                         />
                                       </div>
                                     )}
@@ -3448,7 +3496,7 @@ export default function NewProjectPage() {
                                         value={pkg.daysCount || "1"}
                                         onChange={(e) => handleEventPackageChange(pkg.id, "daysCount", e.target.value)}
                                         className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm w-20 text-white"
-                                        style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#5a4a7a', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
+                                        style={{ backgroundColor: 'transparent', borderColor: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                       />
                                     </div>
                                   </div>
@@ -3471,7 +3519,7 @@ export default function NewProjectPage() {
                                           )
                                         }
                                         className="w-full text-sm text-white placeholder:text-gray-400"
-                                        style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#5a4a7a', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
+                                        style={{ backgroundColor: 'transparent', borderColor: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                       />
                                     </div>
                                     <div className="space-y-2 min-w-0">
@@ -3482,10 +3530,10 @@ export default function NewProjectPage() {
                                           handleEventPackageChange(pkg.id, "pgType", value)
                                         }
                                       >
-                                        <SelectTrigger id={`pgType-${pkg.id}`} className="w-full sm:w-16 text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff' }}>
+                                        <SelectTrigger id={`pgType-${pkg.id}`} className="w-full sm:w-16 text-white placeholder:text-gray-400" style={{ backgroundColor: 'transparent', borderColor: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff' }}>
                                           <SelectValue placeholder="--" className="text-white" />
                                         </SelectTrigger>
-                                        <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
+                                        <SelectContent style={{ backgroundColor: 'transparent', borderColor: '#ffffff' }}>
                                           <SelectItem value="EF" className="text-white hover:bg-[#1a0f3d]">EF</SelectItem>
                                           <SelectItem value="GH" className="text-white hover:bg-[#1a0f3d]">GH</SelectItem>
                                         </SelectContent>
@@ -3507,7 +3555,7 @@ export default function NewProjectPage() {
                                           )
                                         }
                                         className="w-full text-sm text-white placeholder:text-gray-400"
-                                        style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#5a4a7a', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
+                                        style={{ backgroundColor: 'transparent', borderColor: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                       />
                                     </div>
                                     <div className="space-y-2">
@@ -3518,10 +3566,10 @@ export default function NewProjectPage() {
                                           handleEventPackageChange(pkg.id, "vgType", value)
                                         }
                                       >
-                                        <SelectTrigger id={`vgType-${pkg.id}`} className="w-16 text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff' }}>
+                                        <SelectTrigger id={`vgType-${pkg.id}`} className="w-16 text-white placeholder:text-gray-400" style={{ backgroundColor: 'transparent', borderColor: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff' }}>
                                           <SelectValue placeholder="--" className="text-white" />
                                         </SelectTrigger>
-                                        <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
+                                        <SelectContent style={{ backgroundColor: 'transparent', borderColor: '#ffffff' }}>
                                           <SelectItem value="AB" className="text-white hover:bg-[#1a0f3d]">AB</SelectItem>
                                           <SelectItem value="CD" className="text-white hover:bg-[#1a0f3d]">CD</SelectItem>
                                         </SelectContent>
@@ -3544,10 +3592,10 @@ export default function NewProjectPage() {
                                               handleEventPackageChange(pkg.id, "eventType", value)
                                             }
                                           >
-                                            <SelectTrigger id={`eventType-${pkg.id}`} className="text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff' }}>
+                                            <SelectTrigger id={`eventType-${pkg.id}`} className="text-white placeholder:text-gray-400" style={{ backgroundColor: 'transparent', borderColor: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff' }}>
                                               <SelectValue placeholder="Select an event type" className="text-white" />
                                             </SelectTrigger>
-                                            <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
+                                            <SelectContent style={{ backgroundColor: 'transparent', borderColor: '#ffffff' }}>
                                               <SelectItem value="wedding" className="text-white hover:bg-[#1a0f3d]">Wedding</SelectItem>
                                               <SelectItem value="engagement" className="text-white hover:bg-[#1a0f3d]">Engagement</SelectItem>
                                               <SelectItem value="corporate" className="text-white hover:bg-[#1a0f3d]">Corporate</SelectItem>
@@ -3569,7 +3617,7 @@ export default function NewProjectPage() {
                                                 handleEventPackageChange(pkg.id, "customEventTypeName", e.target.value)
                                               }
                                               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm text-white"
-                                          style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#5a4a7a', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
+                                          style={{ backgroundColor: 'transparent', borderColor: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                             />
                                           </div>
                                         )}
@@ -3584,7 +3632,7 @@ export default function NewProjectPage() {
                                             value={pkg.daysCount || "1"}
                                             onChange={(e) => handleEventPackageChange(pkg.id, "daysCount", e.target.value)}
                                             className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm w-20 text-white"
-                                            style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
+                                            style={{ backgroundColor: 'transparent', borderColor: 'transparent', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                           />
                                         </div>
                                       </div>
@@ -3607,7 +3655,7 @@ export default function NewProjectPage() {
                                               )
                                             }
                                             className="w-full text-sm text-white placeholder:text-gray-400"
-                                            style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
+                                            style={{ backgroundColor: 'transparent', borderColor: 'transparent', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                           />
                                         </div>
                                         <div className="space-y-2 min-w-0">
@@ -3618,10 +3666,10 @@ export default function NewProjectPage() {
                                               handleEventPackageChange(pkg.id, "pgType", value)
                                             }
                                           >
-                                            <SelectTrigger id={`pgType-${pkg.id}`} className="w-full sm:w-16 text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}>
+                                            <SelectTrigger id={`pgType-${pkg.id}`} className="w-full sm:w-16 text-white placeholder:text-gray-400" style={{ backgroundColor: 'transparent', borderColor: '#ffffff', color: '#ffffff' }}>
                                               <SelectValue placeholder="--" className="text-white" />
                                             </SelectTrigger>
-                                            <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
+                                            <SelectContent style={{ backgroundColor: 'transparent', borderColor: '#ffffff' }}>
                                               <SelectItem value="EF" className="text-white hover:bg-[#1a0f3d]">EF</SelectItem>
                                               <SelectItem value="GH" className="text-white hover:bg-[#1a0f3d]">GH</SelectItem>
                                             </SelectContent>
@@ -3643,7 +3691,7 @@ export default function NewProjectPage() {
                                               )
                                             }
                                             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm text-white"
-                                            style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
+                                            style={{ backgroundColor: 'transparent', borderColor: 'transparent', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                           />
                                         </div>
                                         <div className="space-y-2">
@@ -3654,10 +3702,10 @@ export default function NewProjectPage() {
                                               handleEventPackageChange(pkg.id, "vgType", value)
                                             }
                                           >
-                                            <SelectTrigger id={`vgType-${pkg.id}`} className="w-16 text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}>
+                                            <SelectTrigger id={`vgType-${pkg.id}`} className="w-16 text-white placeholder:text-gray-400" style={{ backgroundColor: 'transparent', borderColor: '#ffffff', color: '#ffffff' }}>
                                               <SelectValue placeholder="--" className="text-white" />
                                             </SelectTrigger>
-                                            <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
+                                            <SelectContent style={{ backgroundColor: 'transparent', borderColor: '#ffffff' }}>
                                               <SelectItem value="AB" className="text-white hover:bg-[#1a0f3d]">AB</SelectItem>
                                               <SelectItem value="CD" className="text-white hover:bg-[#1a0f3d]">CD</SelectItem>
                                             </SelectContent>
@@ -3753,10 +3801,10 @@ export default function NewProjectPage() {
                                           <Button
                                             variant="outline"
                                             className={cn(
-                                              "inline-flex items-center gap-1 sm:gap-2 whitespace-nowrap rounded-md text-xs sm:text-sm md:text-base ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:h-3 [&_svg]:w-3 sm:[&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 sm:h-9 md:h-10 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 w-full justify-start text-left font-normal text-white",
+                                              "inline-flex items-center gap-1 sm:gap-2 whitespace-nowrap rounded-md text-xs sm:text-sm md:text-base ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:h-3 [&_svg]:w-3 sm:[&_svg]:size-4 [&_svg]:shrink-0 border-0 bg-background hover:bg-accent hover:text-accent-foreground h-8 sm:h-9 md:h-10 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 w-full justify-start text-left font-normal text-white",
                                               !pkg.startDate && "text-gray-400"
                                             )}
-                                            style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
+                                            style={{ backgroundColor: 'transparent', borderColor: '#ffffff', color: '#ffffff' }}
                                           >
                                             <CalendarIcon className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 text-white" />
                                             {pkg.startDate ? (
@@ -3766,11 +3814,35 @@ export default function NewProjectPage() {
                                             )}
                                           </Button>
                                         </PopoverTrigger>
-                                        <PopoverContent className="w-auto p-0" align="start">
+                                        <PopoverContent className="w-auto p-0 rounded-lg" align="start" style={{ backgroundColor: '#1a0f3d', borderColor: '#ffffff', borderWidth: '2px', borderStyle: 'solid' }}>
                                           <Calendar
                                             mode="single"
                                             selected={pkg.startDate}
                                             onSelect={(date) => handleEventPackageChange(pkg.id, "startDate", date)}
+                                            className="text-white"
+                                            classNames={{
+                                              months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+                                              month: "space-y-4 w-full",
+                                              caption: "flex justify-center pt-1 relative items-center",
+                                              caption_label: "text-sm font-medium uppercase text-white text-center",
+                                              nav: "space-x-1 flex items-center",
+                                              nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 border-0 text-white",
+                                              nav_button_previous: "absolute left-1",
+                                              nav_button_next: "absolute right-1",
+                                              table: "w-full border-collapse space-y-1",
+                                              head_row: "flex justify-center",
+                                              head_cell: "text-white rounded-md w-9 font-normal text-[0.8rem] uppercase font-medium opacity-80 text-center",
+                                              row: "flex w-full mt-2 justify-center",
+                                              cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+                                              day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-accent/50 text-sm rounded-md text-white text-center flex items-center justify-center",
+                                              day_range_end: "day-range-end",
+                                              day_selected: "bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary focus:bg-primary/20 focus:text-primary",
+                                              day_today: "border border-primary/50 text-primary font-medium",
+                                              day_outside: "day-outside text-white opacity-50 aria-selected:bg-accent/50 aria-selected:text-white aria-selected:opacity-30",
+                                              day_disabled: "text-white opacity-50",
+                                              day_range_middle: "aria-selected:bg-accent aria-selected:text-white",
+                                              day_hidden: "invisible",
+                                            }}
                                           />
                                         </PopoverContent>
                                       </Popover>
@@ -3798,10 +3870,10 @@ export default function NewProjectPage() {
                                         handleEventPackageChange(pkg.id, "pgType", value)
                                       }
                                     >
-                                    <SelectTrigger id={`pgType-${pkg.id}`} className="w-full sm:w-16 text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}>
+                                    <SelectTrigger id={`pgType-${pkg.id}`} className="w-full sm:w-16 text-white placeholder:text-gray-400" style={{ backgroundColor: 'transparent', borderColor: '#ffffff', color: '#ffffff' }}>
                                       <SelectValue placeholder="--" className="text-white" />
                                     </SelectTrigger>
-                                    <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
+                                    <SelectContent style={{ backgroundColor: 'transparent', borderColor: '#ffffff' }}>
                                       <SelectItem value="EF" className="text-white hover:bg-[#1a0f3d]">EF</SelectItem>
                                       <SelectItem value="GH" className="text-white hover:bg-[#1a0f3d]">GH</SelectItem>
                                     </SelectContent>
@@ -3815,10 +3887,10 @@ export default function NewProjectPage() {
                                         handleEventPackageChange(pkg.id, "vgType", value)
                                       }
                                     >
-                                    <SelectTrigger id={`vgType-${pkg.id}`} className="w-full sm:w-16 text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}>
+                                    <SelectTrigger id={`vgType-${pkg.id}`} className="w-full sm:w-16 text-white placeholder:text-gray-400" style={{ backgroundColor: 'transparent', borderColor: '#ffffff', color: '#ffffff' }}>
                                       <SelectValue placeholder="--" className="text-white" />
                                     </SelectTrigger>
-                                    <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
+                                    <SelectContent style={{ backgroundColor: 'transparent', borderColor: '#ffffff' }}>
                                       <SelectItem value="AB" className="text-white hover:bg-[#1a0f3d]">AB</SelectItem>
                                       <SelectItem value="CD" className="text-white hover:bg-[#1a0f3d]">CD</SelectItem>
                                     </SelectContent>
@@ -3832,7 +3904,7 @@ export default function NewProjectPage() {
                                   <Label htmlFor={`photoCoordinator-${pkg.id}`} className="text-xs sm:text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>PhotoPOC</Label>
                                     <div className="flex items-end gap-2">
                                       {pkg.photographyCoordinatorId ? (
-                                        <div className="flex items-center justify-between p-3 border rounded-md flex-1 w-[60%]" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
+                                        <div className="flex items-center justify-between p-3 border rounded-md flex-1 w-[60%]" style={{ backgroundColor: 'transparent', borderColor: '#ffffff' }}>
                                           <div className="flex-1">
                                             <div className="font-medium text-sm text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>
                                               {photographers.find(p => p.photographer_phno === pkg.photographyCoordinatorId)?.photographer_name || 'Photographer'}
@@ -3859,10 +3931,10 @@ export default function NewProjectPage() {
                                           }
                                           disabled={loadingPhotographers}
                                         >
-                                          <SelectTrigger id={`photoCoordinator-${pkg.id}`} className="w-[60%] text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}>
+                                          <SelectTrigger id={`photoCoordinator-${pkg.id}`} className="w-[60%] text-white placeholder:text-gray-400" style={{ backgroundColor: 'transparent', borderColor: '#ffffff', color: '#ffffff' }}>
                                             <SelectValue placeholder={loadingPhotographers ? "Loading..." : "select POC"} className="text-white" />
                                           </SelectTrigger>
-                                          <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
+                                          <SelectContent style={{ backgroundColor: 'transparent', borderColor: '#ffffff' }}>
                                             {photographers.map((photographer) => (
                                               <SelectItem key={photographer.photographer_phno} value={photographer.photographer_phno} className="text-white hover:bg-[#1a0f3d]">
                                                 {photographer.photographer_name}
@@ -3877,7 +3949,7 @@ export default function NewProjectPage() {
                                     <Label htmlFor={`videoCoordinator-${pkg.id}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-nowrap max-w-fit text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>VideoPOC</Label>
                                     <div className="flex items-end gap-2">
                                       {pkg.videographyCoordinatorId ? (
-                                        <div className="flex items-center justify-between p-3 border rounded-md flex-1 w-[60%]" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
+                                        <div className="flex items-center justify-between p-3 border rounded-md flex-1 w-[60%]" style={{ backgroundColor: 'transparent', borderColor: '#ffffff' }}>
                                           <div className="flex-1">
                                             <div className="font-medium text-sm text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>
                                               {videographers.find(v => v.videographer_phno === pkg.videographyCoordinatorId)?.videographer_name || 'Videographer'}
@@ -3904,10 +3976,10 @@ export default function NewProjectPage() {
                                           }
                                           disabled={loadingVideographers}
                                         >
-                                          <SelectTrigger id={`videoCoordinator-${pkg.id}`} className="w-[60%] text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}>
+                                          <SelectTrigger id={`videoCoordinator-${pkg.id}`} className="w-[60%] text-white placeholder:text-gray-400" style={{ backgroundColor: 'transparent', borderColor: '#ffffff', color: '#ffffff' }}>
                                             <SelectValue placeholder={loadingVideographers ? "Loading..." : "select POC"} className="text-white" />
                                           </SelectTrigger>
-                                          <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
+                                          <SelectContent style={{ backgroundColor: 'transparent', borderColor: '#ffffff' }}>
                                             {videographers.map((videographer) => (
                                               <SelectItem key={videographer.videographer_phno} value={videographer.videographer_phno} className="text-white hover:bg-[#1a0f3d]">
                                                 {videographer.videographer_name}
@@ -3928,7 +4000,7 @@ export default function NewProjectPage() {
                                       value={loadingProjectDetails ? "Loading..." : (projectDetails?.client_name || formData.clientFullName || "Not set")}
                                       disabled
                                       className="bg-muted text-white"
-                                      style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
+                                      style={{ backgroundColor: 'transparent', borderColor: 'transparent', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                     />
                                   </div>
                                   <div className="space-y-2">
@@ -3937,7 +4009,7 @@ export default function NewProjectPage() {
                                       value={loadingProjectDetails ? "Loading..." : (projectDetails?.clientid_phno || formData.clientPhone || "Not set")}
                                       disabled
                                       className="bg-muted max-w-[200px] text-white"
-                                      style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
+                                      style={{ backgroundColor: 'transparent', borderColor: 'transparent', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                     />
                                   </div>
                                 </div>
@@ -3961,7 +4033,7 @@ export default function NewProjectPage() {
                                       pkg.isEditingDeliverablesNotes === false ? "bg-muted cursor-not-allowed" : "",
                                       "w-full text-white placeholder:text-gray-400"
                                     )}
-                                    style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
+                                    style={{ backgroundColor: 'transparent', borderColor: 'transparent', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                   />
                                 </div>
 
@@ -3985,7 +4057,7 @@ export default function NewProjectPage() {
                                             handleChecklistItemChange(pkg.id, item.id, "text", e.target.value)
                                           }
                                           className="flex-1 text-white placeholder:text-gray-400"
-                                          style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
+                                          style={{ backgroundColor: 'transparent', borderColor: 'transparent', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                         />
                                         <Button
                                           variant="ghost"
@@ -4046,7 +4118,7 @@ export default function NewProjectPage() {
 
                   {/* Price Summary - Bottom left, same width as event cards */}
                   <div className="w-full mt-4">
-                    <Card className="rounded-lg border-2 bg-card text-card-foreground shadow-sm p-3 sm:p-4 w-full sm:w-[45%] transition-all duration-300 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(59,130,246,0.4)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', borderWidth: '2px', borderStyle: 'solid' }}>
+                    <Card className="rounded-lg bg-card text-card-foreground shadow-sm p-3 sm:p-4 w-full sm:w-[45%] relative border-2 transition-all duration-300 hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
                       <div className="flex justify-between items-center mb-4">
                         <h3 className="font-semibold text-white">Price</h3>
                         <div className="flex items-center gap-2">
@@ -4130,7 +4202,7 @@ export default function NewProjectPage() {
                                     }));
                                   }}
                                   className="w-24 h-8 text-right text-white placeholder:text-gray-400"
-                                  style={{ backgroundColor: 'rgba(26, 15, 61, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
+                                  style={{ backgroundColor: 'transparent', borderColor: 'transparent', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                   placeholder="0"
                                 />
                               </div>
@@ -4165,7 +4237,7 @@ export default function NewProjectPage() {
                               </div>
                             </div>
                             {/* Row 4: Total Price (not editable, calculated as actualPrice + GST) */}
-                            <div className="border-t pt-3 mt-3" style={{ borderColor: '#3d2a5f' }}>
+                            <div className="border-t pt-3 mt-3" style={{ borderColor: '#ffffff' }}>
                               <div className="flex justify-between items-center">
                                 <span className="font-semibold text-white">Total price:</span>
                                 <div className="flex items-center gap-2">
@@ -4213,7 +4285,7 @@ export default function NewProjectPage() {
                               })()}</span>
                             </div>
                             {/* Row 4: Total Price */}
-                            <div className="border-t pt-3 mt-3" style={{ borderColor: '#3d2a5f' }}>
+                            <div className="border-t pt-3 mt-3" style={{ borderColor: '#ffffff' }}>
                               <div className="flex justify-between">
                                 <span className="font-semibold text-white">Total price:</span>
                                 <span className="font-bold text-blue-400 text-lg">
@@ -4234,10 +4306,10 @@ export default function NewProjectPage() {
 
                       {/* Event-wise Cost Breakdown */}
                       {isPriceDetailsExpanded && (
-                        <div className="mt-4 pt-4 border-t space-y-3" style={{ borderColor: '#3d2a5f' }}>
+                        <div className="mt-4 pt-4 border-t space-y-3" style={{ borderColor: '#ffffff' }}>
                           <h4 className="font-semibold text-sm mb-3 text-white">Event-wise Cost Estimates</h4>
                           {calculateEventWiseCosts().map((eventCost, index) => (
-                            <div key={index} className="rounded-md p-3 space-y-2" style={{ backgroundColor: '#1a0f3d', borderColor: '#3d2a5f' }}>
+                            <div key={index} className="rounded-lg bg-card text-card-foreground shadow-sm p-3 sm:p-4 space-y-2 relative border-2 transition-all duration-300 hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
                               <div className="flex justify-between items-start">
                                 <div>
                                   <p className="font-medium text-sm text-white">{eventCost.eventName}</p>
@@ -4316,10 +4388,10 @@ export default function NewProjectPage() {
                             }
                           }}
                         >
-                          <SelectTrigger className="w-48 text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff' }}>
+                          <SelectTrigger className="w-48 text-white placeholder:text-gray-400" style={{ backgroundColor: 'transparent', borderColor: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff' }}>
                             <SelectValue placeholder="Select template" className="text-white" />
                           </SelectTrigger>
-                          <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
+                          <SelectContent style={{ backgroundColor: 'transparent', borderColor: '#ffffff' }}>
                             <SelectItem value="standard_wedding.pdf" className="text-white hover:bg-[#1a0f3d]">Standard Wedding</SelectItem>
                             <SelectItem value="file-sample_150kB.pdf" className="text-white hover:bg-[#1a0f3d]">Sample Template</SelectItem>
                             <SelectItem value="premium_wedding.pdf" className="text-white hover:bg-[#1a0f3d]">Premium Wedding</SelectItem>
@@ -4366,11 +4438,11 @@ export default function NewProjectPage() {
                     </div>
 
                     {/* PDF Viewer Area */}
-                    <div className="border-2 rounded-lg min-h-[600px] flex flex-col" style={{ borderColor: '#3d2a5f', backgroundColor: '#1a0f3d' }}>
+                    <div className="rounded-lg bg-card text-card-foreground shadow-sm min-h-[600px] flex flex-col p-3 sm:p-4 relative border-2 transition-all duration-300 hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
                       {isEditingPdf ? (
                         <div className="flex flex-col h-full">
                           {/* PDF Viewer */}
-                          <div className="flex-1 w-full h-full border-b" style={{ borderColor: '#3d2a5f' }}>
+                          <div className="flex-1 w-full h-full border-b" style={{ borderColor: '#ffffff' }}>
                             <iframe
                               src={selectedPdfPath}
                               className="w-full h-full min-h-[400px] border-0"
@@ -4379,10 +4451,10 @@ export default function NewProjectPage() {
                           </div>
                           
                           {/* Editable Form Section */}
-                          <div className="p-6 border-t max-h-[400px] overflow-y-auto" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
+                          <div className="p-6 border-t max-h-[400px] overflow-y-auto" style={{ backgroundColor: 'transparent', borderColor: '#ffffff' }}>
                             <div className="space-y-6">
                               {/* Price Table Editor */}
-                              <div className="border rounded-lg p-4" style={{ backgroundColor: '#1a0f3d', borderColor: '#3d2a5f' }}>
+                              <div className="rounded-lg bg-card text-card-foreground shadow-sm p-3 sm:p-4 relative border-2 transition-all duration-300 hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
                                 <h3 className="font-semibold text-lg mb-4 text-white">Edit Price Summary</h3>
                                 <div className="grid grid-cols-2 gap-4">
                                   <div className="space-y-2">
@@ -4397,7 +4469,7 @@ export default function NewProjectPage() {
                                       }}
                                       placeholder="Enter actual price"
                                       className="text-white placeholder:text-gray-400"
-                                      style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
+                                      style={{ backgroundColor: 'transparent', borderColor: 'transparent', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                     />
                                   </div>
                                   <div className="space-y-2">
@@ -4412,7 +4484,7 @@ export default function NewProjectPage() {
                                       }}
                                       placeholder="Enter subtotal"
                                       className="text-white placeholder:text-gray-400"
-                                      style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
+                                      style={{ backgroundColor: 'transparent', borderColor: 'transparent', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                     />
                                   </div>
                                   <div className="space-y-2">
@@ -4427,7 +4499,7 @@ export default function NewProjectPage() {
                                       }}
                                       placeholder="Enter GST amount"
                                       className="text-white placeholder:text-gray-400"
-                                      style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
+                                      style={{ backgroundColor: 'transparent', borderColor: 'transparent', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                     />
                                   </div>
                                   <div className="space-y-2">
@@ -4442,14 +4514,14 @@ export default function NewProjectPage() {
                                       }}
                                       placeholder="Enter total price"
                                       className="font-semibold text-white placeholder:text-gray-400"
-                                      style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
+                                      style={{ backgroundColor: 'transparent', borderColor: 'transparent', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                     />
                                   </div>
                                 </div>
                               </div>
                               
                               {/* Additional Notes Editor */}
-                              <div className="border rounded-lg p-4" style={{ backgroundColor: '#1a0f3d', borderColor: '#3d2a5f' }}>
+                              <div className="rounded-lg bg-card text-card-foreground shadow-sm p-3 sm:p-4 relative border-2 transition-all duration-300 hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
                                 <Label htmlFor="pdf-edit-text" className="mb-2 block font-semibold text-white">
                                   Edit Additional Notes:
                                 </Label>
@@ -4460,7 +4532,7 @@ export default function NewProjectPage() {
                                   placeholder="Enter additional notes or text to add to the price card page..."
                                   rows={6}
                                   className="mb-3 text-white placeholder:text-gray-400"
-                                  style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
+                                  style={{ backgroundColor: 'transparent', borderColor: 'transparent', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                 />
                               </div>
                               
@@ -4505,7 +4577,7 @@ export default function NewProjectPage() {
                           />
                         </div>
                       ) : (
-                        <div className="flex flex-col items-center justify-center p-12 min-h-[500px]" style={{ backgroundColor: '#1a0f3d' }}>
+                        <div className="rounded-lg bg-card text-card-foreground shadow-sm flex flex-col items-center justify-center p-12 min-h-[500px] relative border-2 transition-all duration-300 hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: 'transparent', borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid' }}>
                           <div className="text-center space-y-4 mb-6">
                             <p className="text-lg font-semibold text-white">
                               Your quotation will appear here

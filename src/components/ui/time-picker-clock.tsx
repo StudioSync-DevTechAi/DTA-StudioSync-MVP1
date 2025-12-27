@@ -112,13 +112,14 @@ export function TimePickerClock({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "flex items-center gap-2 px-3 py-2 border rounded-md bg-background hover:bg-accent",
-          "w-full justify-start text-left font-normal text-white"
+          "flex items-center gap-1 sm:gap-2 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 border-0 rounded-md bg-background hover:bg-accent",
+          "w-full justify-start text-left font-normal text-white h-8 sm:h-9 md:h-10 text-xs sm:text-sm md:text-base",
+          "[&_svg]:h-3 [&_svg]:w-3 sm:[&_svg]:size-4 [&_svg]:shrink-0"
         )}
-        style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
+        style={{ backgroundColor: 'transparent', borderColor: 'transparent', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
       >
-        <Clock className="h-4 w-4" />
-        <span>
+        <Clock className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+        <span className="text-xs sm:text-sm md:text-base">
           {currentHour12}:{minute.padStart(2, "0")} {currentAmPm}
         </span>
       </button>

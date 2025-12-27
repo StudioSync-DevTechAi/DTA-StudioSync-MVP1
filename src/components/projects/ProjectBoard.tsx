@@ -390,7 +390,7 @@ export function ProjectBoard({ onNewProject }: ProjectBoardProps) {
 
       {/* Error State */}
       {error && !loading && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+        <div className="border border-red-200 rounded-lg p-4 mb-4" style={{ backgroundColor: 'transparent' }}>
           <p className="text-sm text-red-800">Error: {error}</p>
           <Button
             variant="outline"
@@ -407,10 +407,9 @@ export function ProjectBoard({ onNewProject }: ProjectBoardProps) {
       {!loading && !error && (
       <div 
         className="space-y-3 sm:space-y-4"
-        style={{ backgroundColor: 'rgba(26, 15, 61, 0.98)', backdropFilter: 'blur(10px)', minHeight: '100vh' }}
       >
         {/* Status Headers Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 rounded-lg border-2 p-3 sm:p-4 transition-all duration-300" style={{ borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid', backgroundColor: 'transparent' }}>
           {statusColumns.map((column) => (
             <div key={column.id} className="flex items-center justify-center h-8 sm:h-10">
               <h3 className="font-bold text-xs sm:text-sm uppercase tracking-wide text-center text-white">
@@ -421,7 +420,7 @@ export function ProjectBoard({ onNewProject }: ProjectBoardProps) {
         </div>
 
         {/* Project Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 rounded-lg border-2 p-3 sm:p-4 transition-all duration-300" style={{ borderColor: 'rgb(255, 255, 255)', borderWidth: '2px', borderStyle: 'solid', backgroundColor: 'transparent' }}>
           {statusColumns.map((column) => {
             const columnProjects = getProjectsByStatus(column.id);
             const isDragOver = dragOverColumn === column.id;
@@ -435,17 +434,21 @@ export function ProjectBoard({ onNewProject }: ProjectBoardProps) {
                 onDrop={(e) => handleDrop(e, column.id)}
               >
                 <div
-                  className={`space-y-2 sm:space-y-3 min-h-[300px] sm:min-h-[400px] transition-all duration-200 rounded-lg p-2 ${
+                  className={`space-y-2 sm:space-y-3 min-h-[300px] sm:min-h-[400px] rounded-lg bg-card text-card-foreground shadow-sm p-2 m-1 relative border-2 transition-all duration-300 ${
                     isDragOver
-                      ? "bg-primary/10 border-2 border-dashed border-primary"
-                      : "border-2 border-transparent"
+                      ? "border-dashed border-primary"
+                      : "border-transparent hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60"
                   }`}
+                  style={{ backgroundColor: 'transparent' }}
                 >
                   {columnProjects.length === 0 ? (
                     <div
-                      className={`text-center text-xs sm:text-sm text-muted-foreground py-6 sm:py-8 border-2 border-dashed rounded-lg ${
-                        isDragOver ? "border-primary bg-primary/5" : ""
+                      className={`text-center text-xs sm:text-sm text-muted-foreground py-6 sm:py-8 rounded-lg bg-card text-card-foreground shadow-sm border-2 border-dashed relative transition-all duration-300 ${
+                        isDragOver 
+                          ? "border-primary" 
+                          : "border-transparent hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60"
                       }`}
+                      style={{ backgroundColor: 'transparent' }}
                     >
                       {isDragOver ? "Drop here" : "No projects"}
                     </div>
@@ -458,14 +461,14 @@ export function ProjectBoard({ onNewProject }: ProjectBoardProps) {
                           draggable
                           onDragStart={(e) => handleDragStart(e, project.id)}
                           onDragEnd={handleDragEnd}
-                          className={`relative overflow-hidden transition-all duration-300 p-3 sm:p-4 cursor-move border-2 ${
+                          className={`rounded-lg bg-card text-card-foreground shadow-sm relative overflow-hidden transition-all duration-300 p-3 sm:p-4 cursor-move border-2 mb-2 ${
                             isDragging
                               ? "opacity-50 scale-95 shadow-lg border-primary"
-                              : "opacity-100 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(59,130,246,0.4)] hover:border-blue-400/60 hover:scale-[1.02]"
+                              : "opacity-100 hover:shadow-[0_0_10px_rgba(59,130,246,0.3),0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-400/60 hover:scale-[1.01]"
                           }`}
                           style={{ 
-                            backgroundColor: '#2d1b4e', 
-                            borderColor: '#3d2a5f',
+                            backgroundColor: 'transparent', 
+                            borderColor: 'rgb(255, 255, 255)',
                             borderWidth: '2px',
                             borderStyle: 'solid'
                           }}
