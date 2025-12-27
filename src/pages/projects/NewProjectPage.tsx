@@ -2813,7 +2813,7 @@ export default function NewProjectPage() {
 
   return (
     <Layout>
-      <div className="space-y-6 px-0 xs:px-0.5 sm:px-2 md:px-4 lg:px-6 py-4 xs:py-5 sm:py-6">
+      <div className="space-y-6 p-6">
         <EstimatesHeader 
           onNewEstimate={handleNewEstimate}
           canCreate={true}
@@ -3271,7 +3271,7 @@ export default function NewProjectPage() {
                         return (
                           <Card 
                             key={pkg.id} 
-                            className="p-2 xs:p-2.5 sm:p-4 w-full sm:w-[45%] relative border-2 transition-all duration-300 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(59,130,246,0.4)] hover:border-blue-400/60 hover:scale-[1.02]"
+                            className="p-3 sm:p-4 w-full sm:w-[45%] relative border-2 transition-all duration-300 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(59,130,246,0.4)] hover:border-blue-400/60 hover:scale-[1.02]"
                             style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', borderWidth: '2px', borderStyle: 'solid' }}
                             onClick={(e) => {
                               // Only save if clicking on the card itself (white space), not on interactive elements
@@ -3293,8 +3293,8 @@ export default function NewProjectPage() {
                               <div className="absolute top-2 left-2 w-3 h-3 bg-green-500 rounded-full border-2 border-white shadow-sm" 
                                    title="Event saved to database" />
                             )}
-                            <div className="space-y-1.5 xs:space-y-2 sm:space-y-3 md:space-y-4">
-                              <div className="flex items-center relative flex-wrap gap-1 xs:gap-1.5 sm:gap-2">
+                            <div className="space-y-2 xs:space-y-3 sm:space-y-4">
+                              <div className="flex items-center relative flex-wrap gap-1.5 xs:gap-2">
                                 {editingPackageNameId === pkg.id ? (
                                   <Input
                                     defaultValue={pkg.packageName || `Event Package ${index + 1}`}
@@ -3324,7 +3324,7 @@ export default function NewProjectPage() {
                                     Days {pkg.daysCount || "1"}
                                   </span>
                                 )}
-                                <div className="flex items-center gap-0.5 xs:gap-1 sm:gap-1.5 md:gap-2 ml-auto flex-shrink-0">
+                                <div className="flex items-center gap-1 xs:gap-1.5 sm:gap-2 ml-auto flex-shrink-0">
                                   {!isActiveEvent && (
                                     <button
                                       onClick={() => toggleEventDetails(pkg.id)}
@@ -3349,21 +3349,21 @@ export default function NewProjectPage() {
                                     variant="outline"
                                     size="sm"
                                     onClick={() => toggleEventDetails(pkg.id)}
-                                    className="h-6 xs:h-7 sm:h-8 px-1.5 xs:px-2 sm:px-3 bg-[#2d1b4e] text-white border-[#3d2a5f] hover:bg-[#1a0f3d] text-[9px] xs:text-[10px] sm:text-xs md:text-sm"
+                                    className="h-7 xs:h-8 px-2 xs:px-3 bg-[#2d1b4e] text-white border-[#3d2a5f] hover:bg-[#1a0f3d] text-[10px] xs:text-xs sm:text-sm"
                                     style={{ color: '#ffffff' }}
                                   >
                                     <span className="hidden xs:inline" style={{ color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Details</span>
                                     {isExpanded ? (
-                                      <ChevronUp className="xs:ml-1.5 sm:ml-2 h-2.5 w-2.5 xs:h-3 xs:w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-white" style={{ color: '#ffffff' }} />
+                                      <ChevronUp className="xs:ml-2 h-3 w-3 xs:h-3.5 xs:w-3.5 sm:h-4 sm:w-4 text-white" style={{ color: '#ffffff' }} />
                                     ) : (
-                                      <ChevronDown className="xs:ml-1.5 sm:ml-2 h-2.5 w-2.5 xs:h-3 xs:w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-white" style={{ color: '#ffffff' }} />
+                                      <ChevronDown className="xs:ml-2 h-3 w-3 xs:h-3.5 xs:w-3.5 sm:h-4 sm:w-4 text-white" style={{ color: '#ffffff' }} />
                                     )}
                                   </Button>
                                   <Button
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => handleSaveEventCard(pkg.id)}
-                                    className={`h-6 xs:h-7 sm:h-8 w-6 xs:w-7 sm:w-8 p-0 ${
+                                    className={`h-7 xs:h-8 w-7 xs:w-8 p-0 ${
                                       isExpanded && pkg.eventType && pkg.startDate && hasUnsavedChanges(pkg)
                                         ? 'text-green-400 hover:text-green-300 hover:bg-[#1a0f3d]'
                                         : 'text-gray-300 opacity-50'
@@ -3397,9 +3397,9 @@ export default function NewProjectPage() {
                               {/* Show input boxes for active event, or collapsed view for completed events */}
                               {isActiveEvent ? (
                                 // Active event - show input boxes
-                                <div className="space-y-2 xs:space-y-2.5 sm:space-y-3 md:space-y-4">
+                                <div className="space-y-4">
                                   {/* First row: Event Type and Days No. */}
-                                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 xs:gap-2.5 sm:gap-3 md:gap-4 w-full">
+                                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full">
                                     <div className={pkg.eventType === "other" ? "w-full sm:w-[35%]" : "w-full sm:w-1/2"}>
                                       <Select
                                         value={pkg.eventType}
@@ -3407,7 +3407,7 @@ export default function NewProjectPage() {
                                           handleEventPackageChange(pkg.id, "eventType", value)
                                         }
                                       >
-                                        <SelectTrigger id={`eventType-${pkg.id}`} className="h-8 xs:h-9 sm:h-10 px-2 xs:px-2.5 sm:px-3 py-1.5 xs:py-2 sm:py-2 text-xs xs:text-sm text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff' }}>
+                                        <SelectTrigger id={`eventType-${pkg.id}`} className="text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff' }}>
                                           <SelectValue placeholder="Select an event type" className="text-white" />
                                         </SelectTrigger>
                                         <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
@@ -3431,13 +3431,13 @@ export default function NewProjectPage() {
                                           onChange={(e) =>
                                             handleEventPackageChange(pkg.id, "customEventTypeName", e.target.value)
                                           }
-                                          className="flex h-8 xs:h-9 sm:h-10 w-full rounded-md border border-input bg-background px-2 xs:px-2.5 sm:px-3 py-1.5 xs:py-2 sm:py-2 text-xs xs:text-sm sm:text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-white"
+                                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm text-white"
                                           style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#5a4a7a', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                         />
                                       </div>
                                     )}
-                                    <div className="flex-shrink-0 flex items-center gap-1 xs:gap-1.5 sm:gap-2 ml-2 xs:ml-3 sm:ml-4">
-                                      <Label htmlFor={`daysCount-${pkg.id}`} className="text-[10px] xs:text-xs sm:text-sm font-medium leading-none whitespace-nowrap text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Days No.</Label>
+                                    <div className="flex-shrink-0 flex items-center gap-2 ml-4">
+                                      <Label htmlFor={`daysCount-${pkg.id}`} className="text-sm font-medium leading-none whitespace-nowrap text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Days No.</Label>
                                       <Input
                                         id={`daysCount-${pkg.id}`}
                                         type="number"
@@ -3446,16 +3446,16 @@ export default function NewProjectPage() {
                                         placeholder="Days No."
                                         value={pkg.daysCount || "1"}
                                         onChange={(e) => handleEventPackageChange(pkg.id, "daysCount", e.target.value)}
-                                        className="flex h-8 xs:h-9 sm:h-10 rounded-md border border-input bg-background px-2 xs:px-2.5 sm:px-3 py-1.5 xs:py-2 sm:py-2 text-xs xs:text-sm sm:text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-16 xs:w-18 sm:w-20 text-white"
+                                        className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm w-20 text-white"
                                         style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#5a4a7a', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                       />
                                     </div>
                                   </div>
 
                                   {/* Second row: PGs No, PGDays, VGs No, VGDays */}
-                                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 xs:gap-2 sm:gap-2.5 md:gap-3 lg:gap-4">
-                                    <div className="space-y-1 xs:space-y-1.5 sm:space-y-2 min-w-0">
-                                      <Label htmlFor={`photographers-${pkg.id}`} className="text-[10px] xs:text-xs sm:text-sm font-medium leading-none text-white">PGs No</Label>
+                                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                                    <div className="space-y-2 min-w-0">
+                                      <Label htmlFor={`photographers-${pkg.id}`} className="text-xs sm:text-sm font-medium leading-none text-white">PGs No</Label>
                                       <Input
                                         id={`photographers-${pkg.id}`}
                                         type="number"
@@ -3469,19 +3469,19 @@ export default function NewProjectPage() {
                                             e.target.value
                                           )
                                         }
-                                        className="w-full h-8 xs:h-9 sm:h-10 px-2 xs:px-2.5 sm:px-3 py-1.5 xs:py-2 sm:py-2 text-xs xs:text-sm text-white placeholder:text-gray-400"
+                                        className="w-full text-sm text-white placeholder:text-gray-400"
                                         style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#5a4a7a', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                       />
                                     </div>
-                                    <div className="space-y-1 xs:space-y-1.5 sm:space-y-2 min-w-0">
-                                      <Label htmlFor={`pgType-${pkg.id}`} className="text-[10px] xs:text-xs sm:text-sm font-medium leading-none text-white">PG-Type</Label>
+                                    <div className="space-y-2 min-w-0">
+                                      <Label htmlFor={`pgType-${pkg.id}`} className="text-xs sm:text-sm font-medium leading-none text-white">PG-Type</Label>
                                       <Select
                                         value={pkg.pgType || ""}
                                         onValueChange={(value) =>
                                           handleEventPackageChange(pkg.id, "pgType", value)
                                         }
                                       >
-                                        <SelectTrigger id={`pgType-${pkg.id}`} className="h-8 xs:h-9 sm:h-10 px-2 xs:px-2.5 sm:px-3 py-1.5 xs:py-2 sm:py-2 text-xs xs:text-sm w-full sm:w-16 text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff' }}>
+                                        <SelectTrigger id={`pgType-${pkg.id}`} className="w-full sm:w-16 text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff' }}>
                                           <SelectValue placeholder="--" className="text-white" />
                                         </SelectTrigger>
                                         <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
@@ -3490,8 +3490,8 @@ export default function NewProjectPage() {
                                         </SelectContent>
                                       </Select>
                                     </div>
-                                    <div className="space-y-1 xs:space-y-1.5 sm:space-y-2 min-w-0">
-                                      <Label htmlFor={`videographers-${pkg.id}`} className="text-[10px] xs:text-xs sm:text-sm font-medium leading-none text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>VGs No</Label>
+                                    <div className="space-y-2 min-w-0">
+                                      <Label htmlFor={`videographers-${pkg.id}`} className="text-xs sm:text-sm font-medium leading-none text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>VGs No</Label>
                                       <Input
                                         id={`videographers-${pkg.id}`}
                                         type="number"
@@ -3505,19 +3505,19 @@ export default function NewProjectPage() {
                                             e.target.value
                                           )
                                         }
-                                        className="w-full h-8 xs:h-9 sm:h-10 px-2 xs:px-2.5 sm:px-3 py-1.5 xs:py-2 sm:py-2 text-xs xs:text-sm text-white placeholder:text-gray-400"
+                                        className="w-full text-sm text-white placeholder:text-gray-400"
                                         style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#5a4a7a', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
                                       />
                                     </div>
-                                    <div className="space-y-1 xs:space-y-1.5 sm:space-y-2">
-                                      <Label htmlFor={`vgType-${pkg.id}`} className="text-[10px] xs:text-xs sm:text-sm font-medium leading-none text-white">VG-Type</Label>
+                                    <div className="space-y-2">
+                                      <Label htmlFor={`vgType-${pkg.id}`} className="text-sm font-medium leading-none text-white">VG-Type</Label>
                                       <Select
                                         value={pkg.vgType || ""}
                                         onValueChange={(value) =>
                                           handleEventPackageChange(pkg.id, "vgType", value)
                                         }
                                       >
-                                        <SelectTrigger id={`vgType-${pkg.id}`} className="h-8 xs:h-9 sm:h-10 px-2 xs:px-2.5 sm:px-3 py-1.5 xs:py-2 sm:py-2 text-xs xs:text-sm w-16 text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff' }}>
+                                        <SelectTrigger id={`vgType-${pkg.id}`} className="w-16 text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', borderWidth: '1.5px', borderStyle: 'solid', color: '#ffffff' }}>
                                           <SelectValue placeholder="--" className="text-white" />
                                         </SelectTrigger>
                                         <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
