@@ -290,12 +290,12 @@ export default function Landing() {
   const textColorMuted = isLightTheme ? "text-gray-600" : "text-white/90";
   const textColorSub = isLightTheme ? "text-gray-700" : "text-white/80";
   const textColorIcon = isLightTheme ? "text-gray-400" : "text-white/60";
-  const borderColor = isLightTheme ? "border-gray-300" : "border-white/30";
-  const borderColorHover = isLightTheme ? "border-gray-400" : "border-white/50";
-  const bgColorCard = isLightTheme ? "bg-white" : "bg-[rgba(139,92,246,0.1)]";
-  const bgColorInput = isLightTheme ? "bg-white" : "bg-[rgba(139,92,246,0.1)]";
-  const bgColorSelect = isLightTheme ? "bg-white" : "bg-[rgba(139,92,246,0.15)]";
-  const separatorColor = isLightTheme ? "bg-gray-300" : "bg-white/30";
+  const borderColor = isLightTheme ? "border-black" : "border-white/30";
+  const borderColorHover = isLightTheme ? "border-black" : "border-white/50";
+  const bgColorCard = isLightTheme ? "bg-gray-50" : "bg-[rgba(139,92,246,0.1)]";
+  const bgColorInput = isLightTheme ? "bg-gray-50" : "bg-[rgba(139,92,246,0.1)]";
+  const bgColorSelect = isLightTheme ? "bg-gray-50" : "bg-[rgba(139,92,246,0.15)]";
+  const separatorColor = isLightTheme ? "bg-black" : "bg-white/30";
 
   if (authLoading) {
     return (
@@ -351,7 +351,7 @@ export default function Landing() {
                 className={cn(
                   `w-full h-10 ${bgColorSelect} border-2 ${borderColor} ${textColor} text-sm font-medium backdrop-blur-sm`,
                   `hover:${borderColorHover} transition-all duration-300`,
-                  isLightTheme ? "focus:ring-2 focus:ring-gray-400" : "focus:ring-2 focus:ring-white/50",
+                  isLightTheme ? "focus:ring-2 focus:ring-black" : "focus:ring-2 focus:ring-white/50",
                   selectedRole && "border-[rgba(139,92,246,0.8)] shadow-[0_0_20px_rgba(139,92,246,0.5)]"
                 )}
                 style={{
@@ -478,7 +478,7 @@ export default function Landing() {
                           onChange={(e) => setFullName(e.target.value)}
                           className={cn(
                             `pl-10 ${bgColorInput} ${borderColor} ${textColor}`,
-                            isLightTheme ? "placeholder:text-gray-400 focus:border-gray-400" : "placeholder:text-white/50 focus:border-white/50"
+                            isLightTheme ? "placeholder:text-gray-400 focus:border-black" : "placeholder:text-white/50 focus:border-white/50"
                           )}
                           placeholder="Enter your full name"
                         />
@@ -568,7 +568,7 @@ export default function Landing() {
                             onChange={(e) => setPassword(e.target.value)}
                             className={cn(
                               `pl-10 pr-10 ${bgColorInput} ${borderColor} ${textColor}`,
-                              isLightTheme ? "placeholder:text-gray-400 focus:border-gray-400" : "placeholder:text-white/50 focus:border-white/50"
+                              isLightTheme ? "placeholder:text-gray-400 focus:border-black" : "placeholder:text-white/50 focus:border-white/50"
                             )}
                             placeholder="Enter password"
                           />
@@ -597,7 +597,7 @@ export default function Landing() {
                               onChange={(e) => setConfirmPassword(e.target.value)}
                               className={cn(
                                 `pl-10 pr-10 ${bgColorInput} ${borderColor} ${textColor}`,
-                                isLightTheme ? "placeholder:text-gray-400 focus:border-gray-400" : "placeholder:text-white/50 focus:border-white/50"
+                                isLightTheme ? "placeholder:text-gray-400 focus:border-black" : "placeholder:text-white/50 focus:border-white/50"
                               )}
                               placeholder="Confirm password"
                             />
@@ -633,7 +633,7 @@ export default function Landing() {
                           maxLength={6}
                           className={cn(
                             `flex-1 ${bgColorInput} ${borderColor} ${textColor} text-center text-2xl tracking-widest`,
-                            isLightTheme ? "placeholder:text-gray-400 focus:border-gray-400" : "placeholder:text-white/50 focus:border-white/50"
+                            isLightTheme ? "placeholder:text-gray-400 focus:border-black" : "placeholder:text-white/50 focus:border-white/50"
                           )}
                           placeholder="000000"
                         />

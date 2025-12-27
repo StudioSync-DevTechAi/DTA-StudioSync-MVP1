@@ -88,7 +88,7 @@ export const InfiniteGrid = ({ theme = "dark" }: { theme?: "dark" | "light" }) =
       className={cn(
         "absolute inset-0 w-full h-full"
       )}
-      style={{ backgroundColor: isDark ? "#0a0a0a" : "#ffffff" }}
+      style={{ backgroundColor: isDark ? "#0a0a0a" : "#f5f5f5" }}
     >
       {/* Layer 1: Subtle background grid (always visible) */}
       <div className="absolute inset-0 z-0 opacity-[0.05]">
