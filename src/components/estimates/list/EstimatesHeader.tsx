@@ -40,30 +40,29 @@ export function EstimatesHeader({
   };
 
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 xs:gap-4 w-full">
       <div className="space-y-1 flex-1 min-w-0 w-full">
-        <div className="flex items-center gap-2 sm:gap-4 w-full">
-          <h1 
-            className="text-xl sm:text-2xl font-semibold cursor-pointer hover:opacity-80 transition-opacity shrink-0 text-white"
-            onClick={handleHeaderClick}
-          >
-            {title}
-          </h1>
-          <DraftsBox />
+        <div className="flex flex-col xs:flex-row items-start xs:items-center gap-2 xs:gap-3 sm:gap-4 w-full">
+          <div className="flex items-center gap-2 xs:gap-3 sm:gap-4 flex-shrink-0">
+            <h1 
+              className="text-base xs:text-lg sm:text-xl md:text-2xl font-semibold cursor-pointer hover:opacity-80 transition-opacity shrink-0 text-white"
+              onClick={handleHeaderClick}
+            >
+              {title}
+            </h1>
+            <DraftsBox />
+          </div>
           {showDashboardTitle && (
-            <div className="flex-1 flex justify-center items-center">
+            <div className="flex-1 flex justify-center items-center w-full xs:w-auto">
               <div className="text-center">
-                <h2 className="text-xl sm:text-2xl font-semibold text-white">
+                <h2 className="text-base xs:text-lg sm:text-xl md:text-2xl font-semibold text-white">
                   {dashboardTitle}
                 </h2>
-                <p className="text-xs sm:text-sm text-white/80 mt-1">
-                  {dashboardDescription}
-                </p>
               </div>
             </div>
           )}
         </div>
-        <p className="text-xs sm:text-sm text-white/80">
+        <p className="text-[10px] xs:text-xs sm:text-sm text-white/80">
           {description}
         </p>
       </div>

@@ -42,7 +42,7 @@ export default function EstimatesPage() {
     return (
       <Layout>
         <div 
-          className="space-y-4 sm:space-y-6 p-3 sm:p-4 md:p-6"
+          className="space-y-3 xs:space-y-4 sm:space-y-5 md:space-y-6 p-2 xs:p-3 sm:p-4 md:p-5 lg:p-6 w-full overflow-x-hidden"
           style={{ backgroundColor: 'rgba(26, 15, 61, 0.98)', backdropFilter: 'blur(10px)', minHeight: '100vh' }}
         >
           <LoadingSpinner text="Loading estimates..." fullScreen={false} />
@@ -54,7 +54,7 @@ export default function EstimatesPage() {
   return (
     <Layout>
       <div 
-        className="space-y-4 sm:space-y-6 p-3 sm:p-4 md:p-6"
+        className="space-y-3 xs:space-y-4 sm:space-y-5 md:space-y-6 p-2 xs:p-3 sm:p-4 md:p-5 lg:p-6 w-full overflow-x-hidden"
         style={{ backgroundColor: 'rgba(26, 15, 61, 0.98)', backdropFilter: 'blur(10px)', minHeight: '100vh' }}
       >
           <EstimatesHeader 

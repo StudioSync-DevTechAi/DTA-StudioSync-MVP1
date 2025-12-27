@@ -31,27 +31,27 @@ export function TransactionFilters({
   categories,
 }: TransactionFiltersProps) {
   return (
-    <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
-      <div className="relative flex-1">
-        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-white/70" />
+    <div className="flex flex-col sm:flex-row justify-between gap-3 xs:gap-4 mb-3 xs:mb-4">
+      <div className="relative flex-1 min-w-0">
+        <Search className="absolute left-2 xs:left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 xs:h-4 xs:w-4 text-white/70 z-10" />
         <Input
           placeholder="Search transactions..."
-          className="pl-8 text-white placeholder:text-gray-400"
+          className="pl-7 xs:pl-8 text-xs xs:text-sm text-white placeholder:text-gray-400 h-9 xs:h-10"
           style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff' }}
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
         />
       </div>
-      <div className="flex gap-2">
+      <div className="flex flex-col xs:flex-row gap-2 xs:gap-2 w-full sm:w-auto">
         <Select 
           value={filterType} 
           onValueChange={onFilterTypeChange}
         >
           <SelectTrigger 
-            className="w-[150px] text-white placeholder:text-gray-400"
+            className="w-full xs:w-[130px] sm:w-[150px] text-xs xs:text-sm text-white placeholder:text-gray-400 h-9 xs:h-10"
             style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff' }}
           >
-            <Filter className="mr-2 h-4 w-4" />
+            <Filter className="mr-1.5 xs:mr-2 h-3.5 w-3.5 xs:h-4 xs:w-4" />
             <SelectValue placeholder="Filter by type" />
           </SelectTrigger>
           <SelectContent className="bg-[#2d1b4e] border-[#3d2a5f]">
@@ -66,10 +66,10 @@ export function TransactionFilters({
           onValueChange={onFilterCategoryChange}
         >
           <SelectTrigger 
-            className="w-[180px] text-white placeholder:text-gray-400"
+            className="w-full xs:w-[160px] sm:w-[180px] text-xs xs:text-sm text-white placeholder:text-gray-400 h-9 xs:h-10"
             style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#3d2a5f', color: '#ffffff' }}
           >
-            <Filter className="mr-2 h-4 w-4" />
+            <Filter className="mr-1.5 xs:mr-2 h-3.5 w-3.5 xs:h-4 xs:w-4" />
             <SelectValue placeholder="Filter by category" />
           </SelectTrigger>
           <SelectContent className="bg-[#2d1b4e] border-[#3d2a5f]">

@@ -565,7 +565,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <LoadingSpinner text="Loading..." fullScreen={false} />
           </div>
         )}
-        <div className="max-w-6xl mx-auto w-full">
+        <div className="w-full max-w-full xs:max-w-full sm:max-w-2xl md:max-w-4xl lg:max-w-6xl xl:max-w-7xl mx-auto px-2 xs:px-3 sm:px-4 md:px-5 lg:px-6">
           {children}
         </div>
       </main>

@@ -26,7 +26,7 @@ export const mapSupabaseInvoiceToInvoice = (item: any): Invoice => {
     amount: invoiceItem.amount || ""
   }));
 
-    return {
+  return {
       id: item.invoice_uuid,
       displayNumber: item.invoice_number,
       client: clientDetails.name || "",
