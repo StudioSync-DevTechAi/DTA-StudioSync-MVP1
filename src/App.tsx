@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { Suspense } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,6 +14,7 @@ import { PermissionGuard } from "./components/rbac/PermissionGuard";
 import { LoadingSpinner } from "./components/ui/loading-spinner";
 
 // Lazy load all page components
+const Landing = React.lazy(() => import("./pages/Landing"));
 const Home = React.lazy(() => import("./pages/Home"));
 const Auth = React.lazy(() => import("./pages/Auth"));
 const AuthCallback = React.lazy(() => import("./pages/AuthCallback"));
@@ -41,15 +42,19 @@ const QuoteEnquiries = React.lazy(() => import("./pages/QuoteEnquiries"));
 const PublicPhotographerDirectory = React.lazy(() => import("./pages/PublicPhotographerDirectory"));
 const RoleManager = React.lazy(() => import("./components/rbac/RoleManager").then(mod => ({ default: mod.RoleManager })));
 
-function App() {
+function AppContent() {
+  const location = useLocation();
+  const isLandingPage = location.pathname === '/';
+  
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Header />
-      <div className="flex-1 pt-16">
+      {!isLandingPage && <Header />}
+      <div className={`flex-1 ${!isLandingPage ? 'pt-16' : ''}`}>
         <Suspense fallback={<LoadingSpinner />}>
           <Routes>
           {/* Public routes - these should be accessible without authentication */}
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Landing />} />
+          <Route path="/home" element={<Home />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/login" element={<Navigate to="/auth" replace />} />
@@ -195,13 +200,19 @@ function App() {
           </Routes>
         </Suspense>
       </div>
-      <Footer />
+      {!isLandingPage && <Footer />}
       {/* Bypass Auth Toggle */}
       <BypassAuthToggle />
       
       <Toaster />
       <RadixToaster />
     </div>
+  );
+}
+
+function App() {
+  return (
+    <AppContent />
   );
 }
 
