@@ -19,6 +19,7 @@ export default function EstimatesPage() {
     isEditing,
     currentTab,
     filteredEstimates,
+    isLoadingApproved,
     setCurrentTab,
     handleEditEstimate,
     handleOpenPreview,
@@ -27,7 +28,8 @@ export default function EstimatesPage() {
     handleGoToScheduling,
     handleCreateNewEstimate,
     handleCloseForm,
-    handleClosePreview
+    handleClosePreview,
+    handleEstimateSaved
   } = useEstimatesPage();
 
   useEffect(() => {
@@ -38,14 +40,18 @@ export default function EstimatesPage() {
     return () => clearTimeout(timer);
   }, []);
 
-  if (isLoading) {
+  // Show loading spinner for initial load or when fetching approved estimates
+  if (isLoading || (isLoadingApproved && currentTab === "approved")) {
     return (
       <Layout>
         <div 
           className="space-y-3 xs:space-y-4 sm:space-y-5 md:space-y-6 p-2 xs:p-3 sm:p-4 md:p-5 lg:p-6 w-full overflow-x-hidden"
           style={{ backgroundColor: 'rgba(26, 15, 61, 0.98)', backdropFilter: 'blur(10px)', minHeight: '100vh' }}
         >
-          <LoadingSpinner text="Loading estimates..." fullScreen={false} />
+          <LoadingSpinner 
+            text={isLoadingApproved && currentTab === "approved" ? "Loading approved estimates..." : "Loading estimates..."} 
+            fullScreen={false} 
+          />
         </div>
       </Layout>
     );
@@ -78,6 +84,7 @@ export default function EstimatesPage() {
               open={showNewEstimateForm}
               onClose={handleCloseForm}
               editingEstimate={isEditing ? selectedEstimate : null}
+              onSave={handleEstimateSaved}
             />
           </PermissionGuard>
 

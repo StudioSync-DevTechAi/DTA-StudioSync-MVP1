@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Loader2, ChevronRight, ChevronDown } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
@@ -73,6 +73,7 @@ export function ProjectBoard({ onNewProject }: ProjectBoardProps) {
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [expandedTab, setExpandedTab] = useState<string | null>(null); // For mobile accordion
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
 
   // Fetch projects from database
@@ -114,7 +115,8 @@ export function ProjectBoard({ onNewProject }: ProjectBoardProps) {
           project_type,
           project_status,
           start_date,
-          clientid_phno
+          clientid_phno,
+          drafted_json
         `)
         .order('created_at', { ascending: false });
 
@@ -165,15 +167,46 @@ export function ProjectBoard({ onNewProject }: ProjectBoardProps) {
         }
 
         // Transform database data to Project interface
-        const transformedProjects: Project[] = projectsData.map((project: any) => ({
-          id: project.project_estimate_uuid,
-          projectUuid: project.project_estimate_uuid,
-          title: project.project_name || "Untitled Project",
-          status: mapDatabaseStatusToFrontend(project.project_status),
-          clientName: project.clientid_phno ? clientMap[project.clientid_phno] : undefined,
-          eventType: project.project_type || undefined,
-          startDate: project.start_date || undefined,
-        }));
+        const transformedProjects: Project[] = projectsData.map((project: any) => {
+          // Try to get project name from multiple sources
+          let projectTitle = project.project_name;
+          
+          // If project_name is empty, try to get it from drafted_json
+          if (!projectTitle && project.drafted_json) {
+            try {
+              const draftedData = typeof project.drafted_json === 'string' 
+                ? JSON.parse(project.drafted_json) 
+                : project.drafted_json;
+              
+              // Check various possible locations in drafted_json
+              projectTitle = draftedData?.projectName 
+                || draftedData?.project_name 
+                || draftedData?.formData?.projectName
+                || draftedData?.projectDetails?.project_name;
+              
+              if (projectTitle) {
+                console.log(`Found project name in drafted_json for ${project.project_estimate_uuid}:`, projectTitle);
+              }
+            } catch (e) {
+              console.warn('Error parsing drafted_json for project:', project.project_estimate_uuid, e);
+            }
+          }
+          
+          // Log if project name is still missing
+          if (!projectTitle) {
+            console.warn(`Project ${project.project_estimate_uuid} has no project_name. project_name:`, project.project_name, 'drafted_json exists:', !!project.drafted_json);
+          }
+          
+          return {
+            id: project.project_estimate_uuid,
+            projectUuid: project.project_estimate_uuid,
+            title: projectTitle || "Untitled Project",
+            status: mapDatabaseStatusToFrontend(project.project_status),
+            clientName: project.clientid_phno ? clientMap[project.clientid_phno] : undefined,
+            eventType: project.project_type || undefined,
+            startDate: project.start_date || undefined,
+          };
+        });
 
         console.log(`Transformed ${transformedProjects.length} projects for display`);
         
@@ -219,10 +252,10 @@ export function ProjectBoard({ onNewProject }: ProjectBoardProps) {
     }
   };
 
-  // Fetch projects on component mount
+  // Fetch projects on component mount and when location changes (to refresh after edits)
   useEffect(() => {
     fetchProjects();
-  }, []);
+  }, [location.pathname]); // Refresh when navigating back to dashboard
 
   // Refetch projects function (can be called after updates)
   const refetchProjects = async () => {

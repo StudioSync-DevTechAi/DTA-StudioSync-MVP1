@@ -5,7 +5,7 @@ import { generatePreviewEstimate } from "../../utils/estimateHelpers";
 import { EstimateFormData, PreviewEstimate } from "../types";
 import { supabase } from "@/integrations/supabase/client";
 
-export function useEstimateForm(editingEstimate?: any) {
+export function useEstimateForm(editingEstimate?: any, onSaveCallback?: (estimate: any) => void) {
   const { toast } = useToast();
   const [currentPage, setCurrentPage] = useState(0);
   const [formData, setFormData] = useState<EstimateFormData>({
@@ -186,20 +186,34 @@ export function useEstimateForm(editingEstimate?: any) {
         let estimates = savedEstimates ? JSON.parse(savedEstimates) : [];
         
         if (editingEstimate) {
+          // Update existing estimate
+          const updatedEstimate = {
+            ...previewEstimate,
+            id: previewEstimate.id || editingEstimate.id,
+            project_estimate_uuid: previewEstimate.project_estimate_uuid || editingEstimate.project_estimate_uuid,
+            projectEstimateUuid: previewEstimate.projectEstimateUuid || editingEstimate.projectEstimateUuid
+          };
           estimates = estimates.map(est => 
-            est.id === previewEstimate.id ? previewEstimate : est
+            est.id === previewEstimate.id || est.id === editingEstimate.id ? updatedEstimate : est
           );
           
           toast({
             title: "Estimate Updated",
             description: `Estimate for ${previewEstimate.clientName} has been updated successfully.`,
           });
+          
+          // Call the callback to notify parent component
+          if (onSaveCallback) {
+            onSaveCallback(updatedEstimate);
+          }
         } else {
           // Add the project_estimate_uuid to the preview estimate
           const savedEstimate = {
             ...previewEstimate,
             id: data.project_estimate_uuid,
-            projectEstimateUuid: data.project_estimate_uuid
+            project_estimate_uuid: data.project_estimate_uuid,
+            projectEstimateUuid: data.project_estimate_uuid,
+            status: "pending" // Ensure new estimates have pending status
           };
           estimates.unshift(savedEstimate);
           
@@ -207,6 +221,11 @@ export function useEstimateForm(editingEstimate?: any) {
             title: "Estimate Created",
             description: `Estimate for ${formData.clientName} has been created successfully.`,
           });
+          
+          // Call the callback to notify parent component
+          if (onSaveCallback) {
+            onSaveCallback(savedEstimate);
+          }
         }
         
         localStorage.setItem("estimates", JSON.stringify(estimates));
