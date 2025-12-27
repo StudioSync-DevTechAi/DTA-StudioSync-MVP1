@@ -228,8 +228,8 @@ export function TimePickerClock({
                         <div
                           key={i}
                           className="absolute text-xs font-medium text-white"
-                          style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}
                           style={{
+                            textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px',
                             left: `${pos.x}%`,
                             top: `${pos.y}%`,
                             transform: "translate(-50%, -50%)",
@@ -249,8 +249,8 @@ export function TimePickerClock({
                         <div
                           key={i}
                           className="absolute text-xs font-medium text-white"
-                          style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}
                           style={{
+                            textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px',
                             left: `${pos.x}%`,
                             top: `${pos.y}%`,
                             transform: "translate(-50%, -50%)",
