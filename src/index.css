@@ -176,6 +176,37 @@
     }
   }
 
+  /* Payment History Scrollbar Styles */
+  .payment-history-scroll {
+    overflow-y: scroll !important;
+  }
+  
+  .payment-history-scroll::-webkit-scrollbar {
+    width: 8px;
+    -webkit-appearance: none;
+  }
+  
+  .payment-history-scroll::-webkit-scrollbar-track {
+    background: rgba(26, 15, 61, 0.98);
+    border-radius: 4px;
+  }
+  
+  .payment-history-scroll::-webkit-scrollbar-thumb {
+    background: #5a4a7a;
+    border-radius: 4px;
+    min-height: 20px;
+  }
+  
+  .payment-history-scroll::-webkit-scrollbar-thumb:hover {
+    background: #6b5a8a;
+  }
+  
+  /* Firefox scrollbar */
+  .payment-history-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: #5a4a7a rgba(26, 15, 61, 0.98);
+  }
+
   .animate-slide-in-from-left {
     animation: slide-in-from-left 0.5s ease-in-out;
   }

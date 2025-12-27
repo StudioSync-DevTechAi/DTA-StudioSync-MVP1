@@ -4,12 +4,13 @@ import { Invoice } from "@/components/invoices/types";
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchInvoices, addInvoice as apiAddInvoice, updateInvoice as apiUpdateInvoice } from "./api/invoiceApi";
-import { filterInvoices, sortInvoices, SortOption } from "./utils/invoiceFilters";
+import { filterInvoices, sortInvoices, SortOption, SearchType } from "./utils/invoiceFilters";
 import { useEstimateProcessing } from "./useEstimateProcessing";
 
 export function useInvoices() {
   const [sortBy, setSortBy] = useState<SortOption>("date");
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchType, setSearchType] = useState<SearchType>("client");
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const { toast } = useToast();
@@ -77,7 +78,7 @@ export function useInvoices() {
 
   // Filter and sort invoices
   const filteredInvoices = sortInvoices(
-    filterInvoices(invoices, searchQuery, statusFilter),
+    filterInvoices(invoices, searchQuery, statusFilter, searchType),
     sortBy
   );
 
@@ -134,6 +135,8 @@ export function useInvoices() {
     setSortBy,
     searchQuery,
     setSearchQuery,
+    searchType,
+    setSearchType,
     statusFilter,
     setStatusFilter,
     showNewInvoice,

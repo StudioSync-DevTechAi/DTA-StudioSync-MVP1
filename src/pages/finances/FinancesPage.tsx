@@ -53,19 +53,19 @@ export default function FinancesPage() {
           className="w-full"
         >
           <TabsList 
-            className="grid w-full grid-cols-1 sm:grid-cols-3 mb-4 sm:mb-8 gap-2 sm:gap-0 bg-white/10 border-white/20"
+            className="grid w-full grid-cols-1 sm:grid-cols-3 mb-3 xs:mb-4 sm:mb-6 md:mb-8 gap-2 sm:gap-0 bg-white/10 border-white/20 h-auto sm:h-10"
             style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', borderColor: 'rgba(255, 255, 255, 0.2)' }}
           >
             <TabsTrigger 
               value="overview"
-              className="data-[state=active]:bg-white/20 data-[state=active]:text-white text-gray-300"
+              className="data-[state=active]:bg-white/20 data-[state=active]:text-white text-gray-300 text-xs xs:text-sm px-3 xs:px-4 py-2 xs:py-2.5 sm:py-0"
             >
               Overview
             </TabsTrigger>
             <PermissionGuard permission={PERMISSIONS.FINANCES_MANAGE} fallback={<></>}>
               <TabsTrigger 
                 value="transactions"
-                className="data-[state=active]:bg-white/20 data-[state=active]:text-white text-gray-300"
+                className="data-[state=active]:bg-white/20 data-[state=active]:text-white text-gray-300 text-xs xs:text-sm px-3 xs:px-4 py-2 xs:py-2.5 sm:py-0"
               >
                 Transactions
               </TabsTrigger>
@@ -73,9 +73,10 @@ export default function FinancesPage() {
             <PermissionGuard permission={PERMISSIONS.FINANCES_REPORTS} fallback={<></>}>
               <TabsTrigger 
                 value="reports"
-                className="data-[state=active]:bg-white/20 data-[state=active]:text-white text-gray-300"
+                className="data-[state=active]:bg-white/20 data-[state=active]:text-white text-gray-300 text-xs xs:text-sm px-3 xs:px-4 py-2 xs:py-2.5 sm:py-0"
               >
-                Reports & Analysis
+                <span className="hidden sm:inline">Reports & Analysis</span>
+                <span className="sm:hidden">Reports</span>
               </TabsTrigger>
             </PermissionGuard>
           </TabsList>

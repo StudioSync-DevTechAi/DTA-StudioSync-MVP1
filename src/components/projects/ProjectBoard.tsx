@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus, Loader2, ChevronRight, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -71,6 +71,7 @@ export function ProjectBoard({ onNewProject }: ProjectBoardProps) {
   const [draggedProject, setDraggedProject] = useState<string | null>(null);
   const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [expandedTab, setExpandedTab] = useState<string | null>(null); // For mobile accordion
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -381,7 +382,7 @@ export function ProjectBoard({ onNewProject }: ProjectBoardProps) {
   };
 
   return (
-    <div className="flex-1 p-3 sm:p-4 md:p-6">
+    <div className="flex-1 p-2 xs:p-3 sm:p-4 md:p-5 lg:p-6 w-full md:overflow-x-auto scroll-smooth overflow-x-hidden">
 
       {/* Loading State */}
       {loading && (
@@ -406,104 +407,231 @@ export function ProjectBoard({ onNewProject }: ProjectBoardProps) {
       {/* Projects Board */}
       {!loading && !error && (
       <div 
-        className="space-y-3 sm:space-y-4"
+        className="space-y-3 sm:space-y-4 md:space-y-5 lg:space-y-6 w-full md:overflow-x-auto scroll-smooth overflow-x-hidden"
         style={{ backgroundColor: 'rgba(26, 15, 61, 0.98)', backdropFilter: 'blur(10px)', minHeight: '100vh' }}
       >
-        {/* Status Headers Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
-          {statusColumns.map((column) => (
-            <div key={column.id} className="flex items-center justify-center h-8 sm:h-10">
-              <h3 className="font-bold text-xs sm:text-sm uppercase tracking-wide text-center text-white">
-                {column.label}
-              </h3>
-            </div>
-          ))}
+        {/* Desktop Grid View (md and above) */}
+        <div className="hidden md:block w-full">
+          {/* Status Headers Row */}
+          <div className="grid grid-cols-5 gap-2 sm:gap-3 md:gap-4 w-full">
+            {statusColumns.map((column) => (
+              <div key={column.id} className="flex items-center justify-center h-8 sm:h-10 md:h-12 px-1 sm:px-2">
+                <h3 className="font-bold text-[10px] xs:text-xs sm:text-sm md:text-base uppercase tracking-wide text-center text-white break-words leading-tight">
+                  {column.label}
+                </h3>
+              </div>
+            ))}
+          </div>
+
+          {/* Project Cards Grid */}
+          <div className="grid grid-cols-5 gap-2 sm:gap-3 md:gap-4 w-full">
+            {statusColumns.map((column) => {
+              const columnProjects = getProjectsByStatus(column.id);
+              const isDragOver = dragOverColumn === column.id;
+              return (
+                <div
+                  key={column.id}
+                  className="flex flex-col"
+                  data-drop-zone
+                  onDragOver={(e) => handleDragOver(e, column.id)}
+                  onDragLeave={handleDragLeave}
+                  onDrop={(e) => handleDrop(e, column.id)}
+                >
+                  <div
+                    className={`space-y-2 sm:space-y-3 md:space-y-4 min-h-[200px] xs:min-h-[250px] sm:min-h-[300px] md:min-h-[350px] lg:min-h-[400px] transition-all duration-200 rounded-lg p-1.5 sm:p-2 md:p-3 ${
+                      isDragOver
+                        ? "bg-primary/10 border-2 border-dashed border-primary"
+                        : "border-2 border-transparent"
+                    }`}
+                  >
+                    {columnProjects.length === 0 ? (
+                      <div
+                        className={`text-center text-[10px] xs:text-xs sm:text-sm md:text-base text-muted-foreground py-4 xs:py-5 sm:py-6 md:py-8 border-2 border-dashed rounded-lg ${
+                          isDragOver ? "border-primary bg-primary/5" : ""
+                        }`}
+                      >
+                        {isDragOver ? "Drop here" : "No projects"}
+                      </div>
+                    ) : (
+                      columnProjects.map((project) => {
+                        const isDragging = draggedProject === project.id;
+                        return (
+                          <Card
+                            key={project.id}
+                            draggable
+                            onDragStart={(e) => handleDragStart(e, project.id)}
+                            onDragEnd={handleDragEnd}
+                            className={`relative overflow-hidden transition-all duration-300 p-2 xs:p-2.5 sm:p-3 md:p-4 cursor-move border-2 ${
+                              isDragging
+                                ? "opacity-50 scale-95 shadow-lg border-primary"
+                                : "opacity-100 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(59,130,246,0.4)] hover:border-blue-400/60 hover:scale-[1.02]"
+                            }`}
+                            style={{ 
+                              backgroundColor: '#2d1b4e', 
+                              borderColor: '#3d2a5f',
+                              borderWidth: '2px',
+                              borderStyle: 'solid'
+                            }}
+                            onClick={(e) => {
+                              // Only navigate if not dragging
+                              if (!isDragging && project.projectUuid) {
+                                navigate(`/estimates/projects/new?projectUuid=${project.projectUuid}&page=2`);
+                              }
+                            }}
+                          >
+                            <div className="flex items-start justify-between gap-1.5 sm:gap-2 mb-1">
+                              <h4 className="font-medium text-[11px] xs:text-xs sm:text-sm md:text-base lg:text-lg flex-1 truncate text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>
+                                {project.title}
+                              </h4>
+                              {isUpdatingStatus && isDragging && (
+                                <Loader2 className="h-3 w-3 xs:h-3.5 xs:w-3.5 sm:h-4 sm:w-4 animate-spin text-primary shrink-0" />
+                              )}
+                            </div>
+                            {project.clientName && (
+                              <p className="text-[10px] xs:text-xs sm:text-sm text-white/80 mb-0.5 sm:mb-1 truncate" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
+                                {project.clientName}
+                              </p>
+                            )}
+                            {project.eventType && (
+                              <p className="text-[10px] xs:text-xs sm:text-sm text-white/80 mb-0.5 sm:mb-1 truncate" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
+                                {project.eventType}
+                              </p>
+                            )}
+                            {project.startDate && (
+                              <p className="text-[10px] xs:text-xs sm:text-sm text-white/80" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
+                                {new Date(project.startDate).toLocaleDateString()}
+                              </p>
+                            )}
+                          </Card>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Project Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+        {/* Mobile Accordion View (below md) */}
+        <div className="md:hidden space-y-2">
           {statusColumns.map((column) => {
             const columnProjects = getProjectsByStatus(column.id);
+            const isExpanded = expandedTab === column.id;
             const isDragOver = dragOverColumn === column.id;
+            
             return (
               <div
                 key={column.id}
-                className="flex flex-col"
+                className="rounded-lg border-2"
+                style={{ 
+                  backgroundColor: '#2d1b4e', 
+                  borderColor: '#3d2a5f',
+                  borderWidth: '2px',
+                  borderStyle: 'solid'
+                }}
                 data-drop-zone
                 onDragOver={(e) => handleDragOver(e, column.id)}
                 onDragLeave={handleDragLeave}
                 onDrop={(e) => handleDrop(e, column.id)}
               >
-                <div
-                  className={`space-y-2 sm:space-y-3 min-h-[300px] sm:min-h-[400px] transition-all duration-200 rounded-lg p-2 ${
-                    isDragOver
-                      ? "bg-primary/10 border-2 border-dashed border-primary"
-                      : "border-2 border-transparent"
-                  }`}
+                {/* Tab Header */}
+                <button
+                  onClick={() => setExpandedTab(isExpanded ? null : column.id)}
+                  className="w-full flex items-center justify-between p-3 text-left transition-colors hover:bg-white/5"
+                  style={{ backgroundColor: isExpanded ? 'rgba(61, 42, 95, 0.5)' : 'transparent' }}
                 >
-                  {columnProjects.length === 0 ? (
-                    <div
-                      className={`text-center text-xs sm:text-sm text-muted-foreground py-6 sm:py-8 border-2 border-dashed rounded-lg ${
-                        isDragOver ? "border-primary bg-primary/5" : ""
-                      }`}
-                    >
-                      {isDragOver ? "Drop here" : "No projects"}
-                    </div>
-                  ) : (
-                    columnProjects.map((project) => {
-                      const isDragging = draggedProject === project.id;
-                      return (
-                        <Card
-                          key={project.id}
-                          draggable
-                          onDragStart={(e) => handleDragStart(e, project.id)}
-                          onDragEnd={handleDragEnd}
-                          className={`relative overflow-hidden transition-all duration-300 p-3 sm:p-4 cursor-move border-2 ${
-                            isDragging
-                              ? "opacity-50 scale-95 shadow-lg border-primary"
-                              : "opacity-100 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(59,130,246,0.4)] hover:border-blue-400/60 hover:scale-[1.02]"
-                          }`}
-                          style={{ 
-                            backgroundColor: '#2d1b4e', 
-                            borderColor: '#3d2a5f',
-                            borderWidth: '2px',
-                            borderStyle: 'solid'
-                          }}
-                          onClick={(e) => {
-                            // Only navigate if not dragging
-                            if (!isDragging && project.projectUuid) {
-                              navigate(`/estimates/projects/new?projectUuid=${project.projectUuid}&page=2`);
-                            }
-                          }}
-                        >
-                          <div className="flex items-start justify-between gap-2 mb-1">
-                            <h4 className="font-medium text-sm sm:text-base flex-1 truncate text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>
-                              {project.title}
-                            </h4>
-                            {isUpdatingStatus && isDragging && (
-                              <Loader2 className="h-4 w-4 animate-spin text-primary shrink-0" />
+                  <h3 className="font-bold text-sm uppercase tracking-wide text-white flex-1" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>
+                    {column.label}
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    {columnProjects.length > 0 && (
+                      <span className="text-xs text-white/70 bg-white/10 px-2 py-0.5 rounded-full" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
+                        {columnProjects.length}
+                      </span>
+                    )}
+                    {isExpanded ? (
+                      <ChevronDown className="h-5 w-5 text-white flex-shrink-0" />
+                    ) : (
+                      <ChevronRight className="h-5 w-5 text-white flex-shrink-0" />
+                    )}
+                  </div>
+                </button>
+
+                {/* Tab Content */}
+                {isExpanded && (
+                  <div
+                    className={`px-3 pb-3 space-y-2 transition-all duration-200 ${
+                      isDragOver
+                        ? "bg-primary/10 border-t-2 border-dashed border-primary"
+                        : "border-t border-white/10"
+                    }`}
+                  >
+                    {columnProjects.length === 0 ? (
+                      <div
+                        className={`text-center text-xs text-white/60 py-6 border-2 border-dashed rounded-lg ${
+                          isDragOver ? "border-primary bg-primary/5" : "border-white/20"
+                        }`}
+                        style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}
+                      >
+                        {isDragOver ? "Drop here" : "No projects"}
+                      </div>
+                    ) : (
+                      columnProjects.map((project) => {
+                        const isDragging = draggedProject === project.id;
+                        return (
+                          <Card
+                            key={project.id}
+                            draggable
+                            onDragStart={(e) => handleDragStart(e, project.id)}
+                            onDragEnd={handleDragEnd}
+                            className={`relative overflow-hidden transition-all duration-300 p-3 cursor-move border-2 ${
+                              isDragging
+                                ? "opacity-50 scale-95 shadow-lg border-primary"
+                                : "opacity-100 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(59,130,246,0.4)] hover:border-blue-400/60"
+                            }`}
+                            style={{ 
+                              backgroundColor: '#1a0f3d', 
+                              borderColor: '#3d2a5f',
+                              borderWidth: '2px',
+                              borderStyle: 'solid'
+                            }}
+                            onClick={(e) => {
+                              // Only navigate if not dragging
+                              if (!isDragging && project.projectUuid) {
+                                navigate(`/estimates/projects/new?projectUuid=${project.projectUuid}&page=2`);
+                              }
+                            }}
+                          >
+                            <div className="flex items-start justify-between gap-2 mb-1">
+                              <h4 className="font-medium text-sm flex-1 truncate text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>
+                                {project.title}
+                              </h4>
+                              {isUpdatingStatus && isDragging && (
+                                <Loader2 className="h-4 w-4 animate-spin text-primary shrink-0" />
+                              )}
+                            </div>
+                            {project.clientName && (
+                              <p className="text-xs text-white/80 mb-1 truncate" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
+                                {project.clientName}
+                              </p>
                             )}
-                          </div>
-                          {project.clientName && (
-                            <p className="text-xs text-white/80 mb-1 truncate" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
-                              {project.clientName}
-                            </p>
-                          )}
-                          {project.eventType && (
-                            <p className="text-xs text-white/80 mb-1 truncate" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
-                              {project.eventType}
-                            </p>
-                          )}
-                          {project.startDate && (
-                            <p className="text-xs text-white/80" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
-                              {new Date(project.startDate).toLocaleDateString()}
-                            </p>
-                          )}
-                        </Card>
-                      );
-                    })
-                  )}
-                </div>
+                            {project.eventType && (
+                              <p className="text-xs text-white/80 mb-1 truncate" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
+                                {project.eventType}
+                              </p>
+                            )}
+                            {project.startDate && (
+                              <p className="text-xs text-white/80" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
+                                {new Date(project.startDate).toLocaleDateString()}
+                              </p>
+                            )}
+                          </Card>
+                        );
+                      })
+                    )}
+                  </div>
+                )}
               </div>
             );
           })}

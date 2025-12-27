@@ -52,19 +52,19 @@ export function WorkInProgress({
   if (variant === "card") {
     return (
       <div className={cn(
-        "flex items-center gap-3 p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl shadow-sm",
+        "flex items-center gap-1.5 p-1.5 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-lg shadow-sm",
         className
       )}>
         <img 
           src="/WorkInProgress_WebApp.svg" 
           alt="Work in Progress" 
-          className={cn("rounded-lg", sizeClasses[size])}
+          className={cn("rounded-md h-5 w-5")}
         />
         <div>
-          <h3 className={cn("font-semibold text-amber-900", textSizes[size])}>
+          <h3 className={cn("font-semibold text-amber-900 text-xs")}>
             {text}
           </h3>
-          <p className="text-xs text-amber-700">
+          <p className="text-[10px] text-amber-700">
             This feature is currently under development
           </p>
         </div>

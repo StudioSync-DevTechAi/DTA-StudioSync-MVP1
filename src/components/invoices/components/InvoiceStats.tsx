@@ -27,7 +27,7 @@ export function InvoiceStats({ invoices }: InvoiceStatsProps) {
   const pendingInvoices = invoices.filter(invoice => invoice.status === "pending").length;
 
   return (
-    <div className="grid gap-4 md:grid-cols-3">
+    <div className="grid gap-2 xs:gap-3 sm:gap-4 grid-cols-1 xs:grid-cols-2 md:grid-cols-3 w-full max-w-full">
       <StatCard
         title="Total Outstanding"
         value={`₹${totalOutstanding.toLocaleString()}`}

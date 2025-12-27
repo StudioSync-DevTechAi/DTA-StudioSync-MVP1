@@ -27,7 +27,7 @@ export const StatCard = memo(function StatCard({
   return (
     <Card 
       className={cn(
-        "relative overflow-hidden transition-all hover:shadow-lg hover:scale-105 animated-inner-box",
+        "relative overflow-hidden transition-all hover:shadow-lg hover:scale-105 animated-inner-box w-full",
         onClick && "cursor-pointer",
         className
       )}
@@ -46,27 +46,27 @@ export const StatCard = memo(function StatCard({
       }}
       onClick={onClick}
     >
-      <div className="p-4 sm:p-6">
-        <div className="flex items-center justify-between gap-2">
+      <div className="p-3 xs:p-4 sm:p-5 md:p-6 w-full">
+        <div className="flex items-center justify-between gap-1.5 xs:gap-2">
           <div className="flex-1 min-w-0">
-            <p className="text-xs sm:text-sm font-medium truncate -mt-1" style={{ color: '#ffffff' }}>{title}</p>
+            <p className="text-[10px] xs:text-xs sm:text-sm font-medium truncate -mt-0.5 xs:-mt-1" style={{ color: '#ffffff', textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>{title}</p>
             <h3 
               className={cn(
-                "text-xl sm:text-2xl font-semibold mt-1 sm:mt-2 break-words",
+                "text-lg xs:text-xl sm:text-2xl font-semibold mt-0.5 xs:mt-1 sm:mt-2 break-words",
                 onClick && "font-bold"
               )}
-              style={{ color: '#ffffff' }}
+              style={{ color: '#ffffff', textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}
             >
               {value}
             </h3>
             {trend && (
-              <p className="text-xs mt-1 truncate" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
+              <p className="text-[10px] xs:text-xs mt-0.5 xs:mt-1 truncate" style={{ color: 'rgba(255, 255, 255, 0.9)', textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
                 {trend.value >= 0 ? "+" : "-"}{Math.abs(trend.value)}% {trend.label}
               </p>
             )}
           </div>
-          <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-white/10 flex items-center justify-center shrink-0">
-            <Icon className="h-5 w-5 sm:h-6 sm:w-6" style={{ color: '#ffffff' }} />
+          <div className="h-8 w-8 xs:h-10 xs:w-10 sm:h-12 sm:w-12 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+            <Icon className="h-4 w-4 xs:h-5 xs:w-5 sm:h-6 sm:w-6" style={{ color: '#ffffff' }} />
           </div>
         </div>
       </div>

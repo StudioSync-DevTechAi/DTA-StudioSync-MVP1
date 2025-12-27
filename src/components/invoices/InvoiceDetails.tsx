@@ -28,6 +28,7 @@ export function InvoiceDetails({ invoice, open, onClose, onEdit }: InvoiceDetail
   if (!invoice) return null;
 
   const { toast } = useToast();
+  const versionHistoryScrollRef = useRef<HTMLDivElement>(null);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const invoiceRef = useRef<HTMLDivElement>(null);
 
@@ -132,69 +133,103 @@ export function InvoiceDetails({ invoice, open, onClose, onEdit }: InvoiceDetail
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent 
-                    className="w-80 max-h-96 overflow-y-auto"
+                    className="w-80 max-h-96 flex flex-col overflow-hidden"
                     style={{ backgroundColor: 'rgba(26, 15, 61, 0.98)', backdropFilter: 'blur(10px)', borderColor: '#3d2a5f' }}
                   >
-                    <div className="space-y-3">
-                      <h4 className="font-semibold text-white mb-3" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>
-                        Version History
-                        {invoice.currentVersion && (
-                          <span className="text-sm font-normal text-white/70 ml-2">
-                            (Current: v{invoice.currentVersion})
-                          </span>
-                        )}
-                      </h4>
-                      <div className="space-y-2">
-                        {invoice.versionHistory
-                          .slice()
-                          .reverse()
-                          .map((version, index) => {
-                            const versionData = version.invoice_form_data || {};
-                            const paymentTracking = versionData.paymentTracking || {};
-                            const totals = versionData.totals || {};
-                            const totalAmount = paymentTracking.totalAmount || totals.total || "0";
-                            
-                            return (
-                              <div
-                                key={index}
-                                className="p-3 rounded-md border"
-                                style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a' }}
-                              >
-                                <div className="flex items-center justify-between mb-2">
-                                  <span className="text-sm font-medium text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>
-                                    Version {version.version}
-                                  </span>
-                                  <span className="text-xs text-white/70" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
-                                    {format(new Date(version.updated_at), 'MMM dd, yyyy HH:mm')}
-                                  </span>
-                                </div>
-                                <div className="text-sm text-white/80" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
-                                  <div>Total: ₹{totalAmount}</div>
-                                  {version.updated_by && (
-                                    <div className="text-xs text-white/60 mt-1">
-                                      Updated by: {version.updated_by}
-                                    </div>
-                                  )}
-                                </div>
+                    <h4 className="font-semibold text-white mb-3 flex-shrink-0" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>
+                      Version History
+                      {invoice.currentVersion && (
+                        <span className="text-sm font-normal text-white/70 ml-2">
+                          (Current: v{invoice.currentVersion})
+                        </span>
+                      )}
+                    </h4>
+                    <div 
+                      ref={versionHistoryScrollRef}
+                      className="space-y-2 overflow-y-scroll flex-1 pr-2 payment-history-scroll"
+                      style={{
+                        scrollbarWidth: 'thin',
+                        scrollbarColor: '#5a4a7a rgba(26, 15, 61, 0.98)',
+                        overflowY: 'scroll',
+                        WebkitOverflowScrolling: 'touch',
+                        overscrollBehavior: 'contain',
+                        maxHeight: 'calc(24rem - 4rem)'
+                      }}
+                      onWheel={(e) => {
+                        // Handle wheel events to enable scrolling when hovering over cards
+                        if (versionHistoryScrollRef.current) {
+                          const element = versionHistoryScrollRef.current;
+                          const { scrollTop, scrollHeight, clientHeight } = element;
+                          const maxScroll = scrollHeight - clientHeight;
+                          
+                          // Check if we can scroll in the direction of the wheel
+                          const canScrollDown = scrollTop < maxScroll;
+                          const canScrollUp = scrollTop > 0;
+                          
+                          // If scrolling down and we can scroll down, or scrolling up and we can scroll up
+                          if ((e.deltaY > 0 && canScrollDown) || (e.deltaY < 0 && canScrollUp)) {
+                            // Scroll the container
+                            element.scrollTop += e.deltaY;
+                            e.preventDefault();
+                            e.stopPropagation();
+                          } else if ((e.deltaY > 0 && !canScrollDown) || (e.deltaY < 0 && !canScrollUp)) {
+                            // At scroll boundary, prevent default to stop page scroll
+                            e.preventDefault();
+                            e.stopPropagation();
+                          }
+                        }
+                      }}
+                      tabIndex={0}
+                    >
+                      {invoice.versionHistory
+                        .slice()
+                        .reverse()
+                        .map((version, index) => {
+                          const versionData = version.invoice_form_data || {};
+                          const paymentTracking = versionData.paymentTracking || {};
+                          const totals = versionData.totals || {};
+                          const totalAmount = paymentTracking.totalAmount || totals.total || "0";
+                          
+                          return (
+                            <div
+                              key={index}
+                              className="p-3 rounded-md border flex-shrink-0"
+                              style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a' }}
+                            >
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-sm font-medium text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>
+                                  Version {version.version}
+                                </span>
+                                <span className="text-xs text-white/70" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
+                                  {format(new Date(version.updated_at), 'MMM dd, yyyy HH:mm')}
+                                </span>
                               </div>
-                            );
-                          })}
-                        {invoice.currentVersion && (
-                          <div
-                            className="p-3 rounded-md border"
-                            style={{ backgroundColor: 'rgba(0, 136, 254, 0.2)', borderColor: '#0088FE' }}
-                          >
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="text-sm font-medium text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>
-                                Version {invoice.currentVersion} (Current)
-                              </span>
+                              <div className="text-sm text-white/80" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
+                                <div>Total: ₹{totalAmount}</div>
+                                {version.updated_by && (
+                                  <div className="text-xs text-white/60 mt-1">
+                                    Updated by: {version.updated_by}
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                            <div className="text-sm text-white/80" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
-                              <div>Total: ₹{invoice.amount}</div>
-                            </div>
+                          );
+                        })}
+                      {invoice.currentVersion && (
+                        <div
+                          className="p-3 rounded-md border flex-shrink-0"
+                          style={{ backgroundColor: 'rgba(0, 136, 254, 0.2)', borderColor: '#0088FE' }}
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-medium text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>
+                              Version {invoice.currentVersion} (Current)
+                            </span>
                           </div>
-                        )}
-                      </div>
+                          <div className="text-sm text-white/80" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
+                            <div>Total: ₹{invoice.amount}</div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </PopoverContent>
                 </Popover>

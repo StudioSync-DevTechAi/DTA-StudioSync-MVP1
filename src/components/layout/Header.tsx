@@ -56,25 +56,47 @@ export function Header() {
         `
       }}
     >
-      <div className="container mx-auto px-4 py-3 relative z-10">
-        <div className="flex items-center justify-between">
-          {/* Logo with increased left margin on mobile */}
-          <button 
-            onClick={handleLogoClick}
-            className="flex items-center space-x-2 text-2xl font-bold text-white hover:text-gray-200 transition-colors ml-12 lg:ml-0"
-          >
-            <img 
-              src="/photosyncwork-logo.svg" 
-              alt="StudioSyncWork Logo" 
-              className="h-8 w-8 object-contain"
-            />
-            <span>StudioSyncWork</span>
-          </button>
+      <div className="container mx-auto px-2 xs:px-3 sm:px-4 py-2 xs:py-2.5 sm:py-3 relative z-10">
+        <div className="flex items-center justify-between gap-2 xs:gap-3 sm:gap-4 relative">
+          {/* Left side - Logo on desktop, empty on mobile/tablet */}
+          <div className="flex items-center justify-start flex-shrink-0">
+            <button 
+              onClick={handleLogoClick}
+              className="flex items-center space-x-1 xs:space-x-1.5 sm:space-x-2 text-lg xs:text-xl sm:text-2xl font-bold text-white hover:text-gray-200 transition-colors hidden md:flex"
+            >
+              <img 
+                src="/photosyncwork-logo.svg" 
+                alt="StudioSyncWork Logo" 
+                className="h-6 w-6 xs:h-7 xs:w-7 sm:h-8 sm:w-8 object-contain flex-shrink-0"
+              />
+              <span className="hidden xs:inline whitespace-nowrap">StudioSyncWork</span>
+            </button>
+          </div>
           
-          {/* Work in Progress Indicator */}
-          <WorkInProgress size="sm" showText={true} text="Dev-Work In Progress" className="text-xs" />
+          {/* Center - Logo on mobile/tablet */}
+          <div className="flex-1 flex justify-center items-center absolute left-0 right-0 md:hidden pointer-events-none">
+            <button 
+              onClick={handleLogoClick}
+              className="flex items-center space-x-1 xs:space-x-1.5 sm:space-x-2 text-lg xs:text-xl sm:text-2xl font-bold text-white hover:text-gray-200 transition-colors pointer-events-auto"
+            >
+              <img 
+                src="/photosyncwork-logo.svg" 
+                alt="StudioSyncWork Logo" 
+                className="h-6 w-6 xs:h-7 xs:w-7 sm:h-8 sm:w-8 object-contain flex-shrink-0"
+              />
+              <span className="hidden xs:inline whitespace-nowrap">StudioSyncWork</span>
+            </button>
+          </div>
           
-          <div className="flex items-center space-x-2">
+          {/* Right side - Work in Progress + User menu */}
+          <div className="flex items-center justify-end gap-2 xs:gap-3 sm:gap-4 flex-shrink-0 ml-auto">
+            {/* Work in Progress Indicator */}
+            <div className="hidden sm:block flex-shrink-0">
+              <WorkInProgress size="sm" showText={true} text="Dev-Work In Progress" className="text-xs" />
+            </div>
+            
+            {/* User menu */}
+            <div className="flex items-center space-x-1 xs:space-x-1.5 sm:space-x-2 flex-shrink-0">
             {!isClientPortal && (
               <>
                 {user ? (
@@ -83,19 +105,19 @@ export function Header() {
                       variant="ghost"
                       size="icon"
                       onClick={() => navigate("/settings")}
-                      className="shrink-0 text-white hover:text-gray-200 hover:bg-white/10"
+                      className="shrink-0 text-white hover:text-gray-200 hover:bg-white/10 h-8 w-8 xs:h-9 xs:w-9 sm:h-10 sm:w-10"
                     >
-                      <Settings className="h-5 w-5" />
+                      <Settings className="h-4 w-4 xs:h-4 xs:w-4 sm:h-5 sm:w-5" />
                     </Button>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="text-white hover:text-gray-200 hover:bg-white/10">
-                          <User className="h-5 w-5" />
+                        <Button variant="ghost" size="icon" className="text-white hover:text-gray-200 hover:bg-white/10 h-8 w-8 xs:h-9 xs:w-9 sm:h-10 sm:w-10">
+                          <User className="h-4 w-4 xs:h-4 xs:w-4 sm:h-5 sm:w-5" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent 
                         align="end" 
-                        className="w-56 bg-white/10 backdrop-blur-sm border-white/20"
+                        className="w-48 xs:w-52 sm:w-56 bg-white/10 backdrop-blur-sm border-white/20"
                       >
                         <DropdownMenuLabel className="px-2 py-2">
                           <div className="font-medium truncate text-sm text-white">
@@ -146,21 +168,24 @@ export function Header() {
                       variant="ghost" 
                       size="sm" 
                       onClick={() => navigate('/auth')}
-                      className="text-white hover:text-gray-200 hover:bg-white/10"
+                      className="text-white hover:text-gray-200 hover:bg-white/10 text-xs xs:text-sm h-8 xs:h-9 sm:h-10 px-2 xs:px-3 sm:px-4"
                     >
-                      Login
+                      <span className="hidden xs:inline">Login</span>
+                      <span className="xs:hidden">Log</span>
                     </Button>
                     <Button 
                       size="sm" 
                       onClick={() => navigate('/auth')}
-                      className="bg-white/20 hover:bg-white/30 text-white border border-white/30"
+                      className="bg-white/20 hover:bg-white/30 text-white border border-white/30 text-xs xs:text-sm h-8 xs:h-9 sm:h-10 px-2 xs:px-3 sm:px-4"
                     >
-                      Get Started
+                      <span className="hidden sm:inline">Get Started</span>
+                      <span className="sm:hidden">Start</span>
                     </Button>
                   </>
                 )}
               </>
             )}
+            </div>
           </div>
         </div>
       </div>

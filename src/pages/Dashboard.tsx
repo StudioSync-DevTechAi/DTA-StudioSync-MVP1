@@ -237,7 +237,7 @@ function Dashboard() {
         </div>
 
         {/* Work in Progress Card with Action Buttons */}
-        <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+        <div className="mt-4 sm:mt-6 mb-4 sm:mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
           <WorkInProgress variant="card" size="lg" className="w-fit max-w-md" />
           <div className="flex flex-col sm:flex-row gap-2 ml-0 sm:ml-auto">
             <Button 

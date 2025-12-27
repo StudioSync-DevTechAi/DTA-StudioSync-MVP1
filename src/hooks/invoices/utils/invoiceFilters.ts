@@ -10,16 +10,31 @@ export type SortOption =
   | "status_asc" | "status_desc"
   | "date" | "amount" | "balanceHighToLow" | "balanceLowToHigh"; // Keep old options for backward compatibility
 
+export type SearchType = "client" | "invoice";
+
 // Filter invoices by search query and status
 export const filterInvoices = (
   invoices: Invoice[],
   searchQuery: string,
-  statusFilter: string | null
+  statusFilter: string | null,
+  searchType: SearchType = "client"
 ): Invoice[] => {
   return invoices.filter((invoice) => {
-    const matchesSearch = invoice.client
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
+    let matchesSearch = true;
+    
+    if (searchQuery.trim()) {
+      if (searchType === "client") {
+        matchesSearch = invoice.client
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase());
+      } else if (searchType === "invoice") {
+        const invoiceNumber = invoice.displayNumber || invoice.id.substring(0, 8);
+        matchesSearch = invoiceNumber
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase());
+      }
+    }
+    
     const matchesStatus = !statusFilter || invoice.status.toLowerCase() === statusFilter.toLowerCase();
     return matchesSearch && matchesStatus;
   });
