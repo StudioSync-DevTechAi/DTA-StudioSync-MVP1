@@ -26,9 +26,11 @@ export function PreviewContent({ currentPageIndex, estimate }: PreviewContentPro
       clientName={estimate.clientName}
       clientEmail={estimate.clientEmail || ""}
       clientPhNo={estimate.clientPhNo || ""}
+      countryCode={estimate.countryCode || '+91'}
       onClientNameChange={() => {}} // No-op function since this is read-only
       onClientEmailChange={() => {}} // No-op function since this is read-only
       onClientPhNoChange={() => {}} // No-op function since this is read-only
+      onCountryCodeChange={() => {}} // No-op function since this is read-only
       isReadOnly={true}
     />,
     <ServicesPage 

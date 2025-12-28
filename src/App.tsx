@@ -45,8 +45,49 @@ function AppContent() {
   const location = useLocation();
   const isHomePage = location.pathname === '/';
   
+  // List of internal app routes where footer should be hidden
+  const internalAppRoutes = [
+    '/dashboard',
+    '/estimates',
+    '/projects',
+    '/invoices',
+    '/finances',
+    '/workflow',
+    '/profile',
+    '/settings',
+    '/index',
+    '/quote-enquiries',
+    '/admin',
+    '/portfolio',
+    '/photobank',
+    '/scheduling',
+    '/pre-production',
+    '/production',
+    '/post-production'
+  ];
+  
+  const isInternalAppPage = internalAppRoutes.some(route => 
+    location.pathname === route || location.pathname.startsWith(route + '/')
+  );
+  
+  const shouldShowFooter = !isHomePage && !isInternalAppPage;
+  
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div 
+      className="min-h-screen flex flex-col"
+      style={{
+        background: `
+          radial-gradient(ellipse at bottom left, rgba(255, 100, 50, 0.08) 0%, rgba(255, 150, 0, 0.04) 20%, transparent 50%),
+          linear-gradient(to bottom,
+            #2a1f4d 0%,
+            #3d2a5f 25%,
+            #4a3569 50%,
+            #3d2a5f 75%,
+            #2a1f4d 100%
+          )
+        `
+      }}
+    >
       {!isHomePage && <Header />}
       <div className={`flex-1 ${!isHomePage ? 'pt-16' : ''}`}>
         <Suspense fallback={<LoadingSpinner />}>
@@ -198,7 +239,7 @@ function AppContent() {
           </Routes>
         </Suspense>
       </div>
-      <Footer />
+      {shouldShowFooter && <Footer />}
       {/* Bypass Auth Toggle */}
       <BypassAuthToggle />
       

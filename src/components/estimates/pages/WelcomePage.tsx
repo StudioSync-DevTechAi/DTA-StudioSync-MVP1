@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { Pencil } from "lucide-react";
 
@@ -10,9 +11,11 @@ interface WelcomePageProps {
   clientName: string;
   clientEmail: string;
   clientPhNo?: string;
+  countryCode?: string;
   onClientNameChange: (name: string) => void;
   onClientEmailChange: (email: string) => void;
   onClientPhNoChange?: (phNo: string) => void;
+  onCountryCodeChange?: (code: string) => void;
   isReadOnly?: boolean;
 }
 
@@ -20,9 +23,11 @@ export function WelcomePage({
   clientName, 
   clientEmail,
   clientPhNo = '',
+  countryCode = '+91',
   onClientNameChange, 
   onClientEmailChange,
   onClientPhNoChange,
+  onCountryCodeChange,
   isReadOnly = false 
 }: WelcomePageProps) {
   const { toast } = useToast();
@@ -66,9 +71,16 @@ export function WelcomePage({
   };
 
   const handlePhNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const phNo = e.target.value;
+    // Only allow digits and limit to 10 digits
+    const input = e.target.value.replace(/\D/g, '').slice(0, 10);
     if (onClientPhNoChange) {
-      onClientPhNoChange(phNo);
+      onClientPhNoChange(input);
+    }
+  };
+
+  const handleCountryCodeChange = (value: string) => {
+    if (onCountryCodeChange) {
+      onCountryCodeChange(value);
     }
   };
 
@@ -241,16 +253,41 @@ export function WelcomePage({
 
         <div className="space-y-2">
           <Label htmlFor="clientPhNo" className="text-white">Client PhNo</Label>
-          <Input
-            id="clientPhNo"
-            type="tel"
-            value={clientPhNo}
-            onChange={handlePhNoChange}
-            placeholder="Enter client phone number"
-            readOnly={isReadOnly}
-            className={`text-white placeholder:text-gray-400 ${isReadOnly ? "bg-gray-700" : ""}`}
-            style={!isReadOnly ? { backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' } : {}}
-          />
+          <div className="flex gap-2">
+            <Select
+              value={countryCode}
+              onValueChange={handleCountryCodeChange}
+              disabled={isReadOnly}
+            >
+              <SelectTrigger
+                className="w-[140px] text-white border-[#3d2a5f]"
+                style={!isReadOnly ? { backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' } : {}}
+              >
+                <SelectValue placeholder="Select country" />
+              </SelectTrigger>
+              <SelectContent
+                style={{ backgroundColor: 'rgba(26, 15, 61, 0.98)', backdropFilter: 'blur(10px)', borderColor: '#3d2a5f' }}
+              >
+                <SelectItem value="+91" className="text-white focus:bg-[#3d2a5f]">
+                  🇮🇳 India (+91)
+                </SelectItem>
+                <SelectItem value="+1" className="text-white focus:bg-[#3d2a5f]">
+                  🇺🇸 USA (+1)
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <Input
+              id="clientPhNo"
+              type="tel"
+              value={clientPhNo}
+              onChange={handlePhNoChange}
+              placeholder="Enter 10 digit number"
+              readOnly={isReadOnly}
+              maxLength={10}
+              className={`flex-1 text-white placeholder:text-gray-400 ${isReadOnly ? "bg-gray-700" : ""}`}
+              style={!isReadOnly ? { backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' } : {}}
+            />
+          </div>
         </div>
       </div>
 

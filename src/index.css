@@ -72,6 +72,29 @@
   
   body {
     @apply bg-background text-foreground font-inter antialiased;
+    background: 
+      radial-gradient(ellipse at bottom left, rgba(255, 100, 50, 0.08) 0%, rgba(255, 150, 0, 0.04) 20%, transparent 50%),
+      linear-gradient(to bottom,
+        #2a1f4d 0%,
+        #3d2a5f 25%,
+        #4a3569 50%,
+        #3d2a5f 75%,
+        #2a1f4d 100%
+      ) !important;
+    min-height: 100vh;
+  }
+  
+  html {
+    background: 
+      radial-gradient(ellipse at bottom left, rgba(255, 100, 50, 0.08) 0%, rgba(255, 150, 0, 0.04) 20%, transparent 50%),
+      linear-gradient(to bottom,
+        #2a1f4d 0%,
+        #3d2a5f 25%,
+        #4a3569 50%,
+        #3d2a5f 75%,
+        #2a1f4d 100%
+      );
+    min-height: 100vh;
   }
 
   .glass-panel {

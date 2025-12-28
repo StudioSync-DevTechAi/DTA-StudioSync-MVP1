@@ -1,4 +1,5 @@
 
+import { useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
@@ -13,6 +14,37 @@ interface EstimateDetailsPageProps {
 
 export function EstimateDetailsPage({ estimateDetails, onDetailsChange }: EstimateDetailsPageProps) {
   const { toast } = useToast();
+  
+  // Initialize with one default estimate with one default service if none exist
+  useEffect(() => {
+    if (estimateDetails.estimates.length === 0) {
+      onDetailsChange({
+        ...estimateDetails,
+        estimates: [
+          { 
+            name: "",
+            services: [
+              {
+                event: "",
+                date: "",
+                photographers: "",
+                cinematographers: ""
+              }
+            ], 
+            total: "",
+            deliverables: [
+              "Curated online Gallery with 400+ images",
+              "1200+ Processed Images in hard drive (provided by you)",
+              "20-90 min Documentary film of all events Individually, delivered online for you to download",
+              "Wedding film 8-12mins (with live audio & Audio bytes) - delivered online with password protection",
+              "Live streaming for Wedding event only - Complimentary",
+              "Customised 35 Sheet Album - 2 Copies"
+            ]
+          }
+        ]
+      });
+    }
+  }, []); // Only run once on mount
   
   const addEstimate = () => {
     // Check if we've reached the maximum of 3 estimate options

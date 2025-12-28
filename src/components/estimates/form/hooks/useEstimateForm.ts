@@ -12,6 +12,7 @@ export function useEstimateForm(editingEstimate?: any, onSaveCallback?: (estimat
     clientName: "",
     clientEmail: "",
     clientPhNo: "",
+    countryCode: "+91",
     selectedServices: [],
     estimateDetails: {
       events: [],
@@ -52,6 +53,7 @@ export function useEstimateForm(editingEstimate?: any, onSaveCallback?: (estimat
         clientName: editingEstimate.clientName || "",
         clientEmail: editingEstimate.clientEmail || "",
         clientPhNo: editingEstimate.clientPhNo || "",
+        countryCode: editingEstimate.countryCode || "+91",
         selectedServices,
         estimateDetails: {
           events: [],

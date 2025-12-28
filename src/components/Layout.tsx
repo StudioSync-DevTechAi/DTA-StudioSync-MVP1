@@ -526,7 +526,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         ref={mainContentRef}
         tabIndex={-1}
         className={cn(
-          "flex-1 min-h-screen relative",
+          "flex-1 relative",
           "px-4 lg:px-6 pb-4 lg:pb-6"
         )}
         style={{ 
@@ -534,6 +534,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             ? (isSidebarHovered ? `${sidebarWidth}px` : `${SIDEBAR_COLLAPSED_WIDTH}px`)
             : isDesktop ? `${sidebarWidth}px` : '0',
           transition: isResizing ? 'none' : 'margin-left 0.2s ease-in-out',
+          minHeight: 'calc(100vh - 64px)',
           background: `
             radial-gradient(ellipse at bottom left, rgba(255, 100, 50, 0.08) 0%, rgba(255, 150, 0, 0.04) 20%, transparent 50%),
             linear-gradient(to bottom,

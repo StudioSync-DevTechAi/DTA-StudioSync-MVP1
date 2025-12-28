@@ -131,10 +131,16 @@ export function DraftsBox() {
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-96 p-0" align="end">
-        <div className="p-4 border-b">
-          <h3 className="font-semibold text-sm">Unfinished Projects</h3>
-          <p className="text-xs text-muted-foreground mt-1">
+      <PopoverContent 
+        className="w-96 p-0" 
+        align="end"
+        style={{ backgroundColor: 'rgba(26, 15, 61, 0.98)', backdropFilter: 'blur(10px)', borderColor: '#3d2a5f' }}
+      >
+        <div className="p-4 border-b" style={{ borderColor: '#3d2a5f' }}>
+          <h3 className="font-semibold text-sm text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>
+            Unfinished Projects
+          </h3>
+          <p className="text-xs text-white/70 mt-1" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
             {draftCount === 0 
               ? "No drafts found" 
               : `${unfinishedCount} project${unfinishedCount !== 1 ? 's' : ''} not completed`
@@ -144,40 +150,51 @@ export function DraftsBox() {
         
         <div className="max-h-96 overflow-y-auto">
           {draftCount === 0 ? (
-            <div className="p-8 text-center text-sm text-muted-foreground">
-              <FileText className="h-12 w-12 mx-auto mb-2 opacity-50" />
-              <p>No unfinished projects</p>
-              <p className="text-xs mt-1">Start a new project to see drafts here</p>
+            <div className="p-8 text-center text-sm text-white/70" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
+              <FileText className="h-12 w-12 mx-auto mb-2 opacity-50 text-white/50" />
+              <p className="text-white/80" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>No unfinished projects</p>
+              <p className="text-xs mt-1 text-white/60" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>Start a new project to see drafts here</p>
             </div>
           ) : (
             <div className="p-2 space-y-2">
               {drafts.map((draft) => (
                 <Card
                   key={draft.id}
-                  className="cursor-pointer hover:bg-accent transition-colors"
+                  className="cursor-pointer transition-colors"
+                  style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a' }}
                   onClick={() => handleDraftClick(draft)}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#3d2a5f';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#2d1b4e';
+                  }}
                 >
                   <CardContent className="p-3">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-medium text-sm truncate">
+                          <h4 className="font-medium text-sm truncate text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>
                             {draft.projectName}
                           </h4>
                           {draft.hasProjectEstimateUuid && (
-                            <Badge variant="secondary" className="text-xs">
+                            <Badge 
+                              variant="secondary" 
+                              className="text-xs"
+                              style={{ backgroundColor: '#1a0f3d', color: '#ffffff', borderColor: '#5a4a7a' }}
+                            >
                               Saved
                             </Badge>
                           )}
                         </div>
                         {draft.projectType && (
-                          <p className="text-xs text-muted-foreground mb-1">
+                          <p className="text-xs text-white/80 mb-1" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
                             {draft.projectType}
                           </p>
                         )}
-                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-3 text-xs text-white/70" style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}>
                           <div className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
+                            <Clock className="h-3 w-3 text-white/70" />
                             <span>
                               {format(new Date(draft.lastModified), "MMM d, h:mm a")}
                             </span>
@@ -190,12 +207,12 @@ export function DraftsBox() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-7 w-7 p-0"
+                          className="h-7 w-7 p-0 text-white/80 hover:text-white hover:bg-white/10"
                           onClick={(e) => handleDeleteDraft(draft.id, e)}
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
-                        <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                        <ArrowRight className="h-4 w-4 text-white/70" />
                       </div>
                     </div>
                   </CardContent>
