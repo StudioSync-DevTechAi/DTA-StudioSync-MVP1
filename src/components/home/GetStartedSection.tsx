@@ -7,7 +7,7 @@ export function GetStartedSection() {
   const navigate = useNavigate();
 
   return (
-    <section className="py-20 bg-dustyBlue-whisper">
+    <section className="py-20 bg-cream">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-dustyBlue-dark mb-4">

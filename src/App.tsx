@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { Suspense } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -41,11 +41,14 @@ const QuoteEnquiries = React.lazy(() => import("./pages/QuoteEnquiries"));
 const PublicPhotographerDirectory = React.lazy(() => import("./pages/PublicPhotographerDirectory"));
 const RoleManager = React.lazy(() => import("./components/rbac/RoleManager").then(mod => ({ default: mod.RoleManager })));
 
-function App() {
+function AppContent() {
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
+  
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Header />
-      <div className="flex-1 pt-16">
+      {!isHomePage && <Header />}
+      <div className={`flex-1 ${!isHomePage ? 'pt-16' : ''}`}>
         <Suspense fallback={<LoadingSpinner />}>
           <Routes>
           {/* Public routes - these should be accessible without authentication */}
@@ -202,6 +205,12 @@ function App() {
       <Toaster />
       <RadixToaster />
     </div>
+  );
+}
+
+function App() {
+  return (
+    <AppContent />
   );
 }
 
