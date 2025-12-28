@@ -57,7 +57,7 @@ export function EstimatesHeader({
               </div>
               <Button 
                 variant="outline" 
-                onClick={() => navigate("/estimates/projects/new")} 
+                onClick={() => navigate("/projects/new")} 
                 className="animated-border shrink-0 absolute right-0"
                 style={{
                   backgroundColor: 'transparent',

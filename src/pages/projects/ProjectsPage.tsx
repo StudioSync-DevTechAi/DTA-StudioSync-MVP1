@@ -7,7 +7,7 @@ export default function ProjectsPage() {
   const navigate = useNavigate();
 
   const handleNewProject = () => {
-    navigate("/estimates/projects/new");
+    navigate("/projects/new");
   };
 
   const handleNewEstimate = () => {
@@ -25,7 +25,7 @@ export default function ProjectsPage() {
           canCreate={true}
           showActions={false}
           title="Projects"
-          headerNavigationPath="/estimates/projects"
+          headerNavigationPath="/projects"
           description="View and manage all projects"
           showDashboardTitle={true}
           dashboardTitle="Projects Dashboard"

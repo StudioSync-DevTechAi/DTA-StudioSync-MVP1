@@ -215,3 +215,17 @@
     animation: slide-in-from-right 0.5s ease-in-out;
   }
 }
+
+/* Scale entire app to match 90% zoom appearance at 100% zoom */
+#root {
+  transform: scale(0.9);
+  transform-origin: top left;
+  width: 111.11%; /* 100% / 0.9 = 111.11% to maintain full width */
+  height: 111.11%; /* 100% / 0.9 = 111.11% to maintain full height */
+  overflow-x: hidden; /* Prevent horizontal scroll */
+}
+
+/* Ensure body maintains proper dimensions */
+body {
+  overflow-x: hidden;
+}

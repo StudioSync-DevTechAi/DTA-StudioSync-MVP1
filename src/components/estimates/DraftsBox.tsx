@@ -80,9 +80,9 @@ export function DraftsBox() {
   const handleDraftClick = (draft: DraftProject) => {
     // Navigate to the draft project
     if (draft.hasProjectEstimateUuid) {
-      navigate(`/estimates/projects/new?draft=${draft.id}`);
+      navigate(`/projects/new?draft=${draft.id}`);
     } else {
-      navigate("/estimates/projects/new");
+      navigate("/projects/new");
     }
     setIsOpen(false);
   };

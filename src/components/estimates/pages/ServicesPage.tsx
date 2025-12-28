@@ -648,10 +648,6 @@ export function ServicesPage({ selectedServices, onServicesChange, isReadOnly = 
           })}
         </div>
       </div>
-
-      <div className="text-center text-sm text-gray-300">
-        <p>TailorMade - Customised as per clients requirement</p>
-      </div>
     </div>
   );
 }

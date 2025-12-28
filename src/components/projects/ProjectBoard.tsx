@@ -508,7 +508,7 @@ export function ProjectBoard({ onNewProject }: ProjectBoardProps) {
                             onClick={(e) => {
                               // Only navigate if not dragging
                               if (!isDragging && project.projectUuid) {
-                                navigate(`/estimates/projects/new?projectUuid=${project.projectUuid}&page=2`);
+                                navigate(`/projects/new?projectUuid=${project.projectUuid}&page=2`);
                               }
                             }}
                           >
@@ -632,7 +632,7 @@ export function ProjectBoard({ onNewProject }: ProjectBoardProps) {
                             onClick={(e) => {
                               // Only navigate if not dragging
                               if (!isDragging && project.projectUuid) {
-                                navigate(`/estimates/projects/new?projectUuid=${project.projectUuid}&page=2`);
+                                navigate(`/projects/new?projectUuid=${project.projectUuid}&page=2`);
                               }
                             }}
                           >

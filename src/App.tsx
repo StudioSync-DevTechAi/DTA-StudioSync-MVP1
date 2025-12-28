@@ -97,12 +97,12 @@ function AppContent() {
               <EstimatesPage />
             </AuthGuard>
           } />
-          <Route path="/estimates/projects" element={
+          <Route path="/projects" element={
             <AuthGuard>
               <ProjectsPage />
             </AuthGuard>
           } />
-          <Route path="/estimates/projects/new" element={
+          <Route path="/projects/new" element={
             <AuthGuard>
               <NewProjectPage />
             </AuthGuard>
