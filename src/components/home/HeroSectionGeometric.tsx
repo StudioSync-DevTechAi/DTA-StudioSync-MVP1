@@ -3,9 +3,9 @@ import { Globe, Users, UserPlus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { DottedSurface } from "@/components/ui/dotted-surface";
+import { GeometricHeroBackground } from "@/components/ui/geometric-hero-background";
 
-export function HeroSection() {
+export function HeroSectionGeometric() {
   const navigate = useNavigate();
   const [buttonsVisible, setButtonsVisible] = useState(false);
   const isMobile = useIsMobile();
@@ -19,9 +19,12 @@ export function HeroSection() {
   }, []);
   
   return (
-    <section className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden" style={{ backgroundColor: '#000000' }}>
-      {/* Dotted Surface Animation - Main background */}
-      <DottedSurface className="absolute inset-0 z-0" />
+    <section className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden">
+      {/* Geometric Hero Background - Dark mode */}
+      <GeometricHeroBackground 
+        className="absolute inset-0 z-0"
+        showContent={false}
+      />
 
       {/* Three Main Buttons - Bottom of Screen */}
       <div className="absolute bottom-16 left-0 right-0 px-4 md:px-8 overflow-hidden z-20">
@@ -95,3 +98,4 @@ export function HeroSection() {
     </section>
   );
 }
+

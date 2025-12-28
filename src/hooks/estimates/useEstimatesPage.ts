@@ -471,6 +471,25 @@ export function useEstimatesPage() {
     });
   };
 
+  // Calculate counts for each tab
+  const getTabCounts = () => {
+    const pendingCount = estimates.filter(
+      estimate => estimate.status === "pending" || estimate.status === "negotiating"
+    ).length;
+    
+    const approvedCount = approvedEstimatesFromDB.length > 0 
+      ? approvedEstimatesFromDB.length 
+      : estimates.filter(estimate => estimate.status === "approved").length;
+    
+    const declinedCount = estimates.filter(estimate => estimate.status === "declined").length;
+    
+    return {
+      pending: pendingCount,
+      approved: approvedCount,
+      declined: declinedCount
+    };
+  };
+
   return {
     showNewEstimateForm,
     selectedEstimate,
@@ -479,6 +498,7 @@ export function useEstimatesPage() {
     currentTab,
     estimates,
     filteredEstimates: getFilteredEstimates(),
+    tabCounts: getTabCounts(),
     isLoadingApproved,
     setCurrentTab,
     handleEditEstimate,

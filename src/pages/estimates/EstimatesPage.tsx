@@ -19,6 +19,7 @@ export default function EstimatesPage() {
     isEditing,
     currentTab,
     filteredEstimates,
+    tabCounts,
     isLoadingApproved,
     setCurrentTab,
     handleEditEstimate,
@@ -72,6 +73,7 @@ export default function EstimatesPage() {
             currentTab={currentTab}
             onTabChange={setCurrentTab}
             filteredEstimates={filteredEstimates}
+            tabCounts={tabCounts}
             onEdit={handleEditEstimate}
             onPreview={handleOpenPreview}
             onStatusChange={handleQuickStatusChange}
