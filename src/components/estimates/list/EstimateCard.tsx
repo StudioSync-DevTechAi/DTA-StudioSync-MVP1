@@ -4,11 +4,11 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Eye, Edit, Check, X } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Eye, Edit, Check, X, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useInvoices } from "@/hooks/invoices/useInvoices";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface EstimateCardProps {
   estimate: {
@@ -21,6 +21,8 @@ interface EstimateCardProps {
     packages?: Array<any>;
     clientEmail?: string;
     clientPhNo?: string;
+    isProjectRequested?: boolean;
+    isInvoiceRequested?: boolean;
   };
   onEdit: (estimate: any) => void;
   onPreview: (estimate: any) => void;
@@ -40,6 +42,8 @@ export function EstimateCard({
   const { toast } = useToast();
   const [newProject, setNewProject] = useState(false);
   const [newInvoice, setNewInvoice] = useState(false);
+  const [isCreatingProject, setIsCreatingProject] = useState(false);
+  const [projectCreatedSuccess, setProjectCreatedSuccess] = useState(false);
 
   // Handle navigation to invoice page with estimate data
   const handleCreateInvoice = () => {
@@ -58,6 +62,81 @@ export function EstimateCard({
         fromEstimate: estimate 
       } 
     });
+  };
+
+  // Handle creating/opening project from approved estimate
+  const handleCreateProject = async () => {
+    if (isCreatingProject) return; // Prevent double clicks
+    
+    setIsCreatingProject(true);
+    try {
+      const projectEstimateUuid = (estimate as any).project_estimate_uuid;
+      
+      if (!projectEstimateUuid) {
+        toast({
+          title: "Error",
+          description: "Project estimate UUID not found. Please approve the estimate first.",
+          variant: "destructive"
+        });
+        setIsCreatingProject(false);
+        return;
+      }
+
+      // Update project: set is_project_requested to true and change status from APPROVED to PRE-PROD
+      // This makes the project visible in the ProjectBoard
+      const { error: updateError } = await supabase.rpc('update_project_status', {
+        p_project_estimate_uuid: projectEstimateUuid,
+        p_project_status: 'PRE-PROD',
+        p_is_project_requested: true,
+        p_is_invoice_requested: (estimate as any).isInvoiceRequested || false
+      });
+
+      if (updateError) {
+        console.error("Error updating project:", updateError);
+        // Try direct update as fallback
+        const { error: directUpdateError } = await supabase
+          .from('project_estimation_table')
+          .update({ 
+            is_project_requested: true,
+            project_status: 'PRE-PROD',
+            updated_at: new Date().toISOString()
+          })
+          .eq('project_estimate_uuid', projectEstimateUuid);
+
+        if (directUpdateError) {
+          console.error("Direct update also failed:", directUpdateError);
+          toast({
+            title: "Error",
+            description: "Failed to update project. Please try again.",
+            variant: "destructive"
+          });
+          setIsCreatingProject(false);
+          return;
+        }
+      }
+
+      // Success! Show green glow effect and change button color
+      setProjectCreatedSuccess(true);
+      
+      toast({
+        title: "Project Created",
+        description: "Project card has been created in the dashboard.",
+      });
+
+      // Reset success state after animation completes (2 seconds)
+      setTimeout(() => {
+        setProjectCreatedSuccess(false);
+      }, 2000);
+    } catch (error) {
+      console.error("Error creating project:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create project. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsCreatingProject(false);
+    }
   };
 
   return (
@@ -202,39 +281,42 @@ export function EstimateCard({
           )}
           
           {estimate.status === "approved" && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  className="text-white border-[#3d2a5f] hover:bg-[#1a0f3d] text-xs xs:text-sm h-8 xs:h-9 sm:h-10 px-2 xs:px-3 sm:px-4"
-                  style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
-                >
-                  <span className="hidden xs:inline">Next Steps</span>
-                  <span className="xs:hidden">Next</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="bg-[#2d1b4e] border-[#3d2a5f]"
+            <>
+              <Button
+                variant="outline"
+                onClick={handleCreateProject}
+                disabled={estimate.isProjectRequested === true || isCreatingProject}
+                className={`text-white border-[#3d2a5f] hover:bg-[#1a0f3d] text-xs xs:text-sm h-8 xs:h-9 sm:h-10 px-2 xs:px-3 sm:px-4 flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden ${
+                  projectCreatedSuccess ? 'project-success-glow' : ''
+                }`}
+                style={{ 
+                  backgroundColor: projectCreatedSuccess ? '#22c55e' : '#2d1b4e', 
+                  borderColor: projectCreatedSuccess ? '#16a34a' : '#5a4a7a', 
+                  color: '#ffffff', 
+                  borderWidth: '1.5px', 
+                  borderStyle: 'solid',
+                  transition: 'background-color 0.3s ease, border-color 0.3s ease'
+                }}
               >
-                <DropdownMenuItem 
-                  onClick={handleCreateInvoice}
-                  className="text-white hover:bg-white/10"
-                >
-                  Create Invoice
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  onClick={() => navigate("/pre-production")}
-                  className="text-white hover:bg-white/10"
-                >
-                  Pre-Production Tasks
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  onClick={() => onGoToScheduling(estimate.id)}
-                  className="text-white hover:bg-white/10"
-                >
-                  Schedule Events
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                <span className="relative z-10 flex items-center gap-1.5">
+                  {isCreatingProject ? "Creating..." : "Project"}
+                  {!isCreatingProject && <ChevronRight className="h-3 w-3 xs:h-3.5 xs:w-3.5 sm:h-4 sm:w-4" />}
+                </span>
+                {projectCreatedSuccess && (
+                  <span className="absolute inset-0 project-shine-effect"></span>
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleCreateInvoice}
+                disabled={estimate.isInvoiceRequested === true}
+                className="text-white border-[#3d2a5f] hover:bg-[#1a0f3d] text-xs xs:text-sm h-8 xs:h-9 sm:h-10 px-2 xs:px-3 sm:px-4 flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
+              >
+                Invoice
+                <ChevronRight className="h-3 w-3 xs:h-3.5 xs:w-3.5 sm:h-4 sm:w-4" />
+              </Button>
+            </>
           )}
         </div>
       </div>

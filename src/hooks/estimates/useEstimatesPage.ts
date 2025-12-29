@@ -20,6 +20,7 @@ export function useEstimatesPage() {
   });
   const [approvedEstimatesFromDB, setApprovedEstimatesFromDB] = useState<any[]>([]);
   const [isLoadingApproved, setIsLoadingApproved] = useState(false);
+  const [estimateCounts, setEstimateCounts] = useState({ pending: 0, approved: 0, declined: 0 });
 
   useEffect(() => {
     localStorage.setItem("estimates", JSON.stringify(estimates));
@@ -67,21 +68,28 @@ export function useEstimatesPage() {
       
       // Step 1: Update or create in project_estimation_table
       if (projectEstimateUuid) {
-        // Update existing project status to APPROVED with boolean flags
+        // If isProjectRequested is true, set status to PRE-PROD (so it shows in ProjectBoard)
+        // Otherwise, set status to LEAD-INPROGRESS (shows in "Lead In Progress" column)
+        const projectStatus = isProjectRequested ? 'PRE-PROD' : 'LEAD-INPROGRESS';
+        
+        // Update existing project status with boolean flags and estimate_status
         const { data: updateData, error: updateError } = await supabase.rpc('update_project_status', {
           p_project_estimate_uuid: projectEstimateUuid,
-          p_project_status: 'APPROVED',
+          p_project_status: projectStatus,
           p_is_project_requested: isProjectRequested,
-          p_is_invoice_requested: isInvoiceRequested
+          p_is_invoice_requested: isInvoiceRequested,
+          p_estimate_status: 'APPROVED'  // Set estimate_status to APPROVED when approving
         });
 
         if (updateError) {
           console.error("Error updating project status:", updateError);
           // Try direct update as fallback
+          const projectStatus = isProjectRequested ? 'PRE-PROD' : 'LEAD-INPROGRESS';
           const { error: directUpdateError } = await supabase
             .from('project_estimation_table')
             .update({
-              project_status: 'APPROVED',
+              project_status: projectStatus,
+              estimate_status: 'APPROVED',  // Set estimate_status to APPROVED
               is_project_requested: isProjectRequested,
               is_invoice_requested: isInvoiceRequested,
               updated_at: new Date().toISOString()
@@ -119,17 +127,22 @@ export function useEstimatesPage() {
 
         projectEstimateUuid = projectData?.project_estimate_uuid;
         
-        // Update status to APPROVED with boolean flags
+        // If isProjectRequested is true, set status to PRE-PROD (so it shows in ProjectBoard)
+        // Otherwise, set status to LEAD-INPROGRESS (shows in "Lead In Progress" column)
+        const projectStatus = isProjectRequested ? 'PRE-PROD' : 'LEAD-INPROGRESS';
+        
+        // Update status with boolean flags and estimate_status
         if (projectEstimateUuid) {
           const { error: statusError } = await supabase.rpc('update_project_status', {
             p_project_estimate_uuid: projectEstimateUuid,
-            p_project_status: 'APPROVED',
+            p_project_status: projectStatus,
             p_is_project_requested: isProjectRequested,
-            p_is_invoice_requested: isInvoiceRequested
+            p_is_invoice_requested: isInvoiceRequested,
+            p_estimate_status: 'APPROVED'  // Set estimate_status to APPROVED when approving
           });
 
           if (statusError) {
-            console.warn("Error setting status to APPROVED:", statusError);
+            console.warn("Error setting project status:", statusError);
           }
         }
       }
@@ -285,18 +298,64 @@ export function useEstimatesPage() {
     const updatedEstimate = updatedEstimates.find(est => est.id === estimateId);
     setSelectedEstimate(updatedEstimate);
     
-    // If status is "approved", persist to database
-    if (newStatus === "approved" && updatedEstimate) {
+    // Update estimate_status in database based on newStatus
+    if (updatedEstimate?.project_estimate_uuid) {
       try {
-        await saveApprovedEstimateToDatabase(estimateId, updatedEstimate, actualOptions);
+        let estimateStatus: 'PENDING' | 'APPROVED' | 'DECLINED' | null = null;
+        
+        if (newStatus === "approved") {
+          estimateStatus = 'APPROVED';
+          // Also call saveApprovedEstimateToDatabase for full approval flow
+          await saveApprovedEstimateToDatabase(estimateId, updatedEstimate, actualOptions);
+        } else if (newStatus === "declined") {
+          estimateStatus = 'DECLINED';
+          // Update estimate_status to DECLINED
+          const { error: statusError } = await supabase.rpc('update_estimate_status', {
+            p_project_estimate_uuid: updatedEstimate.project_estimate_uuid,
+            p_estimate_status: 'DECLINED'
+          });
+          
+          if (statusError) {
+            console.error("Error updating estimate status to DECLINED:", statusError);
+            // Try direct update as fallback
+            await supabase
+              .from('project_estimation_table')
+              .update({ 
+                estimate_status: 'DECLINED',
+                updated_at: new Date().toISOString()
+              })
+              .eq('project_estimate_uuid', updatedEstimate.project_estimate_uuid);
+          }
+        } else if (newStatus === "pending" || newStatus === "negotiating") {
+          estimateStatus = 'PENDING';
+          // Update estimate_status to PENDING
+          const { error: statusError } = await supabase.rpc('update_estimate_status', {
+            p_project_estimate_uuid: updatedEstimate.project_estimate_uuid,
+            p_estimate_status: 'PENDING'
+          });
+          
+          if (statusError) {
+            console.error("Error updating estimate status to PENDING:", statusError);
+            // Try direct update as fallback
+            await supabase
+              .from('project_estimation_table')
+              .update({ 
+                estimate_status: 'PENDING',
+                updated_at: new Date().toISOString()
+              })
+              .eq('project_estimate_uuid', updatedEstimate.project_estimate_uuid);
+          }
+        }
       } catch (error) {
-        console.error("Error saving approved estimate to database:", error);
+        console.error("Error updating estimate status in database:", error);
         // Show error toast but don't revert the UI change
-        toast({
-          title: "Warning",
-          description: "Estimate approved locally but failed to save to database. Please try again or contact support.",
-          variant: "destructive"
-        });
+        if (newStatus === "approved") {
+          toast({
+            title: "Warning",
+            description: "Estimate approved locally but failed to save to database. Please try again or contact support.",
+            variant: "destructive"
+          });
+        }
       }
     }
     
@@ -386,11 +445,11 @@ export function useEstimatesPage() {
 
       setIsLoadingApproved(true);
       try {
-        // First, fetch from project_estimation_table with APPROVED status
+        // First, fetch from project_estimation_table with APPROVED estimate_status
         const { data: projectsData, error: projectsError } = await supabase
           .from('project_estimation_table')
           .select('*')
-          .eq('project_status', 'APPROVED')
+          .eq('estimate_status', 'APPROVED')  // Changed from project_status to estimate_status
           .order('created_at', { ascending: false });
 
         if (projectsError) {
@@ -422,6 +481,8 @@ export function useEstimatesPage() {
                 projectType: project.project_type || estimateData.projectType,
                 packages: estimateData.packages,
                 items: estimateData.items,
+                isProjectRequested: project.is_project_requested || false,
+                isInvoiceRequested: project.is_invoice_requested || false,
                 ...estimateData
               };
             });
@@ -452,6 +513,8 @@ export function useEstimatesPage() {
           })
           .map(item => {
             const estimateData = item.invoice_form_data?.estimateData || {};
+            // Try to get the flags from the linked project if available
+            const linkedProject = projectsData?.find(p => p.project_estimate_uuid === item.project_estimate_uuid);
             return {
               id: item.project_estimate_uuid || item.invoice_uuid,
               project_estimate_uuid: item.project_estimate_uuid,
@@ -465,6 +528,8 @@ export function useEstimatesPage() {
               projectType: estimateData.projectType,
               packages: estimateData.packages,
               items: estimateData.items || item.invoice_form_data?.items,
+              isProjectRequested: linkedProject?.is_project_requested || false,
+              isInvoiceRequested: linkedProject?.is_invoice_requested || false,
               ...estimateData,
               // Store reference to invoice
               invoiceData: item
@@ -488,6 +553,8 @@ export function useEstimatesPage() {
               projectType: project.project_type || estimateData.projectType,
               packages: estimateData.packages,
               items: estimateData.items,
+              isProjectRequested: project.is_project_requested || false,
+              isInvoiceRequested: project.is_invoice_requested || false,
               ...estimateData
             };
           });
@@ -523,17 +590,56 @@ export function useEstimatesPage() {
     });
   };
 
+  // Fetch estimate counts from database
+  useEffect(() => {
+    const fetchEstimateCounts = async () => {
+      try {
+        // Get photography owner phone number
+        const { data: ownerData } = await supabase
+          .from("photography_owner_table")
+          .select("photography_owner_phno")
+          .limit(1)
+          .maybeSingle();
+        
+        if (ownerData?.photography_owner_phno) {
+          const { data, error } = await supabase.rpc('get_estimate_counts', {
+            p_photography_owner_phno: ownerData.photography_owner_phno
+          });
+          
+          if (!error && data) {
+            setEstimateCounts({
+              pending: data.pending || 0,
+              approved: data.approved || 0,
+              declined: data.declined || 0
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching estimate counts:", error);
+      }
+    };
+    
+    fetchEstimateCounts();
+  }, [currentTab, estimates]); // Refresh counts when tab changes or estimates update
+
   // Calculate counts for each tab
   const getTabCounts = () => {
-    const pendingCount = estimates.filter(
-      estimate => estimate.status === "pending" || estimate.status === "negotiating"
-    ).length;
+    // Use database counts if available, otherwise fallback to local counts
+    const pendingCount = estimateCounts.pending > 0 
+      ? estimateCounts.pending 
+      : estimates.filter(
+          estimate => estimate.status === "pending" || estimate.status === "negotiating"
+        ).length;
     
-    const approvedCount = approvedEstimatesFromDB.length > 0 
-      ? approvedEstimatesFromDB.length 
-      : estimates.filter(estimate => estimate.status === "approved").length;
+    const approvedCount = estimateCounts.approved > 0 
+      ? estimateCounts.approved 
+      : (approvedEstimatesFromDB.length > 0 
+          ? approvedEstimatesFromDB.length 
+          : estimates.filter(estimate => estimate.status === "approved").length);
     
-    const declinedCount = estimates.filter(estimate => estimate.status === "declined").length;
+    const declinedCount = estimateCounts.declined > 0 
+      ? estimateCounts.declined 
+      : estimates.filter(estimate => estimate.status === "declined").length;
     
     return {
       pending: pendingCount,

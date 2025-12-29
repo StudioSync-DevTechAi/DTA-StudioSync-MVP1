@@ -167,7 +167,11 @@ export function useEstimateForm(editingEstimate?: any, onSaveCallback?: (estimat
         terms: formData.terms,
         portfolioLinks: formData.portfolioLinks,
         selectedTemplate: formData.selectedTemplate,
-        previewEstimate: previewEstimate
+        previewEstimate: previewEstimate,
+        // Include project_estimate_uuid if editing existing estimate
+        ...(editingEstimate?.project_estimate_uuid || editingEstimate?.projectEstimateUuid ? {
+          project_estimate_uuid: editingEstimate.project_estimate_uuid || editingEstimate.projectEstimateUuid
+        } : {})
       };
       
       // Call RPC function to save estimate
