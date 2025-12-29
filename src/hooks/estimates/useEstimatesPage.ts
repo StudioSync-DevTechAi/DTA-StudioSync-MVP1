@@ -429,10 +429,8 @@ export function useEstimatesPage() {
       setCurrentTab("pending");
     }
     
-    // Close the form
-    setShowNewEstimateForm(false);
-    setIsEditing(false);
-    setSelectedEstimate(null);
+    // Don't close the form - keep it open so user can continue editing or view the saved estimate
+    // The form will remain open until user manually closes it
   };
 
   // Fetch approved estimates from database when Approved tab is selected

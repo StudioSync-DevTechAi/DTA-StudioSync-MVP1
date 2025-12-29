@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -20,15 +21,18 @@ interface ApprovalFormProps {
     }>;
     deliverables?: string[];
   };
-  onStatusChange: (estimateId: string, newStatus: string, negotiatedAmount?: string, selectedPackageIndex?: number) => void;
+  onStatusChange: (estimateId: string, newStatus: string, negotiatedAmountOrOptions?: string | { isProjectRequested?: boolean; isInvoiceRequested?: boolean }, selectedPackageIndex?: number) => void;
+  initialOptions?: { isProjectRequested?: boolean; isInvoiceRequested?: boolean };
 }
 
-export function ApprovalForm({ onClose, estimate, onStatusChange }: ApprovalFormProps) {
+export function ApprovalForm({ onClose, estimate, onStatusChange, initialOptions }: ApprovalFormProps) {
   const [isNegotiated, setIsNegotiated] = useState(false);
   const [negotiatedAmount, setNegotiatedAmount] = useState(estimate.amount);
   const [selectedPackageIndex, setSelectedPackageIndex] = useState<number | undefined>(
     estimate.packages && estimate.packages.length > 0 ? 0 : undefined
   );
+  const [newProject, setNewProject] = useState(initialOptions?.isProjectRequested || false);
+  const [newInvoice, setNewInvoice] = useState(initialOptions?.isInvoiceRequested || false);
   const { toast } = useToast();
 
   const handleApprove = async () => {
@@ -53,11 +57,14 @@ export function ApprovalForm({ onClose, estimate, onStatusChange }: ApprovalForm
           : estimate.deliverables
       });
       
-      // Update the status with the selected package index
+      // Update the status with the selected package index and checkbox options
       onStatusChange(
         estimate.id, 
         'approved', 
-        isNegotiated ? negotiatedAmount : undefined,
+        {
+          isProjectRequested: newProject,
+          isInvoiceRequested: newInvoice
+        },
         selectedPackageIndex
       );
       
@@ -163,6 +170,43 @@ export function ApprovalForm({ onClose, estimate, onStatusChange }: ApprovalForm
               />
             </div>
           )}
+
+          {/* Approve with checkboxes */}
+          <div className="space-y-3 pt-2 border-t" style={{ borderColor: '#3d2a5f' }}>
+            <Label className="text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>Approve with:</Label>
+            <div className="flex flex-col xs:flex-row items-start xs:items-center gap-3">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="approve-new-project"
+                  checked={newProject}
+                  onCheckedChange={(checked) => setNewProject(checked === true)}
+                  className="rounded-none border-white/50 data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600 h-4 w-4"
+                />
+                <Label 
+                  htmlFor="approve-new-project"
+                  className="text-sm text-white/90 cursor-pointer"
+                  style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}
+                >
+                  New Project
+                </Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="approve-new-invoice"
+                  checked={newInvoice}
+                  onCheckedChange={(checked) => setNewInvoice(checked === true)}
+                  className="rounded-none border-white/50 data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600 h-4 w-4"
+                />
+                <Label 
+                  htmlFor="approve-new-invoice"
+                  className="text-sm text-white/90 cursor-pointer"
+                  style={{ textShadow: 'rgba(0, 0, 0, 0.5) 0px 1px 2px' }}
+                >
+                  New Invoice
+                </Label>
+              </div>
+            </div>
+          </div>
         </div>
         
         <DialogFooter>

@@ -72,6 +72,10 @@ export function EstimateFormPages({
             onDetailsChange={(details) =>
               onUpdateFormData("estimateDetails", details)
             }
+            projectName={formData.projectName || ""}
+            onProjectNameChange={(name) =>
+              onUpdateFormData("projectName", name)
+            }
           />
         );
       case 3:

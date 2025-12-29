@@ -5,7 +5,7 @@ import { useToast } from "@/components/ui/use-toast";
 
 export function useEstimatePreview(
   estimate: any,
-  onStatusChange: ((estimateId: string, newStatus: string, negotiatedAmount?: string, selectedPackageIndex?: number) => void) | undefined,
+  onStatusChange: ((estimateId: string, newStatus: string, negotiatedAmountOrOptions?: string | { isProjectRequested?: boolean; isInvoiceRequested?: boolean }, selectedPackageIndex?: number) => void) | undefined,
   onClose: () => void
 ) {
   const { toast } = useToast();
@@ -15,9 +15,14 @@ export function useEstimatePreview(
   const [showApprovalForm, setShowApprovalForm] = useState(false);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
 
-  const handleStatusChange = (estimateId: string, newStatus: string, negotiatedAmount?: string, selectedPackageIndex?: number) => {
+  const handleStatusChange = (
+    estimateId: string, 
+    newStatus: string, 
+    negotiatedAmountOrOptions?: string | { isProjectRequested?: boolean; isInvoiceRequested?: boolean }, 
+    selectedPackageIndex?: number
+  ) => {
     if (onStatusChange) {
-      onStatusChange(estimateId, newStatus, negotiatedAmount, selectedPackageIndex);
+      onStatusChange(estimateId, newStatus, negotiatedAmountOrOptions, selectedPackageIndex);
       
       toast({
         title: "Estimate Updated",

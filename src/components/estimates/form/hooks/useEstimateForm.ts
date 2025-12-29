@@ -54,6 +54,7 @@ export function useEstimateForm(editingEstimate?: any, onSaveCallback?: (estimat
         clientEmail: editingEstimate.clientEmail || "",
         clientPhNo: editingEstimate.clientPhNo || "",
         countryCode: editingEstimate.countryCode || "+91",
+        projectName: editingEstimate.projectName || "",
         selectedServices,
         estimateDetails: {
           events: [],
@@ -162,6 +163,7 @@ export function useEstimateForm(editingEstimate?: any, onSaveCallback?: (estimat
         clientName: formData.clientName,
         clientEmail: formData.clientEmail,
         clientPhNo: clientPhno,
+        projectName: formData.projectName || '',  // Include project name
         selectedServices: formData.selectedServices,
         estimateDetails: formData.estimateDetails,
         terms: formData.terms,
@@ -196,9 +198,15 @@ export function useEstimateForm(editingEstimate?: any, onSaveCallback?: (estimat
           const updatedEstimate = {
             ...previewEstimate,
             id: previewEstimate.id || editingEstimate.id,
-            project_estimate_uuid: previewEstimate.project_estimate_uuid || editingEstimate.project_estimate_uuid,
-            projectEstimateUuid: previewEstimate.projectEstimateUuid || editingEstimate.projectEstimateUuid
+            project_estimate_uuid: data.project_estimate_uuid || previewEstimate.project_estimate_uuid || editingEstimate.project_estimate_uuid,
+            projectEstimateUuid: data.project_estimate_uuid || previewEstimate.projectEstimateUuid || editingEstimate.projectEstimateUuid
           };
+          
+          // Update previewEstimate state with the UUID so it shows in the preview
+          setPreviewEstimate({
+            ...previewEstimate,
+            project_estimate_uuid: data.project_estimate_uuid || previewEstimate.project_estimate_uuid || editingEstimate.project_estimate_uuid
+          });
           estimates = estimates.map(est => 
             est.id === previewEstimate.id || est.id === editingEstimate.id ? updatedEstimate : est
           );
@@ -217,10 +225,16 @@ export function useEstimateForm(editingEstimate?: any, onSaveCallback?: (estimat
           const savedEstimate = {
             ...previewEstimate,
             id: data.project_estimate_uuid,
-            project_estimate_uuid: data.project_estimate_uuid,
+            project_estimate_uuid: data.project_estimate_uuid,  // Include UUID for estimate number display
             projectEstimateUuid: data.project_estimate_uuid,
             status: "pending" // Ensure new estimates have pending status
           };
+          
+          // Update previewEstimate state with the UUID so it shows in the preview
+          setPreviewEstimate({
+            ...previewEstimate,
+            project_estimate_uuid: data.project_estimate_uuid
+          });
           estimates.unshift(savedEstimate);
           
           toast({

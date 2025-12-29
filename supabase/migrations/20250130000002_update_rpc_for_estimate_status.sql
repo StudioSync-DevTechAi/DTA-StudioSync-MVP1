@@ -25,10 +25,12 @@ DECLARE
   v_photography_owner_estimates JSONB;
   v_client_name TEXT;
   v_client_email TEXT;
+  v_project_name TEXT;
 BEGIN
   -- Extract client name and email from estimate form data
   v_client_name := p_estimate_form_data->>'clientName';
   v_client_email := p_estimate_form_data->>'clientEmail';
+  v_project_name := p_estimate_form_data->>'projectName';
   
   -- Check if this is an update (estimate has existing project_estimate_uuid)
   IF p_estimate_form_data ? 'project_estimate_uuid' THEN
@@ -84,6 +86,7 @@ BEGIN
     photography_owner_phno,
     clientid_phno,
     estimate_form_data,
+    project_name,  -- NEW: Include project_name
     project_status,
     estimate_status,  -- NEW: Set estimate_status to PENDING for new estimates
     is_drafted,
@@ -94,6 +97,7 @@ BEGIN
     p_photography_owner_phno,
     p_client_phno,
     p_estimate_form_data,
+    COALESCE(v_project_name, NULL),  -- Use extracted project_name
     'LEAD-INPROGRESS',
     'PENDING',  -- NEW: New estimates start as PENDING
     false,
@@ -103,6 +107,7 @@ BEGIN
   ON CONFLICT (project_estimate_uuid) 
   DO UPDATE SET
     estimate_form_data = EXCLUDED.estimate_form_data,
+    project_name = COALESCE(v_project_name, project_estimation_table.project_name),  -- Update project_name
     project_status = 'LEAD-INPROGRESS',
     -- Preserve existing estimate_status when updating (don't reset to PENDING)
     estimate_status = COALESCE(project_estimation_table.estimate_status, 'PENDING'),
