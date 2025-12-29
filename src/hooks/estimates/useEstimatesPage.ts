@@ -37,7 +37,11 @@ export function useEstimatesPage() {
   };
 
   // Function to save approved estimate to both project_estimation_table and invoice_items_table
-  const saveApprovedEstimateToDatabase = async (estimateId: string, estimate: any) => {
+  const saveApprovedEstimateToDatabase = async (
+    estimateId: string, 
+    estimate: any,
+    options?: { isProjectRequested?: boolean; isInvoiceRequested?: boolean }
+  ) => {
     try {
       // Get photography owner phone number
       const { data: ownerData, error: ownerError } = await supabase
@@ -55,15 +59,20 @@ export function useEstimatesPage() {
         throw new Error("Photography owner not found. Please ensure you are enrolled as a photography owner.");
       }
 
+      const isProjectRequested = options?.isProjectRequested ?? false;
+      const isInvoiceRequested = options?.isInvoiceRequested ?? false;
+
       // Get or create project_estimate_uuid
       let projectEstimateUuid = estimate.project_estimate_uuid;
       
       // Step 1: Update or create in project_estimation_table
       if (projectEstimateUuid) {
-        // Update existing project status to APPROVED
+        // Update existing project status to APPROVED with boolean flags
         const { data: updateData, error: updateError } = await supabase.rpc('update_project_status', {
           p_project_estimate_uuid: projectEstimateUuid,
-          p_project_status: 'APPROVED'
+          p_project_status: 'APPROVED',
+          p_is_project_requested: isProjectRequested,
+          p_is_invoice_requested: isInvoiceRequested
         });
 
         if (updateError) {
@@ -73,6 +82,8 @@ export function useEstimatesPage() {
             .from('project_estimation_table')
             .update({
               project_status: 'APPROVED',
+              is_project_requested: isProjectRequested,
+              is_invoice_requested: isInvoiceRequested,
               updated_at: new Date().toISOString()
             })
             .eq('project_estimate_uuid', projectEstimateUuid);
@@ -96,7 +107,9 @@ export function useEstimatesPage() {
           p_client_name: estimate.clientName || '',
           p_client_email: estimate.clientEmail || '',
           p_client_phno: estimate.clientPhone || '',
-          p_is_drafted: false
+          p_is_drafted: false,
+          p_is_project_requested: isProjectRequested,
+          p_is_invoice_requested: isInvoiceRequested
         });
 
         if (projectError) {
@@ -106,11 +119,13 @@ export function useEstimatesPage() {
 
         projectEstimateUuid = projectData?.project_estimate_uuid;
         
-        // Update status to APPROVED
+        // Update status to APPROVED with boolean flags
         if (projectEstimateUuid) {
           const { error: statusError } = await supabase.rpc('update_project_status', {
             p_project_estimate_uuid: projectEstimateUuid,
-            p_project_status: 'APPROVED'
+            p_project_status: 'APPROVED',
+            p_is_project_requested: isProjectRequested,
+            p_is_invoice_requested: isInvoiceRequested
           });
 
           if (statusError) {
@@ -119,7 +134,9 @@ export function useEstimatesPage() {
         }
       }
 
-      // Step 2: Create/update in invoice_items_table
+      // Step 2: Create/update in invoice_items_table (only if isInvoiceRequested is true)
+      // Note: We still create invoice if isInvoiceRequested is false for backward compatibility
+      // but you can add a check here if you want to skip invoice creation when checkbox is unchecked
       const clientPhno = estimate.clientPhone?.replace(/\s/g, '') || '';
       if (!clientPhno) {
         console.warn("No client phone number found, skipping invoice creation");
@@ -188,35 +205,70 @@ export function useEstimatesPage() {
     }
   };
 
-  const handleStatusChange = async (estimateId: string, newStatus: string, negotiatedAmount?: string, selectedPackageIndex?: number) => {
+  const handleStatusChange = async (
+    estimateId: string, 
+    newStatus: string, 
+    optionsOrNegotiatedAmount?: { isProjectRequested?: boolean; isInvoiceRequested?: boolean } | string,
+    negotiatedAmountOrSelectedIndex?: string | number,
+    selectedPackageIndex?: number
+  ) => {
+    // Handle backward compatibility with multiple function signatures:
+    // 1. handleStatusChange(id, status) - no additional params
+    // 2. handleStatusChange(id, status, options) - new signature with options object
+    // 3. handleStatusChange(id, status, negotiatedAmount, selectedPackageIndex) - old signature
+    let actualOptions: { isProjectRequested?: boolean; isInvoiceRequested?: boolean } | undefined;
+    let actualNegotiatedAmount: string | undefined;
+    let actualSelectedPackageIndex: number | undefined;
+
+    if (optionsOrNegotiatedAmount === undefined) {
+      // Case 1: No additional parameters
+      actualOptions = undefined;
+      actualNegotiatedAmount = undefined;
+      actualSelectedPackageIndex = undefined;
+    } else if (typeof optionsOrNegotiatedAmount === 'object' && !Array.isArray(optionsOrNegotiatedAmount)) {
+      // Case 2: New signature with options object
+      actualOptions = optionsOrNegotiatedAmount;
+      actualNegotiatedAmount = typeof negotiatedAmountOrSelectedIndex === 'string' ? negotiatedAmountOrSelectedIndex : undefined;
+      actualSelectedPackageIndex = typeof negotiatedAmountOrSelectedIndex === 'number' 
+        ? negotiatedAmountOrSelectedIndex 
+        : selectedPackageIndex;
+    } else if (typeof optionsOrNegotiatedAmount === 'string') {
+      // Case 3: Old signature - optionsOrNegotiatedAmount is actually negotiatedAmount
+      actualOptions = undefined;
+      actualNegotiatedAmount = optionsOrNegotiatedAmount;
+      actualSelectedPackageIndex = typeof negotiatedAmountOrSelectedIndex === 'number' 
+        ? negotiatedAmountOrSelectedIndex 
+        : selectedPackageIndex;
+    }
+
     // Update local state first (optimistic update)
     const updatedEstimates = estimates.map(est => {
       if (est.id === estimateId) {
         const updatedEstimate = {
           ...est,
           status: newStatus,
-          selectedPackageIndex: selectedPackageIndex
+          selectedPackageIndex: actualSelectedPackageIndex
         };
         
-        if (selectedPackageIndex !== undefined && updatedEstimate.packages && updatedEstimate.packages[selectedPackageIndex]) {
-          updatedEstimate.amount = updatedEstimate.packages[selectedPackageIndex].amount;
+        if (actualSelectedPackageIndex !== undefined && updatedEstimate.packages && updatedEstimate.packages[actualSelectedPackageIndex]) {
+          updatedEstimate.amount = updatedEstimate.packages[actualSelectedPackageIndex].amount;
         }
         
-        if (negotiatedAmount) {
-          updatedEstimate.amount = negotiatedAmount;
+        if (actualNegotiatedAmount) {
+          updatedEstimate.amount = actualNegotiatedAmount;
           
-          if (selectedPackageIndex !== undefined && updatedEstimate.packages) {
+          if (actualSelectedPackageIndex !== undefined && updatedEstimate.packages) {
             updatedEstimate.packages = updatedEstimate.packages.map((pkg, idx) => {
-              if (idx === selectedPackageIndex) {
+              if (idx === actualSelectedPackageIndex) {
                 return {
                   ...pkg,
-                  amount: negotiatedAmount
+                  amount: actualNegotiatedAmount
                 };
               }
               return pkg;
             });
           } else if (updatedEstimate.packages) {
-            const ratio = parseFloat(negotiatedAmount) / parseFloat(est.amount);
+            const ratio = parseFloat(actualNegotiatedAmount) / parseFloat(est.amount);
             updatedEstimate.packages = updatedEstimate.packages.map(pkg => ({
               ...pkg,
               amount: (parseFloat(pkg.amount) * ratio).toFixed(2)
@@ -236,7 +288,7 @@ export function useEstimatesPage() {
     // If status is "approved", persist to database
     if (newStatus === "approved" && updatedEstimate) {
       try {
-        await saveApprovedEstimateToDatabase(estimateId, updatedEstimate);
+        await saveApprovedEstimateToDatabase(estimateId, updatedEstimate, actualOptions);
       } catch (error) {
         console.error("Error saving approved estimate to database:", error);
         // Show error toast but don't revert the UI change
