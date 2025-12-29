@@ -30,7 +30,9 @@ BEGIN
   -- Extract client name and email from estimate form data
   v_client_name := p_estimate_form_data->>'clientName';
   v_client_email := p_estimate_form_data->>'clientEmail';
-  v_project_name := p_estimate_form_data->>'projectName';
+  -- Explicitly extract project name from JSONB and normalize (trim whitespace, convert empty to NULL)
+  -- This ensures project_name column is explicitly set, not just stored in JSONB
+  v_project_name := NULLIF(TRIM(COALESCE(p_estimate_form_data->>'projectName', '')), '');
   
   -- Check if this is an update (estimate has existing project_estimate_uuid)
   IF p_estimate_form_data ? 'project_estimate_uuid' THEN
@@ -81,14 +83,15 @@ BEGIN
   END IF;
   
   -- Insert or update project_estimation_table with LEAD-INPROGRESS status and PENDING estimate_status
+  -- Explicitly set project_name column from extracted value (not just from JSONB)
   INSERT INTO public.project_estimation_table (
     project_estimate_uuid,
     photography_owner_phno,
     clientid_phno,
     estimate_form_data,
-    project_name,  -- NEW: Include project_name
+    project_name,  -- Explicitly set project_name column from extracted value
     project_status,
-    estimate_status,  -- NEW: Set estimate_status to PENDING for new estimates
+    estimate_status,  -- Set estimate_status to PENDING for new estimates
     is_drafted,
     created_at,
     updated_at
@@ -97,9 +100,9 @@ BEGIN
     p_photography_owner_phno,
     p_client_phno,
     p_estimate_form_data,
-    COALESCE(v_project_name, NULL),  -- Use extracted project_name
+    v_project_name,  -- Explicitly set project_name column (extracted and normalized from JSONB)
     'LEAD-INPROGRESS',
-    'PENDING',  -- NEW: New estimates start as PENDING
+    'PENDING',  -- New estimates start as PENDING
     false,
     CASE WHEN v_existing_uuid IS NULL THEN now() ELSE (SELECT created_at FROM public.project_estimation_table WHERE project_estimate_uuid = v_existing_uuid) END,
     now()
@@ -107,7 +110,11 @@ BEGIN
   ON CONFLICT (project_estimate_uuid) 
   DO UPDATE SET
     estimate_form_data = EXCLUDED.estimate_form_data,
-    project_name = COALESCE(v_project_name, project_estimation_table.project_name),  -- Update project_name
+    -- Explicitly update project_name column: use new value if provided, otherwise keep existing
+    project_name = CASE 
+      WHEN v_project_name IS NOT NULL THEN v_project_name 
+      ELSE project_estimation_table.project_name 
+    END,
     project_status = 'LEAD-INPROGRESS',
     -- Preserve existing estimate_status when updating (don't reset to PENDING)
     estimate_status = COALESCE(project_estimation_table.estimate_status, 'PENDING'),
