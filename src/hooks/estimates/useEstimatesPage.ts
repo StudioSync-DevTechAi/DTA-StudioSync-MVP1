@@ -21,6 +21,8 @@ export function useEstimatesPage() {
   const [approvedEstimatesFromDB, setApprovedEstimatesFromDB] = useState<any[]>([]);
   const [isLoadingApproved, setIsLoadingApproved] = useState(false);
   const [estimateCounts, setEstimateCounts] = useState({ pending: 0, approved: 0, declined: 0 });
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10; // Number of estimates per page
 
   useEffect(() => {
     localStorage.setItem("estimates", JSON.stringify(estimates));
@@ -588,6 +590,21 @@ export function useEstimatesPage() {
     });
   };
 
+  // Reset to page 1 when tab changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [currentTab]);
+
+  // Calculate total pages based on filtered estimates (10 per page)
+  const filteredEstimates = getFilteredEstimates();
+  const totalPages = Math.max(1, Math.ceil(filteredEstimates.length / itemsPerPage));
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    // Scroll to top when page changes
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   // Fetch estimate counts from database
   useEffect(() => {
     const fetchEstimateCounts = async () => {
@@ -653,9 +670,11 @@ export function useEstimatesPage() {
     isEditing,
     currentTab,
     estimates,
-    filteredEstimates: getFilteredEstimates(),
+    filteredEstimates: filteredEstimates,
     tabCounts: getTabCounts(),
     isLoadingApproved,
+    currentPage,
+    totalPages,
     setCurrentTab,
     handleEditEstimate,
     handleOpenPreview,
@@ -665,6 +684,7 @@ export function useEstimatesPage() {
     handleCreateNewEstimate,
     handleCloseForm,
     handleClosePreview,
-    handleEstimateSaved
+    handleEstimateSaved,
+    handlePageChange
   };
 }

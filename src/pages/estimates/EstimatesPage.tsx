@@ -21,6 +21,8 @@ export default function EstimatesPage() {
     filteredEstimates,
     tabCounts,
     isLoadingApproved,
+    currentPage,
+    totalPages,
     setCurrentTab,
     handleEditEstimate,
     handleOpenPreview,
@@ -30,7 +32,8 @@ export default function EstimatesPage() {
     handleCreateNewEstimate,
     handleCloseForm,
     handleClosePreview,
-    handleEstimateSaved
+    handleEstimateSaved,
+    handlePageChange
   } = useEstimatesPage();
 
   useEffect(() => {
@@ -74,6 +77,9 @@ export default function EstimatesPage() {
             onTabChange={setCurrentTab}
             filteredEstimates={filteredEstimates}
             tabCounts={tabCounts}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
             onEdit={handleEditEstimate}
             onPreview={handleOpenPreview}
             onStatusChange={handleQuickStatusChange}
