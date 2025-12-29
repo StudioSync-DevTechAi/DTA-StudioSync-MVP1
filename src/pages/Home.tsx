@@ -5,7 +5,6 @@ import { HeroSectionDome } from "@/components/home/HeroSectionDome";
 import { AboutSection } from "@/components/home/AboutSection";
 import { WhyChooseUsSection } from "@/components/home/WhyChooseUsSection";
 import { GetStartedSection } from "@/components/home/GetStartedSection";
-import { Footer } from "@/components/home/Footer";
 import { Button } from "@/components/ui/button";
 import { Camera, Briefcase, Users, ShieldCheck, Globe, UserPlus } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -205,7 +204,6 @@ export default function Home() {
       <AboutSection />
       <WhyChooseUsSection />
       <GetStartedSection />
-      <Footer />
     </div>
   );
 }

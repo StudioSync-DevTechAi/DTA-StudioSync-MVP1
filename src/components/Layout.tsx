@@ -33,7 +33,7 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 const navItems = [
   { path: "/dashboard", label: "Dashboard", icon: Home, permission: PERMISSIONS.DASHBOARD_VIEW },
   { path: "/estimates", label: "Estimates", icon: FileText, permission: PERMISSIONS.ESTIMATES_VIEW },
-  { path: "/estimates/projects", label: "Projects", icon: FolderKanban, permission: PERMISSIONS.ESTIMATES_VIEW },
+  { path: "/projects", label: "Projects", icon: FolderKanban, permission: PERMISSIONS.ESTIMATES_VIEW },
   { path: "/invoices", label: "Invoices", icon: Receipt, permission: PERMISSIONS.INVOICES_VIEW },
   { path: "/finances", label: "Finances", icon: LineChart, permission: PERMISSIONS.FINANCES_VIEW },
   { path: "/workflow", label: "Workflow", icon: Calendar, permission: PERMISSIONS.WORKFLOW_VIEW },
@@ -278,7 +278,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <aside
         ref={sidebarRef}
         className={cn(
-          "fixed left-0 bg-card border-r z-40",
+          "fixed left-0 bg-card border-r z-40 rounded-b-lg overflow-hidden",
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
           !isResizing && "transition-all duration-300 ease-in-out"
         )}
@@ -362,7 +362,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                       isSidebarCollapsed && isDesktop && !isMobileMenuOpen 
                         ? "justify-center px-2 py-2" 
                         : "gap-3 px-3 py-2 text-sm",
-                      location.pathname === item.path || (item.path === "/estimates/projects" && location.pathname.startsWith("/estimates/projects"))
+                      location.pathname === item.path || (item.path === "/projects" && location.pathname.startsWith("/projects"))
                         ? "bg-white/20 text-white font-medium"
                         : "hover:bg-white/10 text-white/90 hover:text-white"
                     )}
@@ -526,7 +526,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         ref={mainContentRef}
         tabIndex={-1}
         className={cn(
-          "flex-1 min-h-screen relative",
+          "flex-1 relative",
           "px-4 lg:px-6 pb-4 lg:pb-6"
         )}
         style={{ 
@@ -534,6 +534,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             ? (isSidebarHovered ? `${sidebarWidth}px` : `${SIDEBAR_COLLAPSED_WIDTH}px`)
             : isDesktop ? `${sidebarWidth}px` : '0',
           transition: isResizing ? 'none' : 'margin-left 0.2s ease-in-out',
+          minHeight: 'calc(100vh - 64px)',
           background: `
             radial-gradient(ellipse at bottom left, rgba(255, 100, 50, 0.08) 0%, rgba(255, 150, 0, 0.04) 20%, transparent 50%),
             linear-gradient(to bottom,

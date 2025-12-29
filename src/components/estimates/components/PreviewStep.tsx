@@ -186,7 +186,7 @@ export function PreviewStep({ estimate, onSave }: PreviewStepProps) {
               style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', borderColor: 'rgba(255, 255, 255, 0.2)', color: '#ffffff' }}
             >
               <Mail className="h-4 w-4" />
-              {isSaving ? "Saving..." : "Send via Email"}
+              {isSaving ? "Saving..." : "Email"}
             </Button>
             <Button 
               onClick={handleShowWhatsAppForm} 
@@ -196,7 +196,7 @@ export function PreviewStep({ estimate, onSave }: PreviewStepProps) {
               style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', borderColor: 'rgba(255, 255, 255, 0.2)', color: '#ffffff' }}
             >
               <Share2 className="h-4 w-4" />
-              {isSaving ? "Saving..." : "Share via WhatsApp"}
+              {isSaving ? "Saving..." : "WhatsApp"}
             </Button>
           </div>
         </div>

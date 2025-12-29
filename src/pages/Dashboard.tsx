@@ -60,7 +60,7 @@ function Dashboard() {
       title: "Projects",
       description: "View and manage all projects",
       icon: FolderKanban,
-      path: "/estimates/projects",
+      path: "/projects",
       color: "bg-teal-500",
       showWIP: false
     },
@@ -241,7 +241,7 @@ function Dashboard() {
           <WorkInProgress variant="card" size="lg" className="w-fit max-w-md" />
           <div className="flex flex-col sm:flex-row gap-2 ml-0 sm:ml-auto">
             <Button 
-              onClick={() => navigate("/estimates/projects/new")} 
+              onClick={() => navigate("/projects/new")} 
               className="animated-border w-full sm:w-auto"
               variant="outline"
               style={{

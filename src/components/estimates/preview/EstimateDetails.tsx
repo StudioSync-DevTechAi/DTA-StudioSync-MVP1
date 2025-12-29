@@ -12,6 +12,7 @@ interface EstimateDetailsProps {
     date: string;
     amount: string;
     status: string;
+    project_estimate_uuid?: string;  // Added to check if estimate is saved
     selectedServices?: string[];
     selectedTemplate?: string;
     portfolioLinks?: PortfolioLink[];
@@ -185,14 +186,17 @@ export function EstimateDetails({ estimate }: EstimateDetailsProps) {
       <div className={`p-6 space-y-6 ${templateId === "bold" ? "bg-white/10 backdrop-blur-sm border-white/20" : ""}`} style={{ backgroundColor: templateId === "bold" ? '' : '#1a0f3d', borderColor: templateId === "bold" ? 'rgba(255, 255, 255, 0.2)' : undefined }}>
         <div className={`flex justify-between items-start border-b pb-4 ${styles.sectionClass}`} style={{ borderColor: '#3d2a5f' }}>
           <div>
-            <h2 className={`${styles.headingClass} text-white`}>Client</h2>
-            <p className="text-white">{estimate.clientName}</p>
+            <h2 className={`${styles.headingClass} text-white`}>Client: {estimate.clientName}</h2>
             <p className="text-sm text-gray-300">
               Date: {new Date(estimate.date).toLocaleDateString()}
             </p>
           </div>
           <div className="text-right">
-            <h2 className={`${styles.headingClass} text-white`}>Estimate #{estimate.id}</h2>
+            {estimate.project_estimate_uuid && (
+              <h2 className={`${styles.headingClass} text-white`}>
+                Estimate #{estimate.project_estimate_uuid.split('-').pop()?.toUpperCase()}
+              </h2>
+            )}
             <p className="text-sm text-gray-300 capitalize">
               Valid until: {new Date(new Date(estimate.date).getTime() + 30*24*60*60*1000).toLocaleDateString()}
             </p>

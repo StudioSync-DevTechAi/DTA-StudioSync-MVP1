@@ -39,6 +39,7 @@ export function EstimateFormPages({
             clientName={formData.clientName}
             clientEmail={formData.clientEmail}
             clientPhNo={formData.clientPhNo}
+            countryCode={formData.countryCode || '+91'}
             onClientNameChange={(name) => 
               onUpdateFormData("clientName", name)
             }
@@ -47,6 +48,9 @@ export function EstimateFormPages({
             }
             onClientPhNoChange={(phNo) =>
               onUpdateFormData("clientPhNo", phNo)
+            }
+            onCountryCodeChange={(code) =>
+              onUpdateFormData("countryCode", code)
             }
             isReadOnly={isEditing}
           />
@@ -67,6 +71,10 @@ export function EstimateFormPages({
             estimateDetails={formData.estimateDetails}
             onDetailsChange={(details) =>
               onUpdateFormData("estimateDetails", details)
+            }
+            projectName={formData.projectName || ""}
+            onProjectNameChange={(name) =>
+              onUpdateFormData("projectName", name)
             }
           />
         );

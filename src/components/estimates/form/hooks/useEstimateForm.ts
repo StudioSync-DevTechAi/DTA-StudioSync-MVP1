@@ -8,10 +8,24 @@ import { supabase } from "@/integrations/supabase/client";
 export function useEstimateForm(editingEstimate?: any, onSaveCallback?: (estimate: any) => void) {
   const { toast } = useToast();
   const [currentPage, setCurrentPage] = useState(0);
+  
+  // Helper function to get projectName from localStorage
+  const getStoredProjectName = (): string => {
+    try {
+      const stored = localStorage.getItem("estimate_projectName");
+      return stored ? stored : "";
+    } catch (error) {
+      console.error("Error reading projectName from localStorage:", error);
+      return "";
+    }
+  };
+  
   const [formData, setFormData] = useState<EstimateFormData>({
     clientName: "",
     clientEmail: "",
     clientPhNo: "",
+    countryCode: "+91",
+    projectName: getStoredProjectName(),  // Initialize from localStorage if available
     selectedServices: [],
     estimateDetails: {
       events: [],
@@ -28,6 +42,17 @@ export function useEstimateForm(editingEstimate?: any, onSaveCallback?: (estimat
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewEstimate, setPreviewEstimate] = useState<PreviewEstimate | null>(null);
+
+  // Save projectName to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      if (formData.projectName !== undefined && formData.projectName !== null) {
+        localStorage.setItem("estimate_projectName", formData.projectName || "");
+      }
+    } catch (error) {
+      console.error("Error saving projectName to localStorage:", error);
+    }
+  }, [formData.projectName]);
 
   useEffect(() => {
     if (editingEstimate) {
@@ -48,10 +73,14 @@ export function useEstimateForm(editingEstimate?: any, onSaveCallback?: (estimat
         }];
       }
       
+      const editingProjectName = editingEstimate.projectName || "";
+      
       setFormData({
         clientName: editingEstimate.clientName || "",
         clientEmail: editingEstimate.clientEmail || "",
         clientPhNo: editingEstimate.clientPhNo || "",
+        countryCode: editingEstimate.countryCode || "+91",
+        projectName: editingProjectName,
         selectedServices,
         estimateDetails: {
           events: [],
@@ -66,6 +95,15 @@ export function useEstimateForm(editingEstimate?: any, onSaveCallback?: (estimat
         portfolioLinks: editingEstimate.portfolioLinks || [],
         selectedTemplate: editingEstimate.selectedTemplate || "modern"
       });
+      
+      // Update localStorage with the editing estimate's project name
+      try {
+        if (editingProjectName) {
+          localStorage.setItem("estimate_projectName", editingProjectName);
+        }
+      } catch (error) {
+        console.error("Error saving projectName to localStorage when editing:", error);
+      }
       
       setPreviewEstimate(editingEstimate);
       
@@ -155,18 +193,30 @@ export function useEstimateForm(editingEstimate?: any, onSaveCallback?: (estimat
         return Promise.reject(new Error("Client phone number is required"));
       }
       
+      // Get projectName from formData or localStorage as fallback
+      const storedProjectName = getStoredProjectName();
+      const projectNameToSend = formData.projectName || storedProjectName || '';
+      
       // Prepare estimate form data JSONB
       const estimateFormData = {
         clientName: formData.clientName,
         clientEmail: formData.clientEmail,
         clientPhNo: clientPhno,
+        projectName: projectNameToSend,  // Include project name from formData or localStorage - will be persisted in project_name column
         selectedServices: formData.selectedServices,
         estimateDetails: formData.estimateDetails,
         terms: formData.terms,
         portfolioLinks: formData.portfolioLinks,
         selectedTemplate: formData.selectedTemplate,
-        previewEstimate: previewEstimate
+        previewEstimate: previewEstimate,
+        // Include project_estimate_uuid if editing existing estimate
+        ...(editingEstimate?.project_estimate_uuid || editingEstimate?.projectEstimateUuid ? {
+          project_estimate_uuid: editingEstimate.project_estimate_uuid || editingEstimate.projectEstimateUuid
+        } : {})
       };
+      
+      // Log the project name being sent for debugging
+      console.log("Saving estimate with projectName (from formData/localStorage):", projectNameToSend);
       
       // Call RPC function to save estimate
       const { data, error } = await supabase.rpc('save_estimate_form_data', {
@@ -181,6 +231,14 @@ export function useEstimateForm(editingEstimate?: any, onSaveCallback?: (estimat
       }
       
       if (data && data.success) {
+        // Clear projectName from localStorage after successful save
+        try {
+          localStorage.removeItem("estimate_projectName");
+          console.log("Cleared projectName from localStorage after successful save");
+        } catch (error) {
+          console.error("Error clearing projectName from localStorage:", error);
+        }
+        
         // Also save to localStorage for backward compatibility
         const savedEstimates = localStorage.getItem("estimates");
         let estimates = savedEstimates ? JSON.parse(savedEstimates) : [];
@@ -190,9 +248,15 @@ export function useEstimateForm(editingEstimate?: any, onSaveCallback?: (estimat
           const updatedEstimate = {
             ...previewEstimate,
             id: previewEstimate.id || editingEstimate.id,
-            project_estimate_uuid: previewEstimate.project_estimate_uuid || editingEstimate.project_estimate_uuid,
-            projectEstimateUuid: previewEstimate.projectEstimateUuid || editingEstimate.projectEstimateUuid
+            project_estimate_uuid: data.project_estimate_uuid || previewEstimate.project_estimate_uuid || editingEstimate.project_estimate_uuid,
+            projectEstimateUuid: data.project_estimate_uuid || previewEstimate.projectEstimateUuid || editingEstimate.projectEstimateUuid
           };
+          
+          // Update previewEstimate state with the UUID so it shows in the preview
+          setPreviewEstimate({
+            ...previewEstimate,
+            project_estimate_uuid: data.project_estimate_uuid || previewEstimate.project_estimate_uuid || editingEstimate.project_estimate_uuid
+          });
           estimates = estimates.map(est => 
             est.id === previewEstimate.id || est.id === editingEstimate.id ? updatedEstimate : est
           );
@@ -211,10 +275,16 @@ export function useEstimateForm(editingEstimate?: any, onSaveCallback?: (estimat
           const savedEstimate = {
             ...previewEstimate,
             id: data.project_estimate_uuid,
-            project_estimate_uuid: data.project_estimate_uuid,
+            project_estimate_uuid: data.project_estimate_uuid,  // Include UUID for estimate number display
             projectEstimateUuid: data.project_estimate_uuid,
             status: "pending" // Ensure new estimates have pending status
           };
+          
+          // Update previewEstimate state with the UUID so it shows in the preview
+          setPreviewEstimate({
+            ...previewEstimate,
+            project_estimate_uuid: data.project_estimate_uuid
+          });
           estimates.unshift(savedEstimate);
           
           toast({

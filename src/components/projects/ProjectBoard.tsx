@@ -107,6 +107,7 @@ export function ProjectBoard({ onNewProject }: ProjectBoardProps) {
       }
       
       // Fetch projects from project_estimation_table
+      // Exclude declined estimates (estimate_status = 'DECLINED')
       const { data: projectsData, error: fetchError } = await supabase
         .from('project_estimation_table')
         .select(`
@@ -114,10 +115,12 @@ export function ProjectBoard({ onNewProject }: ProjectBoardProps) {
           project_name,
           project_type,
           project_status,
+          estimate_status,
           start_date,
           clientid_phno,
           drafted_json
         `)
+        .neq('estimate_status', 'DECLINED')  // Filter out declined estimates
         .order('created_at', { ascending: false });
 
       if (fetchError) {
@@ -508,7 +511,7 @@ export function ProjectBoard({ onNewProject }: ProjectBoardProps) {
                             onClick={(e) => {
                               // Only navigate if not dragging
                               if (!isDragging && project.projectUuid) {
-                                navigate(`/estimates/projects/new?projectUuid=${project.projectUuid}&page=2`);
+                                navigate(`/projects/new?projectUuid=${project.projectUuid}&page=2`);
                               }
                             }}
                           >
@@ -632,7 +635,7 @@ export function ProjectBoard({ onNewProject }: ProjectBoardProps) {
                             onClick={(e) => {
                               // Only navigate if not dragging
                               if (!isDragging && project.projectUuid) {
-                                navigate(`/estimates/projects/new?projectUuid=${project.projectUuid}&page=2`);
+                                navigate(`/projects/new?projectUuid=${project.projectUuid}&page=2`);
                               }
                             }}
                           >

@@ -2905,7 +2905,7 @@ export default function NewProjectPage() {
       }
       
       alert("Project submitted successfully!");
-      navigate("/estimates/projects");
+      navigate("/projects");
     } else {
       // Stay on the current page (Page 2) after saving events
       // Don't navigate - allow user to proceed to next page for quote documentation
@@ -2926,7 +2926,7 @@ export default function NewProjectPage() {
           canCreate={true}
           showActions={false}
           title="Projects"
-          headerNavigationPath="/estimates/projects"
+          headerNavigationPath="/projects"
           description="Create and manage your photography projects"
         />
         

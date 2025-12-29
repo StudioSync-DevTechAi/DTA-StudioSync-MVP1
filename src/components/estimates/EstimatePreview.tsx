@@ -109,6 +109,9 @@ export function EstimatePreview({ open, onClose, estimate, onStatusChange }: Est
             onShowApprovalForm={() => setShowApprovalForm(true)}
             isApproved={estimate.status === "approved"}
             onCreateInvoice={handleCreateInvoice}
+            estimateId={estimate.id}
+            hasPackages={hasMultiplePackages}
+            onStatusChange={handleStatusChange}
           />
         </DialogHeader>
 

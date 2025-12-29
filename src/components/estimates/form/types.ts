@@ -3,6 +3,8 @@ export interface EstimateFormData {
   clientName: string;
   clientEmail: string;
   clientPhNo?: string;
+  countryCode?: string;
+  projectName?: string;  // Added project name field
   selectedServices: string[];
   estimateDetails: {
     events: any[];
@@ -28,6 +30,8 @@ export interface PreviewEstimate {
   clientName: string;
   clientEmail?: string;
   clientPhNo?: string;
+  countryCode?: string;
+  projectName?: string;  // Added project name field
   selectedPackageIndex?: number;
   portfolioLinks?: PortfolioLink[];
   selectedTemplate?: string;
