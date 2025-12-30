@@ -15,6 +15,8 @@ interface EstimateFormPagesProps {
   isSubmitting: boolean;
   isEditing: boolean;
   onUpdateFormData: (key: keyof EstimateFormData, value: any) => void;
+  onPhoneChange?: (phNo: string) => void;
+  phoneError?: string;
   onPrevious: () => void;
   onNext: () => void;
   onSave: () => Promise<void>;
@@ -27,6 +29,8 @@ export function EstimateFormPages({
   isSubmitting,
   isEditing,
   onUpdateFormData,
+  onPhoneChange,
+  phoneError,
   onPrevious,
   onNext,
   onSave
@@ -46,9 +50,10 @@ export function EstimateFormPages({
             onClientEmailChange={(email) =>
               onUpdateFormData("clientEmail", email)
             }
-            onClientPhNoChange={(phNo) =>
-              onUpdateFormData("clientPhNo", phNo)
+            onClientPhNoChange={onPhoneChange || ((phNo) =>
+              onUpdateFormData("clientPhNo", phNo))
             }
+            phoneError={phoneError}
             onCountryCodeChange={(code) =>
               onUpdateFormData("countryCode", code)
             }

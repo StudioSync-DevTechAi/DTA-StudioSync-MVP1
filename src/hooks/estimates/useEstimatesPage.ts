@@ -64,6 +64,9 @@ export function useEstimatesPage() {
 
       const isProjectRequested = options?.isProjectRequested ?? false;
       const isInvoiceRequested = options?.isInvoiceRequested ?? false;
+      
+      console.log("saveApprovedEstimateToDatabase - Received options:", options);
+      console.log("saveApprovedEstimateToDatabase - isProjectRequested:", isProjectRequested, "isInvoiceRequested:", isInvoiceRequested);
 
       // Get or create project_estimate_uuid
       let projectEstimateUuid = estimate.project_estimate_uuid;
@@ -75,13 +78,17 @@ export function useEstimatesPage() {
         const projectStatus = isProjectRequested ? 'PRE-PROD' : 'LEAD-INPROGRESS';
         
         // Update existing project status with boolean flags and estimate_status
-        const { data: updateData, error: updateError } = await supabase.rpc('update_project_status', {
+        const rpcParams = {
           p_project_estimate_uuid: projectEstimateUuid,
           p_project_status: projectStatus,
           p_is_project_requested: isProjectRequested,
           p_is_invoice_requested: isInvoiceRequested,
           p_estimate_status: 'APPROVED'  // Set estimate_status to APPROVED when approving
-        });
+        };
+        
+        console.log("saveApprovedEstimateToDatabase - RPC call params:", JSON.stringify(rpcParams, null, 2));
+        
+        const { data: updateData, error: updateError } = await supabase.rpc('update_project_status', rpcParams);
 
         if (updateError) {
           console.error("Error updating project status:", updateError);
@@ -227,6 +234,21 @@ export function useEstimatesPage() {
     negotiatedAmountOrSelectedIndex?: string | number,
     selectedPackageIndex?: number
   ) => {
+    // DEBUG: Log entry point with all parameters
+    console.log("🔵 handleStatusChange - ENTRY POINT:", {
+      estimateId,
+      newStatus,
+      optionsOrNegotiatedAmount,
+      type: typeof optionsOrNegotiatedAmount,
+      isNull: optionsOrNegotiatedAmount === null,
+      isUndefined: optionsOrNegotiatedAmount === undefined,
+      isObject: typeof optionsOrNegotiatedAmount === 'object',
+      isArray: Array.isArray(optionsOrNegotiatedAmount),
+      stringified: JSON.stringify(optionsOrNegotiatedAmount),
+      negotiatedAmountOrSelectedIndex,
+      selectedPackageIndex
+    });
+    
     // Handle backward compatibility with multiple function signatures:
     // 1. handleStatusChange(id, status) - no additional params
     // 2. handleStatusChange(id, status, options) - new signature with options object
@@ -235,13 +257,15 @@ export function useEstimatesPage() {
     let actualNegotiatedAmount: string | undefined;
     let actualSelectedPackageIndex: number | undefined;
 
-    if (optionsOrNegotiatedAmount === undefined) {
+    if (optionsOrNegotiatedAmount === undefined || optionsOrNegotiatedAmount === null) {
       // Case 1: No additional parameters
+      console.log("🔵 handleStatusChange - Case 1: No additional parameters");
       actualOptions = undefined;
       actualNegotiatedAmount = undefined;
       actualSelectedPackageIndex = undefined;
-    } else if (typeof optionsOrNegotiatedAmount === 'object' && !Array.isArray(optionsOrNegotiatedAmount)) {
+    } else if (typeof optionsOrNegotiatedAmount === 'object' && !Array.isArray(optionsOrNegotiatedAmount) && optionsOrNegotiatedAmount !== null) {
       // Case 2: New signature with options object
+      console.log("🔵 handleStatusChange - Case 2: Options object detected:", optionsOrNegotiatedAmount);
       actualOptions = optionsOrNegotiatedAmount;
       actualNegotiatedAmount = typeof negotiatedAmountOrSelectedIndex === 'string' ? negotiatedAmountOrSelectedIndex : undefined;
       actualSelectedPackageIndex = typeof negotiatedAmountOrSelectedIndex === 'number' 
@@ -249,12 +273,24 @@ export function useEstimatesPage() {
         : selectedPackageIndex;
     } else if (typeof optionsOrNegotiatedAmount === 'string') {
       // Case 3: Old signature - optionsOrNegotiatedAmount is actually negotiatedAmount
+      console.log("🔵 handleStatusChange - Case 3: String (negotiatedAmount) detected:", optionsOrNegotiatedAmount);
       actualOptions = undefined;
       actualNegotiatedAmount = optionsOrNegotiatedAmount;
       actualSelectedPackageIndex = typeof negotiatedAmountOrSelectedIndex === 'number' 
         ? negotiatedAmountOrSelectedIndex 
         : selectedPackageIndex;
+    } else {
+      console.log("🔵 handleStatusChange - UNKNOWN CASE:", {
+        type: typeof optionsOrNegotiatedAmount,
+        value: optionsOrNegotiatedAmount
+      });
     }
+    
+    console.log("🔵 handleStatusChange - After type checking:", {
+      actualOptions,
+      actualNegotiatedAmount,
+      actualSelectedPackageIndex
+    });
 
     // Update local state first (optimistic update)
     const updatedEstimates = estimates.map(est => {
@@ -308,6 +344,12 @@ export function useEstimatesPage() {
         if (newStatus === "approved") {
           estimateStatus = 'APPROVED';
           // Also call saveApprovedEstimateToDatabase for full approval flow
+          console.log("🔵 handleStatusChange - Before calling saveApprovedEstimateToDatabase:", {
+            estimateId,
+            updatedEstimateId: updatedEstimate?.id,
+            actualOptions,
+            actualOptionsStringified: JSON.stringify(actualOptions)
+          });
           await saveApprovedEstimateToDatabase(estimateId, updatedEstimate, actualOptions);
         } else if (newStatus === "declined") {
           estimateStatus = 'DECLINED';
@@ -375,8 +417,18 @@ export function useEstimatesPage() {
     });
   };
 
-  const handleQuickStatusChange = (estimateId: string, newStatus: string) => {
-    handleStatusChange(estimateId, newStatus);
+  const handleQuickStatusChange = (
+    estimateId: string, 
+    newStatus: string,
+    options?: { isProjectRequested?: boolean; isInvoiceRequested?: boolean }
+  ) => {
+    console.log("🟢 handleQuickStatusChange - Called with:", {
+      estimateId,
+      newStatus,
+      options,
+      optionsStringified: JSON.stringify(options)
+    });
+    handleStatusChange(estimateId, newStatus, options);
     setShowPreview(false);
   };
 
@@ -469,6 +521,7 @@ export function useEstimatesPage() {
           if (projectsData && projectsData.length > 0) {
             const mappedFromProjects = projectsData.map(project => {
               const estimateData = project.estimate_form_data || {};
+              
               return {
                 id: project.project_estimate_uuid,
                 project_estimate_uuid: project.project_estimate_uuid,
@@ -476,14 +529,16 @@ export function useEstimatesPage() {
                 clientName: estimateData.clientName,
                 clientEmail: estimateData.clientEmail,
                 clientPhone: project.clientid_phno,
-                amount: estimateData.amount,
+                amount: estimateData.previewEstimate?.amount || '₹0.00',
                 projectName: project.project_name || estimateData.projectName,
                 projectType: project.project_type || estimateData.projectType,
                 packages: estimateData.packages,
                 items: estimateData.items,
                 isProjectRequested: project.is_project_requested || false,
                 isInvoiceRequested: project.is_invoice_requested || false,
-                ...estimateData
+                ...estimateData,
+                // Map created_at to date AFTER spread to ensure it's not overwritten
+                date: project.created_at || estimateData.date || new Date().toISOString()
               };
             });
             setApprovedEstimatesFromDB(mappedFromProjects);
@@ -515,6 +570,7 @@ export function useEstimatesPage() {
             const estimateData = item.invoice_form_data?.estimateData || {};
             // Try to get the flags from the linked project if available
             const linkedProject = projectsData?.find(p => p.project_estimate_uuid === item.project_estimate_uuid);
+            
             return {
               id: item.project_estimate_uuid || item.invoice_uuid,
               project_estimate_uuid: item.project_estimate_uuid,
@@ -523,7 +579,7 @@ export function useEstimatesPage() {
               clientName: estimateData.clientName || item.invoice_form_data?.clientDetails?.name,
               clientEmail: estimateData.clientEmail || item.invoice_form_data?.clientDetails?.email,
               clientPhone: item.clientid_phno,
-              amount: estimateData.amount || item.invoice_form_data?.totals?.total,
+              amount: estimateData.previewEstimate?.amount || '₹0.00',
               projectName: estimateData.projectName,
               projectType: estimateData.projectType,
               packages: estimateData.packages,
@@ -531,6 +587,9 @@ export function useEstimatesPage() {
               isProjectRequested: linkedProject?.is_project_requested || false,
               isInvoiceRequested: linkedProject?.is_invoice_requested || false,
               ...estimateData,
+              // Map created_at to date AFTER spread to ensure it's not overwritten
+              // Prioritize project's created_at, then invoice's created_at, then estimateData.date
+              date: linkedProject?.created_at || item.created_at || estimateData.date || new Date().toISOString(),
               // Store reference to invoice
               invoiceData: item
             };
@@ -541,6 +600,7 @@ export function useEstimatesPage() {
           .filter(project => !invoiceMap.has(project.project_estimate_uuid))
           .map(project => {
             const estimateData = project.estimate_form_data || {};
+            
             return {
               id: project.project_estimate_uuid,
               project_estimate_uuid: project.project_estimate_uuid,
@@ -548,14 +608,16 @@ export function useEstimatesPage() {
               clientName: estimateData.clientName,
               clientEmail: estimateData.clientEmail,
               clientPhone: project.clientid_phno,
-              amount: estimateData.amount,
+              amount: estimateData.previewEstimate?.amount || '₹0.00',
               projectName: project.project_name || estimateData.projectName,
               projectType: project.project_type || estimateData.projectType,
               packages: estimateData.packages,
               items: estimateData.items,
               isProjectRequested: project.is_project_requested || false,
               isInvoiceRequested: project.is_invoice_requested || false,
-              ...estimateData
+              ...estimateData,
+              // Map created_at to date AFTER spread to ensure it's not overwritten
+              date: project.created_at || estimateData.date || new Date().toISOString()
             };
           });
 

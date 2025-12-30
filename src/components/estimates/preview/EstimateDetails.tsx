@@ -159,7 +159,11 @@ export function EstimateDetails({ estimate }: EstimateDetailsProps) {
   const addonTotal = calculateAddonTotal();
 
   // Function to calculate package total including addons
-  const calculatePackageTotal = (packageAmount: string): string => {
+  const calculatePackageTotal = (packageAmount: string | undefined): string => {
+    // Handle undefined or null packageAmount
+    if (!packageAmount) {
+      return `₹${addonTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
     // Parse package amount (remove currency symbols and commas)
     const packageNum = parseFloat(packageAmount.replace(/[₹,]/g, '')) || 0;
     const total = packageNum + addonTotal;
@@ -318,7 +322,7 @@ export function EstimateDetails({ estimate }: EstimateDetailsProps) {
               <span className="text-xl font-semibold text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>
                 {calculatePackageTotal(pkg.amount)}
               </span>
-              {addonTotal > 0 && (
+              {addonTotal > 0 && pkg.amount && (
                 <div className="text-sm text-gray-300 mt-1">
                   (Base: {pkg.amount} + Addons: ₹{addonTotal.toLocaleString('en-IN')})
                 </div>

@@ -12,6 +12,7 @@ interface PreviewFormDisplayProps {
   onCloseApprovalForm: () => void;
   estimate: any;
   onStatusChange: (estimateId: string, newStatus: string, negotiatedAmount?: string, selectedPackageIndex?: number) => void;
+  onUpdateEstimateOptions?: (estimateId: string, options: { isProjectRequested?: boolean; isInvoiceRequested?: boolean }) => void;
 }
 
 export function PreviewFormDisplay({
@@ -22,7 +23,8 @@ export function PreviewFormDisplay({
   onCloseWhatsAppForm,
   onCloseApprovalForm,
   estimate,
-  onStatusChange
+  onStatusChange,
+  onUpdateEstimateOptions
 }: PreviewFormDisplayProps) {
   return (
     <>
@@ -45,6 +47,10 @@ export function PreviewFormDisplay({
           onClose={onCloseApprovalForm} 
           estimate={estimate} 
           onStatusChange={onStatusChange}
+          initialOptions={{
+            isProjectRequested: estimate.isProjectRequested,
+            isInvoiceRequested: estimate.isInvoiceRequested
+          }}
         />
       )}
     </>

@@ -20,6 +20,7 @@ interface HeaderActionsProps {
   estimateId?: string;
   hasPackages?: boolean; // Whether the estimate has multiple packages that need selection
   onStatusChange?: (estimateId: string, newStatus: string, options?: { isProjectRequested?: boolean; isInvoiceRequested?: boolean }) => void;
+  initialOptions?: { isProjectRequested?: boolean; isInvoiceRequested?: boolean }; // Initial checkbox state from EstimateCard
 }
 
 export function HeaderActions({ 
@@ -30,10 +31,12 @@ export function HeaderActions({
   onCreateInvoice,
   estimateId,
   hasPackages,
-  onStatusChange
+  onStatusChange,
+  initialOptions
 }: HeaderActionsProps) {
-  const [newProject, setNewProject] = useState(false);
-  const [newInvoice, setNewInvoice] = useState(false);
+  // Initialize checkbox state from initialOptions if provided (from EstimateCard)
+  const [newProject, setNewProject] = useState(initialOptions?.isProjectRequested || false);
+  const [newInvoice, setNewInvoice] = useState(initialOptions?.isInvoiceRequested || false);
 
   const handleApprove = () => {
     // If there are packages, show approval form for package selection

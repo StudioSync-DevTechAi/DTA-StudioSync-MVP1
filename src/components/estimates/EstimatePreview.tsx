@@ -23,6 +23,8 @@ interface EstimatePreviewProps {
     status: string;
     selectedServices?: string[];
     selectedPackageIndex?: number;
+    isProjectRequested?: boolean;
+    isInvoiceRequested?: boolean;
     services?: Array<{
       event: string;
       date: string;
@@ -112,6 +114,10 @@ export function EstimatePreview({ open, onClose, estimate, onStatusChange }: Est
             estimateId={estimate.id}
             hasPackages={hasMultiplePackages}
             onStatusChange={handleStatusChange}
+            initialOptions={{
+              isProjectRequested: estimate.isProjectRequested,
+              isInvoiceRequested: estimate.isInvoiceRequested
+            }}
           />
         </DialogHeader>
 
