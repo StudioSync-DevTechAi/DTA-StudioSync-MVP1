@@ -17,6 +17,7 @@ interface WelcomePageProps {
   onClientPhNoChange?: (phNo: string) => void;
   onCountryCodeChange?: (code: string) => void;
   isReadOnly?: boolean;
+  phoneError?: string;
 }
 
 export function WelcomePage({ 
@@ -28,7 +29,8 @@ export function WelcomePage({
   onClientEmailChange,
   onClientPhNoChange,
   onCountryCodeChange,
-  isReadOnly = false 
+  isReadOnly = false,
+  phoneError
 }: WelcomePageProps) {
   const { toast } = useToast();
   const [title, setTitle] = useState(() => {
@@ -238,21 +240,9 @@ export function WelcomePage({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="clientEmail" className="text-white">Client Email</Label>
-          <Input
-            id="clientEmail"
-            type="email"
-            value={clientEmail}
-            onChange={handleEmailChange}
-            placeholder="Enter client email"
-            readOnly={isReadOnly}
-            className={`text-white placeholder:text-gray-400 ${isReadOnly ? "bg-gray-700" : ""}`}
-            style={!isReadOnly ? { backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' } : {}}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="clientPhNo" className="text-white">Client PhNo</Label>
+          <Label htmlFor="clientPhNo" className="text-white">
+            Client PhNo <span className="text-red-400">*</span>
+          </Label>
           <div className="flex gap-2">
             <Select
               value={countryCode}
@@ -276,18 +266,38 @@ export function WelcomePage({
                 </SelectItem>
               </SelectContent>
             </Select>
-            <Input
-              id="clientPhNo"
-              type="tel"
-              value={clientPhNo}
-              onChange={handlePhNoChange}
-              placeholder="Enter 10 digit number"
-              readOnly={isReadOnly}
-              maxLength={10}
-              className={`flex-1 text-white placeholder:text-gray-400 ${isReadOnly ? "bg-gray-700" : ""}`}
-              style={!isReadOnly ? { backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' } : {}}
-            />
+            <div className="flex-1">
+              <Input
+                id="clientPhNo"
+                type="tel"
+                value={clientPhNo}
+                onChange={handlePhNoChange}
+                placeholder="Enter 10 digit number"
+                readOnly={isReadOnly}
+                maxLength={10}
+                required
+                className={`w-full text-white placeholder:text-gray-400 ${isReadOnly ? "bg-gray-700" : ""} ${phoneError ? "border-red-500" : ""}`}
+                style={!isReadOnly ? { backgroundColor: '#2d1b4e', borderColor: phoneError ? '#ef4444' : '#3d2a5f', color: '#ffffff' } : {}}
+              />
+              {phoneError && (
+                <p className="text-red-400 text-sm mt-1">{phoneError}</p>
+              )}
+            </div>
           </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="clientEmail" className="text-white">Client Email</Label>
+          <Input
+            id="clientEmail"
+            type="email"
+            value={clientEmail}
+            onChange={handleEmailChange}
+            placeholder="Enter client email"
+            readOnly={isReadOnly}
+            className={`text-white placeholder:text-gray-400 ${isReadOnly ? "bg-gray-700" : ""}`}
+            style={!isReadOnly ? { backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' } : {}}
+          />
         </div>
       </div>
 

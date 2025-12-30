@@ -11,7 +11,7 @@ export function PreviewPagination({
   setCurrentPageIndex 
 }: PreviewPaginationProps) {
   return (
-    <div className="flex justify-between mt-6">
+    <div className="flex justify-between items-center">
       <Button
         onClick={() => setCurrentPageIndex(Math.max(0, currentPageIndex - 1))}
         disabled={currentPageIndex === 0}

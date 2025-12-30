@@ -23,6 +23,8 @@ interface EstimatePreviewProps {
     status: string;
     selectedServices?: string[];
     selectedPackageIndex?: number;
+    isProjectRequested?: boolean;
+    isInvoiceRequested?: boolean;
     services?: Array<{
       event: string;
       date: string;
@@ -112,6 +114,10 @@ export function EstimatePreview({ open, onClose, estimate, onStatusChange }: Est
             estimateId={estimate.id}
             hasPackages={hasMultiplePackages}
             onStatusChange={handleStatusChange}
+            initialOptions={{
+              isProjectRequested: estimate.isProjectRequested,
+              isInvoiceRequested: estimate.isInvoiceRequested
+            }}
           />
         </DialogHeader>
 
@@ -134,14 +140,17 @@ export function EstimatePreview({ open, onClose, estimate, onStatusChange }: Est
 
         {!showEmailForm && !showWhatsAppForm && !showApprovalForm && (
           <>
+            {/* Preview Pagination - Moved to top and made sticky */}
+            <div className="sticky top-0 z-10 bg-[rgba(26,15,61,0.98)] backdrop-blur-md py-3 mb-4 border-b border-white/10">
+              <PreviewPagination 
+                currentPageIndex={currentPageIndex}
+                setCurrentPageIndex={setCurrentPageIndex}
+              />
+            </div>
+            
             <PreviewContent 
               currentPageIndex={currentPageIndex} 
               estimate={estimate} 
-            />
-            
-            <PreviewPagination 
-              currentPageIndex={currentPageIndex}
-              setCurrentPageIndex={setCurrentPageIndex}
             />
             
             <ScheduleButton 

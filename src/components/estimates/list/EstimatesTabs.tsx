@@ -19,7 +19,7 @@ interface EstimatesTabsProps {
   onPageChange: (page: number) => void;
   onEdit: (estimate: any) => void;
   onPreview: (estimate: any) => void;
-  onStatusChange: (estimateId: string, newStatus: string) => void;
+  onStatusChange: (estimateId: string, newStatus: string, options?: { isProjectRequested?: boolean; isInvoiceRequested?: boolean }) => void;
   onGoToScheduling: (estimateId: string) => void;
   onNewEstimate: () => void;
 }

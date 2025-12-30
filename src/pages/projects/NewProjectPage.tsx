@@ -3126,6 +3126,15 @@ export default function NewProjectPage() {
                           mode="single"
                           selected={formData.startDate}
                           onSelect={(date) => handleInputChange("startDate", date)}
+                          classNames={{
+                            caption_label: "text-sm font-medium uppercase text-white",
+                            head_cell: "text-white rounded-md w-9 font-normal text-[0.8rem] uppercase font-medium opacity-90",
+                            day: "text-white hover:bg-white/20 hover:text-white",
+                            day_selected: "bg-blue-600 text-white hover:bg-blue-700 hover:text-white focus:bg-blue-700 focus:text-white",
+                            day_today: "border border-blue-500 text-white font-medium",
+                            day_outside: "text-white/50 hover:text-white/70",
+                            nav_button: "text-white hover:bg-white/20",
+                          }}
                         />
                       </PopoverContent>
                     </Popover>
@@ -3208,6 +3217,15 @@ export default function NewProjectPage() {
                           mode="single"
                           selected={formData.endDate}
                           onSelect={(date) => handleInputChange("endDate", date)}
+                          classNames={{
+                            caption_label: "text-sm font-medium uppercase text-white",
+                            head_cell: "text-white rounded-md w-9 font-normal text-[0.8rem] uppercase font-medium opacity-90",
+                            day: "text-white hover:bg-white/20 hover:text-white",
+                            day_selected: "bg-blue-600 text-white hover:bg-blue-700 hover:text-white focus:bg-blue-700 focus:text-white",
+                            day_today: "border border-blue-500 text-white font-medium",
+                            day_outside: "text-white/50 hover:text-white/70",
+                            nav_button: "text-white hover:bg-white/20",
+                          }}
                           disabled={(date) => {
                             if (!formData.startDate) return false;
                             const startDateOnly = new Date(formData.startDate);
@@ -3442,11 +3460,12 @@ export default function NewProjectPage() {
                                   />
                                 ) : (
                                   <h3 
-                                    className="font-medium cursor-pointer hover:text-primary text-white text-xs xs:text-sm sm:text-base"
+                                    className="font-medium cursor-pointer hover:text-primary text-white text-xs xs:text-sm sm:text-base flex items-center gap-1.5 xs:gap-2"
                                     style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}
                                     onClick={() => handleEditPackageName(pkg.id)}
                                   >
-                                    {pkg.packageName || `Event Package ${index + 1}`}
+                                    <span>{pkg.packageName || `Event Package ${index + 1}`}</span>
+                                    <Pencil className="h-3 w-3 xs:h-3.5 xs:w-3.5 sm:h-4 sm:w-4 text-white/70 hover:text-white transition-colors" />
                                   </h3>
                                 )}
                                 {!isExpanded && pkg.daysCount && (

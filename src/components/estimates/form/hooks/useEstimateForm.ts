@@ -197,6 +197,13 @@ export function useEstimateForm(editingEstimate?: any, onSaveCallback?: (estimat
       const storedProjectName = getStoredProjectName();
       const projectNameToSend = formData.projectName || storedProjectName || '';
       
+      // Extract estimate amount from the first estimate's total or from previewEstimate
+      const estimateAmount = formData.estimateDetails?.estimates?.[0]?.total || 
+                            previewEstimate?.amount || 
+                            '0.00';
+      // Remove currency symbols and format for storage
+      const cleanedAmount = estimateAmount.toString().replace(/[₹,]/g, '').trim();
+      
       // Prepare estimate form data JSONB
       const estimateFormData = {
         clientName: formData.clientName,
@@ -217,12 +224,14 @@ export function useEstimateForm(editingEstimate?: any, onSaveCallback?: (estimat
       
       // Log the project name being sent for debugging
       console.log("Saving estimate with projectName (from formData/localStorage):", projectNameToSend);
+      console.log("Saving estimate with estimate_amount:", cleanedAmount);
       
       // Call RPC function to save estimate
       const { data, error } = await supabase.rpc('save_estimate_form_data', {
         p_photography_owner_phno: photographyOwnerPhno,
         p_client_phno: clientPhno,
-        p_estimate_form_data: estimateFormData as any
+        p_estimate_form_data: estimateFormData as any,
+        p_estimate_amount: cleanedAmount
       });
       
       if (error) {

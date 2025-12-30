@@ -10,10 +10,26 @@
 -- ============================================
 
 -- 1. Update save_estimate_form_data to set estimate_status = 'PENDING'
+-- Drop ALL existing versions of save_estimate_form_data first (to avoid "function name is not unique" error)
+DO $$ 
+DECLARE
+  r RECORD;
+BEGIN
+  FOR r IN (
+    SELECT oid::regprocedure
+    FROM pg_proc
+    WHERE proname = 'save_estimate_form_data'
+    AND pronamespace = 'public'::regnamespace
+  ) LOOP
+    EXECUTE 'DROP FUNCTION IF EXISTS ' || r.oid::regprocedure || ' CASCADE';
+  END LOOP;
+END $$;
+
 CREATE OR REPLACE FUNCTION public.save_estimate_form_data(
   p_photography_owner_phno TEXT,
   p_client_phno TEXT,
-  p_estimate_form_data JSONB
+  p_estimate_form_data JSONB,
+  p_estimate_amount TEXT DEFAULT NULL
 )
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -26,6 +42,7 @@ DECLARE
   v_client_name TEXT;
   v_client_email TEXT;
   v_project_name TEXT;
+  v_estimate_form_data_with_amount JSONB;
 BEGIN
   -- Extract client name and email from estimate form data
   v_client_name := p_estimate_form_data->>'clientName';
@@ -33,6 +50,12 @@ BEGIN
   -- Explicitly extract project name from JSONB and normalize (trim whitespace, convert empty to NULL)
   -- This ensures project_name column is explicitly set, not just stored in JSONB
   v_project_name := NULLIF(TRIM(COALESCE(p_estimate_form_data->>'projectName', '')), '');
+  
+  -- Add estimate_amount to estimate_form_data JSONB if provided
+  v_estimate_form_data_with_amount := p_estimate_form_data;
+  IF p_estimate_amount IS NOT NULL AND p_estimate_amount != '' THEN
+    v_estimate_form_data_with_amount := v_estimate_form_data_with_amount || jsonb_build_object('estimate_amount', p_estimate_amount);
+  END IF;
   
   -- Check if this is an update (estimate has existing project_estimate_uuid)
   IF p_estimate_form_data ? 'project_estimate_uuid' THEN
@@ -99,7 +122,7 @@ BEGIN
     v_project_estimate_uuid,
     p_photography_owner_phno,
     p_client_phno,
-    p_estimate_form_data,
+    v_estimate_form_data_with_amount,  -- Use JSONB with estimate_amount included
     v_project_name,  -- Explicitly set project_name column (extracted and normalized from JSONB)
     'LEAD-INPROGRESS',
     'PENDING',  -- New estimates start as PENDING

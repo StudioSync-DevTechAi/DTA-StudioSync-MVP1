@@ -23,6 +23,7 @@ interface EstimateCardProps {
     clientPhNo?: string;
     isProjectRequested?: boolean;
     isInvoiceRequested?: boolean;
+    project_estimate_uuid?: string;
   };
   onEdit: (estimate: any) => void;
   onPreview: (estimate: any) => void;
@@ -147,6 +148,11 @@ export function EstimateCard({
     >
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
         <div className="flex-1 min-w-0">
+          {estimate.project_estimate_uuid && (
+            <p className="text-[10px] xs:text-xs sm:text-sm text-white/70 mb-1" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>
+              Estimate: {estimate.project_estimate_uuid.split('-').pop()}
+            </p>
+          )}
           <h3 className="text-base xs:text-lg sm:text-xl font-medium text-white truncate" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>{estimate.clientName}</h3>
           {estimate.clientPhNo && (
             <p className="text-xs xs:text-sm text-white mt-1" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>
@@ -154,8 +160,16 @@ export function EstimateCard({
             </p>
           )}
           <div className="flex flex-wrap items-center gap-1.5 xs:gap-2 sm:gap-3 md:gap-4 mt-2 text-[9px] xs:text-[10px] sm:text-xs md:text-sm text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>
-            <span className="whitespace-nowrap">Created: {new Date(estimate.date).toLocaleDateString()}</span>
-            <span className="whitespace-nowrap">Amount: {estimate.amount}</span>
+            <span className="whitespace-nowrap">
+              Created: {estimate.date ? (() => {
+                const date = new Date(estimate.date);
+                if (isNaN(date.getTime())) return 'N/A';
+                const dateStr = date.toLocaleDateString();
+                const timeStr = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+                return `${dateStr} ${timeStr}`;
+              })() : 'N/A'}
+            </span>
+            <span className="whitespace-nowrap">Amount: {estimate.amount || '₹0.00'}</span>
             {estimate.selectedPackageIndex !== undefined && estimate.packages && (
               <span className="hidden md:inline whitespace-nowrap">Selected Package: {estimate.packages[estimate.selectedPackageIndex]?.name || 
                 `Option ${estimate.selectedPackageIndex + 1}`}</span>
@@ -182,7 +196,11 @@ export function EstimateCard({
                       <Checkbox
                         id={`new-project-${estimate.id}`}
                         checked={newProject}
-                        onCheckedChange={(checked) => setNewProject(checked === true)}
+                        onCheckedChange={(checked) => {
+                          const isChecked = checked === true;
+                          console.log("New Project checkbox changed:", { checked, isChecked, type: typeof checked });
+                          setNewProject(isChecked);
+                        }}
                         className="rounded-none border-white/50 data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600 h-3.5 w-3.5 xs:h-4 xs:w-4 flex-shrink-0"
                       />
                       <Label 
@@ -197,7 +215,11 @@ export function EstimateCard({
                       <Checkbox
                         id={`new-invoice-${estimate.id}`}
                         checked={newInvoice}
-                        onCheckedChange={(checked) => setNewInvoice(checked === true)}
+                        onCheckedChange={(checked) => {
+                          const isChecked = checked === true;
+                          console.log("New Invoice checkbox changed:", { checked, isChecked, type: typeof checked });
+                          setNewInvoice(isChecked);
+                        }}
                         className="rounded-none border-white/50 data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600 h-3.5 w-3.5 xs:h-4 xs:w-4 flex-shrink-0"
                       />
                       <Label 
@@ -215,7 +237,14 @@ export function EstimateCard({
                 <div className="flex flex-wrap items-center justify-center gap-1.5 xs:gap-2 sm:flex-nowrap sm:gap-2 w-full">
                   <Button 
                     variant="outline"
-                    onClick={() => onPreview(estimate)}
+                    onClick={() => {
+                      // Pass checkbox state along with estimate to preview
+                      onPreview({
+                        ...estimate,
+                        isProjectRequested: newProject,
+                        isInvoiceRequested: newInvoice
+                      });
+                    }}
                     className="text-white border-[#3d2a5f] hover:bg-[#1a0f3d] text-xs xs:text-sm h-8 xs:h-9 sm:h-10 px-2 xs:px-3 sm:px-4"
                     style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
                   >
@@ -235,16 +264,39 @@ export function EstimateCard({
                     variant="outline" 
                     className="text-white border-green-500/50 hover:bg-green-600/20 text-xs xs:text-sm h-8 xs:h-9 sm:h-10 px-2 xs:px-3 sm:px-4"
                     style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)', borderColor: 'rgba(34, 197, 94, 0.5)' }}
-                    onClick={() => {
-                      // Handle approve with checkboxes
-                      onStatusChange(estimate.id, "approved", {
-                        isProjectRequested: newProject,
-                        isInvoiceRequested: newInvoice
-                      });
-                      // Reset checkboxes after approval
-                      setNewProject(false);
-                      setNewInvoice(false);
-                    }}
+                      onClick={() => {
+                        // Capture checkbox values before resetting
+                        const projectRequested = newProject;
+                        const invoiceRequested = newInvoice;
+                        
+                        const optionsObject = {
+                          isProjectRequested: projectRequested,
+                          isInvoiceRequested: invoiceRequested
+                        };
+                        
+                        console.log("🟡 EstimateCard - Approve clicked with checkboxes:", {
+                          newProject: projectRequested,
+                          newInvoice: invoiceRequested,
+                          estimateId: estimate.id,
+                          optionsObject,
+                          optionsStringified: JSON.stringify(optionsObject),
+                          onStatusChangeType: typeof onStatusChange,
+                          onStatusChangeLength: onStatusChange.length
+                        });
+                        
+                        // Handle approve with checkboxes
+                        console.log("🟡 EstimateCard - About to call onStatusChange with:", {
+                          estimateId: estimate.id,
+                          status: "approved",
+                          options: optionsObject
+                        });
+                        onStatusChange(estimate.id, "approved", optionsObject);
+                        console.log("🟡 EstimateCard - onStatusChange call completed");
+                        
+                        // Reset checkboxes after approval
+                        setNewProject(false);
+                        setNewInvoice(false);
+                      }}
                   >
                     <Check className="h-3 w-3 xs:h-3.5 xs:w-3.5 sm:h-4 sm:w-4 mr-1 xs:mr-1.5 sm:mr-2" />
                     <span className="hidden sm:inline">Approve</span>
@@ -270,7 +322,14 @@ export function EstimateCard({
             <>
               <Button 
                 variant="outline"
-                onClick={() => onPreview(estimate)}
+                    onClick={() => {
+                      // Pass checkbox state along with estimate to preview
+                      onPreview({
+                        ...estimate,
+                        isProjectRequested: newProject,
+                        isInvoiceRequested: newInvoice
+                      });
+                    }}
                 className="text-white border-[#3d2a5f] hover:bg-[#1a0f3d] text-xs xs:text-sm h-8 xs:h-9 sm:h-10 px-2 xs:px-3 sm:px-4"
                 style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
               >
