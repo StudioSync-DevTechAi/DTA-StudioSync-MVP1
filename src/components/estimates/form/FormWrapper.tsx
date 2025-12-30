@@ -11,10 +11,11 @@ interface FormWrapperProps {
   children: ReactNode;
   currentPage?: number;
   onPrevious?: () => void;
+  hideBackButton?: boolean; // Hide back button when estimate is saved
 }
 
-export function FormWrapper({ open, onClose, title, children, currentPage = 0, onPrevious }: FormWrapperProps) {
-  const showPreviousButton = currentPage > 0 && onPrevious;
+export function FormWrapper({ open, onClose, title, children, currentPage = 0, onPrevious, hideBackButton = false }: FormWrapperProps) {
+  const showPreviousButton = currentPage > 0 && onPrevious && !hideBackButton;
   const isEstimatesPage = currentPage === 2;
   const isPreviewPage = currentPage === 5;
   

@@ -169,6 +169,7 @@ export function EstimateForm({ open, onClose, editingEstimate, onSave }: Estimat
       title={getDialogTitle()}
       currentPage={currentPage}
       onPrevious={currentPage > 0 ? handlePreviousPage : undefined}
+      hideBackButton={!!previewEstimate?.project_estimate_uuid}
     >
       <EstimateFormPages 
         currentPage={currentPage}

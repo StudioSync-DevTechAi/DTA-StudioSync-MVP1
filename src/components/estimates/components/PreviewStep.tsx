@@ -59,6 +59,16 @@ export function PreviewStep({ estimate, onSave }: PreviewStepProps) {
   };
 
   const handleSaveEstimate = async () => {
+    // Prevent saving if estimate already has a UUID
+    if (estimate?.project_estimate_uuid) {
+      toast({
+        title: "Already Saved",
+        description: "This estimate has already been saved.",
+        variant: "default",
+      });
+      return;
+    }
+    
     if (!isSaving) {
       setIsSaving(true);
       try {
@@ -160,12 +170,12 @@ export function PreviewStep({ estimate, onSave }: PreviewStepProps) {
         <div className="flex justify-between items-center space-x-4 mb-4">
           <Button 
             onClick={handleSaveEstimate} 
-            disabled={isSaving}
+            disabled={isSaving || !!estimate?.project_estimate_uuid}
             className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 text-white"
             style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', borderColor: 'rgba(255, 255, 255, 0.2)', color: '#ffffff' }}
           >
             <Save className="h-4 w-4" />
-            {isSaving ? "Saving..." : "Save Estimate"}
+            {isSaving ? "Saving..." : estimate?.project_estimate_uuid ? "Saved" : "Save Estimate"}
           </Button>
           <div className="flex items-center space-x-4">
             <Button 
