@@ -60,6 +60,7 @@ export function InvoiceForm({ open, onClose, onSave, editingInvoice }: InvoiceFo
         <form className="space-y-6" onSubmit={submitForm}>
           <ClientDetailsCard 
             {...clientDetails}
+            isFromEstimate={!!estimateData}
             onInvoiceTypeChange={(value) => updateClientDetail('invoiceType', value)}
             onPaymentReceivedChange={(value) => updateClientDetail('paymentReceived', value)}
             onPaymentDateChange={(value) => updateClientDetail('paymentDate', value)}
