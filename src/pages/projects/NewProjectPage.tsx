@@ -2744,67 +2744,125 @@ export default function NewProjectPage() {
 
   const uploadPdfToStorage = async (pdfBlob: Blob, projectUuid: string): Promise<string | null> => {
     try {
-      console.log('📤 Starting PDF upload via Edge Function...', { 
+      console.log('📤 Starting PDF upload to storage...', { 
         projectUuid, 
         blobSize: pdfBlob.size,
         blobType: pdfBlob.type 
       });
       
-      // Get current session for auth token (more reliable than getUser)
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      // Try to get current user (optional - bucket is now public)
+      // If no user, we'll use project UUID only for path structure
+      let userId: string | null = null;
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
       
-      if (sessionError || !session) {
-        // Fallback to getUser if getSession fails
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-        if (userError || !user) {
-          console.error('❌ Authentication error:', { sessionError, userError });
-          throw new Error('Not authenticated. Please log in to upload PDFs.');
+      if (user && !userError) {
+        userId = user.id;
+        console.log('✅ User authenticated:', { userId: user.id, email: user.email });
+      } else {
+        console.warn('⚠️ No authenticated user found, using public upload (bucket is public)');
+      }
+
+      // Generate storage path: {user_id}/{project_uuid}/{timestamp}-{random}-quotation.pdf
+      // If no user, use: {project_uuid}/{timestamp}-{random}-quotation.pdf
+      // NOTE: Don't include bucket name - it's specified in .from('documents')
+      const timestamp = Date.now();
+      const randomString = Math.random().toString(36).substring(2, 15);
+      const storagePath = userId 
+        ? `${userId}/${projectUuid}/${timestamp}-${randomString}-quotation.pdf`
+        : `${projectUuid}/${timestamp}-${randomString}-quotation.pdf`;
+
+      console.log('📁 Storage path:', storagePath);
+      console.log('📦 Uploading to documents bucket...');
+
+      // Convert blob to File for upload
+      const pdfFile = new File([pdfBlob], `quotation-${projectUuid}.pdf`, { type: 'application/pdf' });
+
+      // Upload to storage (use 'documents' bucket - will be created via migration)
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('documents')
+        .upload(storagePath, pdfFile, {
+          contentType: 'application/pdf',
+          upsert: false,
+        });
+
+      if (uploadError) {
+        console.error('❌ Upload error details:', {
+          message: uploadError.message,
+          statusCode: uploadError.statusCode,
+          statusText: uploadError.statusText,
+          error: uploadError,
+          storagePath,
+          bucket: 'documents',
+          userId: userId || 'anonymous',
+          projectUuid
+        });
+        
+        // Check for specific error types
+        const isRLSError = uploadError.message.includes('row-level security') || 
+                          uploadError.message.includes('RLS') ||
+                          uploadError.statusCode === 403;
+        const isBucketNotFound = uploadError.message.includes('Bucket not found') || 
+                                uploadError.message.includes('not found') ||
+                                uploadError.statusCode === 404;
+        
+        if (isRLSError) {
+          console.error('🔒 RLS Policy Error: Upload may have failed due to policy restrictions');
+          console.error('   Current path:', storagePath);
+          console.error('   Note: Bucket should be public - check migration 20250201000006_bypass_rls_documents_bucket.sql');
+          throw new Error(`Permission denied: RLS policy violation. Please ensure bucket is public. Path: ${storagePath}`);
         }
-        // If we have user but no session, we can't get access token
-        // This shouldn't happen, but handle it gracefully
-        throw new Error('No active session found. Please refresh the page and try again.');
-      }
+        
+        // If bucket doesn't exist or access denied, try 'images' bucket as fallback
+        if (isBucketNotFound || uploadError.statusCode === 403) {
+          console.warn('⚠️ Documents bucket issue detected, trying images bucket as fallback');
+          const { data: fallbackUpload, error: fallbackError } = await supabase.storage
+            .from('images')
+            .upload(storagePath, pdfFile, {
+              contentType: 'application/pdf',
+              upsert: false,
+            });
+          
+          if (fallbackError) {
+            console.error('❌ Error uploading PDF to fallback bucket (images):', {
+              message: fallbackError.message,
+              statusCode: fallbackError.statusCode,
+              error: fallbackError,
+              storagePath,
+              bucket: 'images'
+            });
+            throw new Error(`Failed to upload PDF to fallback storage: ${fallbackError.message}`);
+          }
 
-      console.log('✅ User authenticated:', { 
-        userId: session.user.id, 
-        email: session.user.email 
-      });
-
-      // Convert blob to base64 for Edge Function
-      const arrayBuffer = await pdfBlob.arrayBuffer();
-      const uint8Array = new Uint8Array(arrayBuffer);
-      const base64 = btoa(String.fromCharCode(...uint8Array));
-      
-      console.log('📦 Calling Edge Function: upload-pdf');
-      
-      // Call Edge Function to upload PDF (bypasses RLS using service role)
-      const { data, error } = await supabase.functions.invoke('upload-pdf', {
-        body: {
-          file: base64,
-          fileName: `quotation-${projectUuid}.pdf`,
-          projectUuid: projectUuid
-        },
-        headers: {
-          Authorization: `Bearer ${session.access_token}`
+          console.log('✅ PDF uploaded to fallback bucket (images)');
+          // Get public URL from fallback bucket
+          const { data: urlData } = supabase.storage
+            .from('images')
+            .getPublicUrl(storagePath);
+          
+          console.log('🔗 Public URL from fallback:', urlData.publicUrl);
+          return urlData.publicUrl;
         }
-      });
-
-      if (error) {
-        console.error('❌ Edge Function error:', error);
-        throw new Error(error.message || 'Failed to upload PDF via Edge Function');
+        
+        // For other errors, throw with detailed message
+        console.error('❌ Unexpected upload error:', uploadError);
+        throw new Error(`Failed to upload PDF: ${uploadError.message || 'Unknown error'}`);
       }
 
-      if (!data || !data.success || !data.url) {
-        console.error('❌ Edge Function returned error:', data);
-        const errorMessage = data?.error || 'Unknown error from Edge Function';
-        throw new Error(`PDF upload failed: ${errorMessage}`);
+      console.log('✅ PDF uploaded successfully to documents bucket');
+      console.log('📄 Upload data:', uploadData);
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('documents')
+        .getPublicUrl(storagePath);
+
+      if (!urlData || !urlData.publicUrl) {
+        console.error('❌ Failed to get public URL for uploaded PDF');
+        throw new Error('Failed to retrieve public URL for uploaded PDF');
       }
 
-      console.log('✅ PDF uploaded successfully via Edge Function');
-      console.log('🔗 Public URL:', data.url);
-      console.log('📁 Storage path:', data.path);
-      
-      return data.url;
+      console.log('🔗 Public URL:', urlData.publicUrl);
+      return urlData.publicUrl;
     } catch (error: any) {
       console.error('❌ Error uploading PDF to storage:', {
         error: error,
