@@ -81,8 +81,11 @@ export default function NewProjectPage() {
   const projectNameFromUrl = searchParams.get('projectName');
   
   // Initialize currentPage from URL query parameter, fallback to 1
+  // If we have projectUuid and page=2 in URL, start directly on page 2 to prevent flickering
   const pageFromUrl = searchParams.get('page');
-  const initialPage = pageFromUrl ? parseInt(pageFromUrl, 10) : 1;
+  const initialPage = (projectUuidFromUrl && pageFromUrl === '2') 
+    ? 2 
+    : (pageFromUrl ? parseInt(pageFromUrl, 10) : 1);
   const [currentPage, setCurrentPage] = useState(initialPage >= 1 && initialPage <= 3 ? initialPage : 1);
   const [formData, setFormData] = useState({
     projectName: "",
@@ -639,10 +642,20 @@ export default function NewProjectPage() {
 
       // Restore currentPage from URL first (takes precedence), then fallback to sessionStorage
       const pageFromUrlInEffect = searchParams.get('page');
+      const projectUuidFromUrlInEffect = searchParams.get('projectUuid');
       let finalPage = currentPage; // Use current state as default
       
-      // Prioritize page from URL if present (especially when navigating from project card)
-      if (pageFromUrlInEffect) {
+      // If we have projectUuid and page=2 in URL, skip sessionStorage and go directly to page 2
+      const isDirectNavigationToPage2 = projectUuidFromUrlInEffect && pageFromUrlInEffect === '2';
+      
+      if (isDirectNavigationToPage2) {
+        // Direct navigation to page 2 - don't load sessionStorage, set page directly
+        finalPage = 2;
+        setCurrentPage(2);
+        // Don't load form data or event packages from sessionStorage
+        // They will be loaded from database
+        console.log('Direct navigation to page 2 with projectUuid - skipping sessionStorage');
+      } else if (pageFromUrlInEffect) {
         const page = parseInt(pageFromUrlInEffect, 10);
         if (page >= 1 && page <= 3) {
           finalPage = page;
@@ -658,9 +671,8 @@ export default function NewProjectPage() {
         }
       }
 
-      // Load form data from sessionStorage (but don't override if loading from database)
-      // Only load if we don't have projectUuidFromUrl (which means we're loading from database)
-      if (savedFormData && !projectUuidFromUrl) {
+      // Only load form data from sessionStorage if not directly navigating to page 2
+      if (!isDirectNavigationToPage2 && savedFormData && !projectUuidFromUrl) {
         const parsed = JSON.parse(savedFormData);
         // Convert date strings back to Date objects
         if (parsed.startDate) parsed.startDate = new Date(parsed.startDate);
@@ -668,12 +680,12 @@ export default function NewProjectPage() {
         setFormData(parsed);
       }
 
-      // Only load event packages from sessionStorage if we're on Page 2 or 3
-      // BUT: If we have projectUuidFromUrl and page=2, skip sessionStorage events
-      // because loadExistingEvents will fetch from database
-      if (finalPage === 2 && projectUuidFromUrl) {
+      // Only load event packages from sessionStorage if not directly navigating to page 2
+      if (isDirectNavigationToPage2) {
         // Don't load from sessionStorage - events will be loaded from database
-        // The loadExistingEvents effect will handle this
+        console.log('Skipping sessionStorage event loading - will load from database');
+      } else if (finalPage === 2 && projectUuidFromUrl) {
+        // Don't load from sessionStorage - events will be loaded from database
         console.log('Skipping sessionStorage event loading - will load from database');
       } else if (savedEventPackages && (finalPage === 2 || finalPage === 3)) {
         const parsed = JSON.parse(savedEventPackages);
@@ -696,6 +708,10 @@ export default function NewProjectPage() {
           prepChecklist: [],
           daysCount: "1",
           isSaved: false,
+          // Set default date and time from formData (landing page values)
+          startDate: formData.startDate ? new Date(formData.startDate) : undefined,
+          startHour: formData.startHour || "00",
+          startMinute: formData.startMinute || "00",
         };
         setEventPackages([newPackage]);
       }
@@ -713,10 +729,10 @@ export default function NewProjectPage() {
       if (savedPhotographyOwnerPhno) {
         console.log('Photography owner phone from sessionStorage:', savedPhotographyOwnerPhno);
       }
-      if (savedProjectName && !formData.projectName) {
+      if (savedProjectName && !formData.projectName && !isDirectNavigationToPage2) {
         handleInputChange('projectName', savedProjectName);
       }
-      if (savedProjectType && !formData.eventType) {
+      if (savedProjectType && !formData.eventType && !isDirectNavigationToPage2) {
         handleInputChange('eventType', savedProjectType);
       }
     } catch (error) {
@@ -1244,39 +1260,44 @@ export default function NewProjectPage() {
       try {
         console.log('Loading existing events for project:', projectEstimateUuid);
         
-        // Fetch events from events_details_table
-        const { data: eventsData, error: eventsError } = await supabase
-          .from('events_details_table' as any)
-          .select(`
-            event_uuid,
-            event_name,
-            event_start_date,
-            event_start_time,
-            event_photographers_count,
-            event_videographers_count,
-            event_photo_coordinator_phno,
-            event_video_coordinator_phno,
-            event_deliverables_notes_json,
-            event_prep_checklist_json,
-            event_days_count,
-            pg_type,
-            vg_type,
-            event_photographers_days_count,
-            event_videographers_days_count
-          `)
-          .eq('project_uuid', projectEstimateUuid)
-          .order('event_start_date', { ascending: true });
+        // Get client phone number for RPC call
+        const clientPhno = (projectDetails?.clientid_phno || formData.clientPhone || '').replace(/\s/g, '');
+        
+        // Call RPC function to get all events for this project
+        const { data: eventsData, error: eventsError } = await supabase.rpc('get_project_events', {
+          p_project_estimate_uuid: projectEstimateUuid,
+          p_client_phno: clientPhno || null, // Pass null if not available
+        });
 
         if (eventsError) {
-          console.error('Error fetching existing events:', eventsError);
+          console.error('Error fetching project events via RPC:', eventsError);
+          // Fallback: initialize with empty event card
+          if (eventPackages.length === 0) {
+            const newPackage: EventPackage = {
+              id: Date.now().toString(),
+              eventType: "",
+              photographersCount: "",
+              videographersCount: "",
+              prepChecklist: [],
+              daysCount: "1",
+              isSaved: false,
+              startDate: formData.startDate ? new Date(formData.startDate) : undefined,
+              startHour: formData.startHour || "00",
+              startMinute: formData.startMinute || "00",
+            };
+            setEventPackages([newPackage]);
+          }
           return;
         }
 
-        if (eventsData && eventsData.length > 0) {
-          console.log(`Loaded ${eventsData.length} existing events`);
+        // Parse the JSONB response - RPC returns JSONB which might be a single object or array
+        const events = Array.isArray(eventsData) ? eventsData : (eventsData ? [eventsData] : []);
+
+        if (events && events.length > 0) {
+          console.log(`Loaded ${events.length} existing events via RPC`);
           
           // Transform database events to EventPackage format
-          const loadedEvents: EventPackage[] = eventsData.map((event: any) => {
+          const loadedEvents: EventPackage[] = events.map((event: any) => {
             // Parse start date and time
             const startDate = event.event_start_date ? new Date(event.event_start_date) : undefined;
             const startTime = event.event_start_time ? event.event_start_time.split(':') : null;
@@ -1318,8 +1339,8 @@ export default function NewProjectPage() {
             return {
               id: Date.now().toString() + Math.random(), // Generate unique ID
               event_uuid: event.event_uuid,
-              packageName: event.event_name || `Event Package ${eventsData.indexOf(event) + 1}`,
-              eventType: event.event_name || "",
+              packageName: event.event_name || `Event Package ${events.indexOf(event) + 1}`,
+              eventType: event.event_type || event.event_name || "",
               photographersCount: event.event_photographers_count?.toString() || "",
               videographersCount: event.event_videographers_count?.toString() || "",
               startDate: startDate,
@@ -1338,20 +1359,34 @@ export default function NewProjectPage() {
             };
           });
 
-          setEventPackages(loadedEvents);
-          
           // Mark events as saved and create snapshot since they're loaded from database
           setEventsSaved(true);
-          const snapshot = loadedEvents.map((pkg) => ({
-            ...pkg,
-            startDate: pkg.startDate ? new Date(pkg.startDate) : undefined,
-            prepChecklist: pkg.prepChecklist ? JSON.parse(JSON.stringify(pkg.prepChecklist)) : undefined,
-          }));
+          const snapshot = loadedEvents.map((pkg) => {
+            // Create a deep copy with proper date conversion
+            const savedState: EventPackage = {
+              ...pkg,
+              startDate: pkg.startDate ? (pkg.startDate instanceof Date ? new Date(pkg.startDate) : new Date(pkg.startDate)) : undefined,
+              prepChecklist: pkg.prepChecklist ? JSON.parse(JSON.stringify(pkg.prepChecklist)) : undefined,
+            };
+            return savedState;
+          });
           setSavedEventsSnapshot(snapshot);
-          console.log('Events loaded from database - marked as saved, Next button should be enabled');
+
+          // Also set savedState for each loaded event package
+          const eventsWithSavedState = loadedEvents.map((pkg) => ({
+            ...pkg,
+            savedState: {
+              ...pkg,
+              startDate: pkg.startDate ? (pkg.startDate instanceof Date ? new Date(pkg.startDate) : new Date(pkg.startDate)) : undefined,
+              prepChecklist: pkg.prepChecklist ? JSON.parse(JSON.stringify(pkg.prepChecklist)) : undefined,
+            } as EventPackage
+          }));
+          setEventPackages(eventsWithSavedState);
+          
+          console.log('Events loaded from database via RPC - marked as saved, Next button should be enabled');
         } else {
           // No existing events, initialize with one empty event card
-          console.log('No existing events found, initializing with empty event card');
+          console.log('No existing events found via RPC, initializing with empty event card');
           if (eventPackages.length === 0) {
             const newPackage: EventPackage = {
               id: Date.now().toString(),
@@ -1370,7 +1405,7 @@ export default function NewProjectPage() {
     };
 
     loadExistingEvents();
-  }, [projectEstimateUuid, currentPage]);
+  }, [projectEstimateUuid, currentPage, projectDetails?.clientid_phno, formData.clientPhone]);
 
   // Fetch photographers and videographers when Page 2 loads
   useEffect(() => {
@@ -1608,6 +1643,11 @@ export default function NewProjectPage() {
               videographersCount: "",
               prepChecklist: [],
               isSaved: false,
+              daysCount: "1",
+              // Set default date and time from formData (landing page values)
+              startDate: formData.startDate ? new Date(formData.startDate) : undefined,
+              startHour: formData.startHour || "00",
+              startMinute: formData.startMinute || "00",
             };
             setEventPackages([newPackage]);
           }
@@ -1734,6 +1774,7 @@ export default function NewProjectPage() {
         p_event_days_count: eventPackage.daysCount ? parseFloat(eventPackage.daysCount) : null,
         p_pg_type: eventPackage.pgType ? { type: eventPackage.pgType } : null, // PG-Type JSON: {"type": "EF"} or {"type": "GH"}
         p_vg_type: eventPackage.vgType ? { type: eventPackage.vgType } : null, // VG-Type JSON: {"type": "AB"} or {"type": "CD"}
+        p_event_type: eventPackage.eventType || null, // Add event_type parameter
         p_event_photographers_days_count: null, // Deprecated - using pg_type instead
         p_event_videographers_days_count: null, // Deprecated - using vg_type instead
       };
@@ -1845,6 +1886,27 @@ export default function NewProjectPage() {
       daysCount: "1",
       isSaved: false,
     };
+
+    // Calculate default date for new event based on previous event
+    if (eventPackages.length > 0) {
+      const previousEvent = eventPackages[eventPackages.length - 1];
+      if (previousEvent.startDate) {
+        // Calculate new date: previous event date + previous event's daysCount
+        const daysToAdd = parseInt(previousEvent.daysCount || "1", 10);
+        const newDate = new Date(previousEvent.startDate);
+        newDate.setDate(newDate.getDate() + daysToAdd);
+        newPackage.startDate = newDate;
+        // Use same time as previous event
+        newPackage.startHour = previousEvent.startHour || "00";
+        newPackage.startMinute = previousEvent.startMinute || "00";
+      }
+    } else {
+      // If no previous events, use formData values (shouldn't happen, but fallback)
+      newPackage.startDate = formData.startDate ? new Date(formData.startDate) : undefined;
+      newPackage.startHour = formData.startHour || "00";
+      newPackage.startMinute = formData.startMinute || "00";
+    }
+
     setEventPackages([...eventPackages, newPackage]);
   };
 
@@ -1862,6 +1924,25 @@ export default function NewProjectPage() {
 
     // Compare current state with saved state
     const saved = pkg.savedState;
+    
+    // Helper function to safely compare dates
+    const compareDates = (date1: Date | string | undefined, date2: Date | string | undefined): boolean => {
+      if (!date1 && !date2) return false; // Both undefined/null, they're equal
+      if (!date1 || !date2) return true; // One is undefined, they're different
+      
+      // Convert to Date objects if they're strings
+      const d1 = date1 instanceof Date ? date1 : new Date(date1);
+      const d2 = date2 instanceof Date ? date2 : new Date(date2);
+      
+      // Check if dates are valid
+      if (isNaN(d1.getTime()) || isNaN(d2.getTime())) {
+        // If either is invalid, compare as strings
+        return String(date1) !== String(date2);
+      }
+      
+      return d1.getTime() !== d2.getTime();
+    };
+    
     return (
       pkg.eventType !== saved.eventType ||
       pkg.customEventTypeName !== saved.customEventTypeName ||
@@ -1874,12 +1955,10 @@ export default function NewProjectPage() {
       pkg.startMinute !== saved.startMinute ||
       pkg.photographyCoordinatorId !== saved.photographyCoordinatorId ||
       pkg.videographyCoordinatorId !== saved.videographyCoordinatorId ||
-      pkg.pgType !== saved.pgType ||
-      pkg.vgType !== saved.vgType ||
       pkg.packageName !== saved.packageName ||
       JSON.stringify(pkg.prepChecklist) !== JSON.stringify(saved.prepChecklist) ||
       pkg.deliverablesNotes !== saved.deliverablesNotes ||
-      (pkg.startDate?.getTime() !== saved.startDate?.getTime())
+      compareDates(pkg.startDate, saved.startDate)
     );
   };
 
@@ -1887,6 +1966,14 @@ export default function NewProjectPage() {
   const hasAnyUnsavedChanges = (): boolean => {
     // If events haven't been saved yet, check if there are valid events to save
     if (!eventsSaved || savedEventsSnapshot.length === 0) {
+      // If we have loaded events from database (they have event_uuid and isSaved), they are considered saved
+      // So if we have events with event_uuid, we should check against savedState
+      const hasLoadedEvents = eventPackages.some(pkg => pkg.event_uuid && pkg.isSaved);
+      if (hasLoadedEvents) {
+        // Events were loaded from database, check for changes using hasUnsavedChanges
+        return eventPackages.some(pkg => hasUnsavedChanges(pkg));
+      }
+      // No saved events yet, check if there are valid events to save
       const validEventCards = eventPackages.filter(
         (pkg) => pkg.eventType && pkg.startDate
       );
@@ -1930,7 +2017,22 @@ export default function NewProjectPage() {
         currentPkg.packageName !== savedPkg.packageName ||
         JSON.stringify(currentPkg.prepChecklist) !== JSON.stringify(savedPkg.prepChecklist) ||
         currentPkg.deliverablesNotes !== savedPkg.deliverablesNotes ||
-        (currentPkg.startDate?.getTime() !== savedPkg.startDate?.getTime())
+        (() => {
+          // Safely compare dates
+          const currentDate = currentPkg.startDate instanceof Date 
+            ? currentPkg.startDate 
+            : (currentPkg.startDate ? new Date(currentPkg.startDate) : undefined);
+          const savedDate = savedPkg.startDate instanceof Date 
+            ? savedPkg.startDate 
+            : (savedPkg.startDate ? new Date(savedPkg.startDate) : undefined);
+          
+          if (!currentDate && !savedDate) return false;
+          if (!currentDate || !savedDate) return true;
+          if (isNaN(currentDate.getTime()) || isNaN(savedDate.getTime())) {
+            return String(currentPkg.startDate) !== String(savedPkg.startDate);
+          }
+          return currentDate.getTime() !== savedDate.getTime();
+        })()
       ) {
         return true; // Event changed
       }
@@ -2240,10 +2342,12 @@ export default function NewProjectPage() {
       if (pkg.eventType && pkg.photographersCount && pkg.videographersCount) {
         const photographers = parseInt(pkg.photographersCount, 10) || 0;
         const videographers = parseInt(pkg.videographersCount, 10) || 0;
+        const daysCount = parseInt(pkg.daysCount || "1", 10) || 1; // Get days count, default to 1
         const multiplier = eventTypeMultiplier[pkg.eventType] || 1.0;
         const packagePrice =
           (photographers * basePricePerPhotographer + videographers * basePricePerVideographer) *
-          multiplier;
+          multiplier *
+          daysCount; // Multiply by daysCount
         actualPrice += packagePrice;
       }
     });
@@ -2638,6 +2742,80 @@ export default function NewProjectPage() {
     }
   };
 
+  const uploadPdfToStorage = async (pdfBlob: Blob, projectUuid: string): Promise<string | null> => {
+    try {
+      console.log('📤 Starting PDF upload via Edge Function...', { 
+        projectUuid, 
+        blobSize: pdfBlob.size,
+        blobType: pdfBlob.type 
+      });
+      
+      // Get current session for auth token (more reliable than getUser)
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session) {
+        // Fallback to getUser if getSession fails
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError || !user) {
+          console.error('❌ Authentication error:', { sessionError, userError });
+          throw new Error('Not authenticated. Please log in to upload PDFs.');
+        }
+        // If we have user but no session, we can't get access token
+        // This shouldn't happen, but handle it gracefully
+        throw new Error('No active session found. Please refresh the page and try again.');
+      }
+
+      console.log('✅ User authenticated:', { 
+        userId: session.user.id, 
+        email: session.user.email 
+      });
+
+      // Convert blob to base64 for Edge Function
+      const arrayBuffer = await pdfBlob.arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
+      const base64 = btoa(String.fromCharCode(...uint8Array));
+      
+      console.log('📦 Calling Edge Function: upload-pdf');
+      
+      // Call Edge Function to upload PDF (bypasses RLS using service role)
+      const { data, error } = await supabase.functions.invoke('upload-pdf', {
+        body: {
+          file: base64,
+          fileName: `quotation-${projectUuid}.pdf`,
+          projectUuid: projectUuid
+        },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
+      });
+
+      if (error) {
+        console.error('❌ Edge Function error:', error);
+        throw new Error(error.message || 'Failed to upload PDF via Edge Function');
+      }
+
+      if (!data || !data.success || !data.url) {
+        console.error('❌ Edge Function returned error:', data);
+        const errorMessage = data?.error || 'Unknown error from Edge Function';
+        throw new Error(`PDF upload failed: ${errorMessage}`);
+      }
+
+      console.log('✅ PDF uploaded successfully via Edge Function');
+      console.log('🔗 Public URL:', data.url);
+      console.log('📁 Storage path:', data.path);
+      
+      return data.url;
+    } catch (error: any) {
+      console.error('❌ Error uploading PDF to storage:', {
+        error: error,
+        message: error?.message,
+        stack: error?.stack
+      });
+      // Re-throw to allow caller to handle with specific error messages
+      throw error;
+    }
+  };
+
   // Auto-load PDF with price card when Standard Wedding is selected on Page 3
   useEffect(() => {
     if (currentPage === 3 && selectedFormat === "standard_wedding.pdf" && !editedPdfBlob && !isEditingPdf) {
@@ -2666,10 +2844,12 @@ export default function NewProjectPage() {
       .map((pkg, index) => {
         const photographers = parseInt(pkg.photographersCount || '0', 10) || 0;
         const videographers = parseInt(pkg.videographersCount || '0', 10) || 0;
+        const daysCount = parseInt(pkg.daysCount || "1", 10) || 1; // Get days count, default to 1
         const multiplier = eventTypeMultiplier[pkg.eventType] || 1.0;
         const packagePrice =
           (photographers * basePricePerPhotographer + videographers * basePricePerVideographer) *
-          multiplier;
+          multiplier *
+          daysCount; // Multiply by daysCount
         const packageGst = packagePrice * 0.18;
         const packageTotal = packagePrice + packageGst;
 
@@ -2678,6 +2858,7 @@ export default function NewProjectPage() {
           eventType: pkg.eventType,
           photographers,
           videographers,
+          daysCount, // Include daysCount in the return object
           basePrice: packagePrice,
           gst: packageGst,
           total: packageTotal,
@@ -2773,50 +2954,320 @@ export default function NewProjectPage() {
       return;
     }
 
-    // Validate and save all event cards with valid data
     setIsSavingEvents(true);
     
     try {
-      // Filter valid event cards (must have eventType and startDate)
-      // OR already saved events (have event_uuid) - these should be updatable
-      const validEventCards = eventPackages.filter(
-        (pkg) => (pkg.eventType && pkg.startDate) || pkg.event_uuid
-      );
+      // When submitting, save all valid events regardless of changes
+      // When just saving, only save modified/new events
+      const eventsToSave = isSubmit 
+        ? eventPackages.filter((pkg) => pkg.eventType && pkg.startDate) // All valid events on submit
+        : eventPackages.filter((pkg) => {
+            // New event: has required fields but no event_uuid
+            if (!pkg.event_uuid && pkg.eventType && pkg.startDate) {
+              return true;
+            }
+            // Modified event: has event_uuid but has unsaved changes
+            if (pkg.event_uuid && hasUnsavedChanges(pkg)) {
+              return true;
+            }
+            return false;
+          });
 
-      if (validEventCards.length === 0) {
-        alert('No valid event cards to save. Please add at least one event with Event Type and Start Date.');
+      if (eventsToSave.length === 0 && !isSubmit) {
+        alert('No events to save. All events are already saved or have no changes.');
         setIsSavingEvents(false);
         return;
       }
 
-      // Save events sequentially
-      const updatedPackages = [...eventPackages];
-      let savedCount = 0;
-      let failedCount = 0;
+      // If submitting and no events to save, still proceed (events already saved)
+      let updatedPackages = [...eventPackages];
+      
+      if (eventsToSave.length === 0 && isSubmit) {
+        console.log('All events already saved, proceeding with submission...');
+        // Continue to PDF upload and submission below
+      } else if (eventsToSave.length > 0) {
+        // Save events sequentially
+        let savedCount = 0;
+        let failedCount = 0;
 
-      for (let i = 0; i < validEventCards.length; i++) {
-        const pkg = validEventCards[i];
-        const eventIndex = eventPackages.findIndex((ep) => ep.id === pkg.id);
-        
-        if (eventIndex === -1) continue;
+        for (let i = 0; i < eventsToSave.length; i++) {
+          const pkg = eventsToSave[i];
+          const eventIndex = eventPackages.findIndex((ep) => ep.id === pkg.id);
+          
+          if (eventIndex === -1) continue;
 
-        const eventUuid = await saveEventToDatabase(pkg, eventIndex);
-        
-        if (eventUuid) {
-          // Update the event package with the UUID and mark as saved
-          updatedPackages[eventIndex] = {
-            ...pkg,
-            event_uuid: eventUuid,
-            isSaved: true,
-          };
-          savedCount++;
-        } else {
-          failedCount++;
+          const eventUuid = await saveEventToDatabase(pkg, eventIndex);
+          
+          if (eventUuid) {
+            // Create savedState snapshot
+            const savedState: Partial<EventPackage> = {
+              eventType: pkg.eventType,
+              customEventTypeName: pkg.customEventTypeName,
+              photographersCount: pkg.photographersCount,
+              videographersCount: pkg.videographersCount,
+              pgType: pkg.pgType,
+              vgType: pkg.vgType,
+              daysCount: pkg.daysCount,
+              startHour: pkg.startHour,
+              startMinute: pkg.startMinute,
+              photographyCoordinatorId: pkg.photographyCoordinatorId,
+              videographyCoordinatorId: pkg.videographyCoordinatorId,
+              packageName: pkg.packageName,
+              prepChecklist: pkg.prepChecklist ? JSON.parse(JSON.stringify(pkg.prepChecklist)) : undefined,
+              deliverablesNotes: pkg.deliverablesNotes,
+              startDate: pkg.startDate ? new Date(pkg.startDate) : undefined,
+            };
+
+            // Update the event package with the UUID, mark as saved, and store saved state
+            updatedPackages[eventIndex] = {
+              ...pkg,
+              event_uuid: eventUuid,
+              isSaved: true,
+              savedState: savedState,
+            };
+            savedCount++;
+          } else {
+            failedCount++;
+          }
         }
+
+        // Update state with all saved events
+        setEventPackages(updatedPackages);
+        
+        // Update savedEventsSnapshot
+        const newSnapshot = updatedPackages
+          .filter(pkg => pkg.isSaved && pkg.event_uuid)
+          .map(pkg => ({
+            ...pkg,
+            startDate: pkg.startDate ? new Date(pkg.startDate) : undefined,
+            prepChecklist: pkg.prepChecklist ? JSON.parse(JSON.stringify(pkg.prepChecklist)) : undefined,
+          }));
+        setSavedEventsSnapshot(newSnapshot);
+        setEventsSaved(true);
       }
 
-      // Update state with all saved events
-      setEventPackages(updatedPackages);
+      // If submitting, upload PDF and save link
+      if (isSubmit) {
+        try {
+          // Ensure PDF is generated with latest prices and text
+          let pdfBlob = editedPdfBlob;
+          
+          // If we're on Page 3, ensure PDF has latest data (prices and text)
+          if (currentPage === 3) {
+            // Always regenerate PDF with latest prices and text before upload
+            try {
+              // Get existing PDF or create new one
+              let workingBlob = pdfBlob;
+              if (!workingBlob) {
+                workingBlob = await loadPdfWithPriceCard();
+              }
+              
+              // Load PDF document
+              const arrayBuffer = await workingBlob.arrayBuffer();
+              const pdfDoc = await PDFDocument.load(arrayBuffer);
+              const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+              const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+              
+              // Get the last page (price card page)
+              const pages = pdfDoc.getPages();
+              const pricePage = pages[pages.length - 1];
+              const { width, height } = pricePage.getSize();
+              
+              // Clear and redraw with latest prices
+              let currentY = height - 50;
+              
+              // Redraw title
+              pricePage.drawText("Price Summary", {
+                x: 70,
+                y: currentY,
+                size: 24,
+                font: helveticaBold,
+                color: rgb(0, 0, 0),
+              });
+              
+              currentY -= 40;
+              
+              // Redraw price card background
+              const cardY = currentY - 200;
+              pricePage.drawRectangle({
+                x: 50,
+                y: cardY,
+                width: width - 100,
+                height: 200,
+                borderColor: rgb(0.8, 0.8, 0.8),
+                borderWidth: 2,
+                color: rgb(0.98, 0.98, 0.98),
+              });
+              
+              // Use editable prices if available, otherwise calculate
+              const actualPriceValue = editablePrices.actualPrice.replace(/,/g, '') || calculatePrice().actualPrice.toString();
+              const subtotalValue = editablePrices.subtotal.replace(/,/g, '') || calculatePrice().subtotal.toString();
+              const gstValue = editablePrices.gst.replace(/,/g, '') || calculatePrice().gst.toString();
+              const totalValue = editablePrices.total.replace(/,/g, '') || calculatePrice().total.toString();
+              
+              const formatPrice = (value: string) => {
+                const num = parseFloat(value) || 0;
+                return `Rs.${num.toLocaleString()}`;
+              };
+              
+              // Draw updated price details
+              const priceDetails = [
+                { label: "Actual Price:", value: formatPrice(actualPriceValue) },
+                { label: "Sub Total:", value: formatPrice(subtotalValue) },
+                { label: "GST (18%):", value: formatPrice(gstValue) },
+              ];
+              
+              let yPos = currentY - 20;
+              priceDetails.forEach((detail) => {
+                pricePage.drawText(detail.label, {
+                  x: 70,
+                  y: yPos,
+                  size: 12,
+                  font: helveticaFont,
+                  color: rgb(0, 0, 0),
+                });
+                
+                pricePage.drawText(detail.value, {
+                  x: width - 200,
+                  y: yPos,
+                  size: 12,
+                  font: helveticaFont,
+                  color: rgb(0, 0, 0),
+                });
+                
+                yPos -= 30;
+              });
+              
+              // Draw separator line
+              pricePage.drawLine({
+                start: { x: 70, y: yPos - 10 },
+                end: { x: width - 70, y: yPos - 10 },
+                thickness: 1,
+                color: rgb(0.7, 0.7, 0.7),
+              });
+              
+              yPos -= 20;
+              
+              // Draw updated total
+              pricePage.drawText("Total Price:", {
+                x: 70,
+                y: yPos,
+                size: 16,
+                font: helveticaBold,
+                color: rgb(0, 0, 0),
+              });
+              
+              pricePage.drawText(formatPrice(totalValue), {
+                x: width - 200,
+                y: yPos,
+                size: 18,
+                font: helveticaBold,
+                color: rgb(0, 0.4, 0.8),
+              });
+              
+              yPos -= 50;
+              
+              // Draw additional notes if provided
+              if (pdfEditText.trim()) {
+                pricePage.drawText("Additional Notes:", {
+                  x: 70,
+                  y: yPos,
+                  size: 14,
+                  font: helveticaBold,
+                  color: rgb(0, 0, 0),
+                });
+                
+                pricePage.drawRectangle({
+                  x: 70,
+                  y: yPos - 100,
+                  width: width - 140,
+                  height: 80,
+                  borderColor: rgb(0.7, 0.7, 0.7),
+                  borderWidth: 1,
+                  color: rgb(1, 1, 1),
+                });
+                
+                const lines = pdfEditText.split('\n');
+                let textY = yPos - 20;
+                lines.forEach((line, index) => {
+                  if (index < 5) {
+                    pricePage.drawText(line, {
+                      x: 80,
+                      y: textY,
+                      size: 11,
+                      font: helveticaFont,
+                      color: rgb(0, 0, 0),
+                      maxWidth: width - 160,
+                    });
+                    textY -= 15;
+                  }
+                });
+              }
+              
+              // Save updated PDF
+              const pdfBytes = await pdfDoc.save();
+              pdfBlob = new Blob([pdfBytes], { type: "application/pdf" });
+              setEditedPdfBlob(pdfBlob);
+              console.log('PDF regenerated with latest prices and text');
+            } catch (regenerateError) {
+              console.warn('Error regenerating PDF, using existing blob:', regenerateError);
+              // If regeneration fails, try to use existing blob or create new one
+              if (!pdfBlob) {
+                pdfBlob = await loadPdfWithPriceCard();
+                setEditedPdfBlob(pdfBlob);
+              }
+            }
+          } else {
+            // Not on Page 3, just ensure PDF exists
+            if (!pdfBlob) {
+              pdfBlob = await loadPdfWithPriceCard();
+              setEditedPdfBlob(pdfBlob);
+            }
+          }
+
+          // Upload PDF to Supabase storage
+          if (pdfBlob) {
+            console.log('📤 Uploading PDF to storage...', { blobSize: pdfBlob.size });
+            try {
+              const pdfUrl = await uploadPdfToStorage(pdfBlob, projectEstimateUuid);
+              
+              if (pdfUrl) {
+                console.log('✅ PDF uploaded successfully, URL:', pdfUrl);
+                // Update project_estimation_table with PDF link using RPC
+                const { data: updateData, error: updateError } = await supabase.rpc('update_project_document_link', {
+                  p_project_estimate_uuid: projectEstimateUuid,
+                  p_document_link: pdfUrl
+                });
+
+                if (updateError) {
+                  console.error('❌ RPC Error updating project_document_link:', updateError);
+                  alert(`Warning: PDF uploaded but failed to save link to database: ${updateError.message || 'Unknown error'}`);
+                } else if (!updateData?.success) {
+                  console.error('❌ RPC returned failure:', updateData);
+                  alert(`Warning: PDF uploaded but failed to save link: ${updateData?.error || 'Unknown error'}`);
+                } else {
+                  console.log('✅ PDF uploaded and link saved successfully to project_document_link');
+                }
+              } else {
+                console.error('❌ PDF upload returned null URL');
+                alert('Warning: Failed to upload PDF to storage. Please check console for details and try again.');
+              }
+            } catch (uploadError: any) {
+              console.error('❌ PDF upload error caught:', uploadError);
+              const errorMessage = uploadError?.message || 'Unknown error occurred during PDF upload';
+              alert(`Error uploading PDF: ${errorMessage}\n\nPlease check:\n1. You are logged in\n2. Storage bucket exists\n3. RLS policies are configured correctly`);
+              // Don't fail submission if PDF upload fails, but show error
+            }
+          } else {
+            console.error('❌ No PDF blob available for upload');
+            alert('Warning: No PDF available to upload. Please generate the PDF first.');
+          }
+        } catch (pdfError: any) {
+          console.error('❌ Error in PDF upload process:', pdfError);
+          alert(`Error uploading PDF: ${pdfError?.message || 'Unknown error'}\n\nPlease check the console for detailed error information.`);
+          // Don't fail submission if PDF upload fails, but show error
+        }
+      }
 
       // Update draft status
       if (projectEstimateUuid) {
@@ -2858,26 +3309,30 @@ export default function NewProjectPage() {
       // Save cost items (price card) to cost_items_table
       await saveCostItems();
 
-      // Show success message
-      if (savedCount > 0) {
-        if (failedCount > 0) {
-          alert(`${savedCount} event(s) saved successfully. ${failedCount} event(s) failed to save.`);
+      // Show success message (only if we actually saved events)
+      if (!isSubmit && eventsToSave.length > 0) {
+        const savedCount = updatedPackages.filter(pkg => pkg.isSaved && pkg.event_uuid).length;
+        const failedCount = eventsToSave.length - savedCount;
+        if (savedCount > 0) {
+          if (failedCount > 0) {
+            alert(`${savedCount} event(s) saved successfully. ${failedCount} event(s) failed to save.`);
+          } else {
+            alert(`${savedCount} event(s) saved successfully!`);
+          }
+          // Mark events as saved to enable Next button
+          setEventsSaved(true);
+          // Save a deep copy snapshot of all events for change detection
+          const snapshot = updatedPackages.map((pkg) => ({
+            ...pkg,
+            startDate: pkg.startDate ? new Date(pkg.startDate) : undefined,
+            prepChecklist: pkg.prepChecklist ? JSON.parse(JSON.stringify(pkg.prepChecklist)) : undefined,
+          }));
+          setSavedEventsSnapshot(snapshot);
         } else {
-          alert(`${savedCount} event(s) saved successfully!`);
+          alert('Failed to save events. Please check the console for errors.');
+          setEventsSaved(false);
+          setSavedEventsSnapshot([]);
         }
-        // Mark events as saved to enable Next button
-        setEventsSaved(true);
-        // Save a deep copy snapshot of all events for change detection
-        const snapshot = updatedPackages.map((pkg) => ({
-          ...pkg,
-          startDate: pkg.startDate ? new Date(pkg.startDate) : undefined,
-          prepChecklist: pkg.prepChecklist ? JSON.parse(JSON.stringify(pkg.prepChecklist)) : undefined,
-        }));
-        setSavedEventsSnapshot(snapshot);
-      } else {
-        alert('Failed to save events. Please check the console for errors.');
-        setEventsSaved(false);
-        setSavedEventsSnapshot([]);
       }
     } catch (error: any) {
       console.error('Exception saving events:', error);
@@ -3383,8 +3838,8 @@ export default function NewProjectPage() {
                       <div className="flex items-center gap-2">
                         <Button 
                           onClick={() => handleSaveEvent(false)} 
-                          className="bg-blue-600 hover:bg-blue-700 text-white"
-                          disabled={isSavingEvents || (eventsSaved && !hasAnyUnsavedChanges())}
+                          className="bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                          disabled={isSavingEvents || !hasAnyUnsavedChanges()}
                         >
                           {isSavingEvents ? (
                             <>
@@ -3936,44 +4391,6 @@ export default function NewProjectPage() {
                                   </div>
                                 </div>
 
-                                {/* PG-Type & VG-Type */}
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
-                                  <div className="space-y-2 min-w-0">
-                                    <Label htmlFor={`pgType-${pkg.id}`} className="text-xs sm:text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>PG-Type</Label>
-                                    <Select
-                                      value={pkg.pgType || ""}
-                                      onValueChange={(value) =>
-                                        handleEventPackageChange(pkg.id, "pgType", value)
-                                      }
-                                    >
-                                    <SelectTrigger id={`pgType-${pkg.id}`} className="w-full sm:w-16 text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}>
-                                      <SelectValue placeholder="--" className="text-white" />
-                                    </SelectTrigger>
-                                    <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
-                                      <SelectItem value="EF" className="text-white hover:bg-[#1a0f3d]">EF</SelectItem>
-                                      <SelectItem value="GH" className="text-white hover:bg-[#1a0f3d]">GH</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                                <div className="space-y-2 min-w-0">
-                                  <Label htmlFor={`vgType-${pkg.id}`} className="text-xs sm:text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-white" style={{ textShadow: 'rgba(0, 0, 0, 0.7) 0px 1px 2px' }}>VG-Type</Label>
-                                    <Select
-                                      value={pkg.vgType || ""}
-                                      onValueChange={(value) =>
-                                        handleEventPackageChange(pkg.id, "vgType", value)
-                                      }
-                                    >
-                                    <SelectTrigger id={`vgType-${pkg.id}`} className="w-full sm:w-16 text-white placeholder:text-gray-400" style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}>
-                                      <SelectValue placeholder="--" className="text-white" />
-                                    </SelectTrigger>
-                                    <SelectContent style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}>
-                                      <SelectItem value="AB" className="text-white hover:bg-[#1a0f3d]">AB</SelectItem>
-                                      <SelectItem value="CD" className="text-white hover:bg-[#1a0f3d]">CD</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                              </div>
-
                               {/* PhotoPOC & VideoPOC */}
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
                                 <div className="space-y-2 min-w-0">
@@ -4400,7 +4817,7 @@ export default function NewProjectPage() {
                               <div className="text-xs space-y-1 text-gray-300">
                                 <div className="flex justify-between">
                                   <span>
-                                    {eventCost.photographers} Photographer{eventCost.photographers !== 1 ? 's' : ''} × {eventCost.videographers} Videographer{eventCost.videographers !== 1 ? 's' : ''}
+                                    {eventCost.photographers} Photographer{eventCost.photographers !== 1 ? 's' : ''} × {eventCost.videographers} Videographer{eventCost.videographers !== 1 ? 's' : ''} × {eventCost.daysCount} Day{eventCost.daysCount !== 1 ? 's' : ''}
                                   </span>
                                   <span>₹{eventCost.basePrice.toLocaleString()}</span>
                                 </div>
@@ -4433,7 +4850,7 @@ export default function NewProjectPage() {
                     </Button>
                     <Button
                       onClick={handleNext}
-                      disabled={!eventsSaved}
+                      disabled={!eventsSaved || hasAnyUnsavedChanges()}
                       className="bg-blue-600 hover:bg-blue-700 text-white px-8 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Next

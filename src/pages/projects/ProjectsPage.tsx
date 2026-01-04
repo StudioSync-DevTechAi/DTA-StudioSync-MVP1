@@ -7,6 +7,24 @@ export default function ProjectsPage() {
   const navigate = useNavigate();
 
   const handleNewProject = () => {
+    // Clear all project-related sessionStorage data before starting new project
+    try {
+      sessionStorage.removeItem("newProjectFormData");
+      sessionStorage.removeItem("newProjectCurrentPage");
+      sessionStorage.removeItem("newProjectEventPackages");
+      sessionStorage.removeItem("newProjectSelectedFormat");
+      sessionStorage.removeItem("newProjectEstimateUuid");
+      sessionStorage.removeItem("newProjectPhotographyOwnerPhno");
+      sessionStorage.removeItem("newProjectName");
+      sessionStorage.removeItem("newProjectType");
+      sessionStorage.removeItem("newProjectLastModified");
+      sessionStorage.removeItem("newProjectClientName");
+      sessionStorage.removeItem("newProjectClientEmail");
+      sessionStorage.removeItem("newProjectClientPhone");
+      console.log("Cleared all project data from sessionStorage");
+    } catch (error) {
+      console.error("Error clearing project sessionStorage:", error);
+    }
     navigate("/projects/new");
   };
 
