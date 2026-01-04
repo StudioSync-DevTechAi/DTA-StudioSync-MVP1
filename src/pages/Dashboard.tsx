@@ -241,7 +241,27 @@ function Dashboard() {
           <WorkInProgress variant="card" size="lg" className="w-fit max-w-md" />
           <div className="flex flex-col sm:flex-row gap-2 ml-0 sm:ml-auto">
             <Button 
-              onClick={() => navigate("/projects/new")} 
+              onClick={() => {
+                // Clear all project-related sessionStorage data before starting new project
+                try {
+                  sessionStorage.removeItem("newProjectFormData");
+                  sessionStorage.removeItem("newProjectCurrentPage");
+                  sessionStorage.removeItem("newProjectEventPackages");
+                  sessionStorage.removeItem("newProjectSelectedFormat");
+                  sessionStorage.removeItem("newProjectEstimateUuid");
+                  sessionStorage.removeItem("newProjectPhotographyOwnerPhno");
+                  sessionStorage.removeItem("newProjectName");
+                  sessionStorage.removeItem("newProjectType");
+                  sessionStorage.removeItem("newProjectLastModified");
+                  sessionStorage.removeItem("newProjectClientName");
+                  sessionStorage.removeItem("newProjectClientEmail");
+                  sessionStorage.removeItem("newProjectClientPhone");
+                  console.log("Cleared all project data from sessionStorage");
+                } catch (error) {
+                  console.error("Error clearing project sessionStorage:", error);
+                }
+                navigate("/projects/new");
+              }} 
               className="animated-border w-full sm:w-auto"
               variant="outline"
               style={{

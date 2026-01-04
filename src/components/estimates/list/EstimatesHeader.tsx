@@ -57,7 +57,28 @@ export function EstimatesHeader({
               </div>
               <Button 
                 variant="outline" 
-                onClick={() => navigate("/projects/new")} 
+                onClick={() => {
+                  // Clear all project-related sessionStorage data before navigating
+                  try {
+                    sessionStorage.removeItem("newProjectFormData");
+                    sessionStorage.removeItem("newProjectCurrentPage");
+                    sessionStorage.removeItem("newProjectEventPackages");
+                    sessionStorage.removeItem("newProjectSelectedFormat");
+                    sessionStorage.removeItem("newProjectEstimateUuid");
+                    sessionStorage.removeItem("newProjectPhotographyOwnerPhno");
+                    sessionStorage.removeItem("newProjectName");
+                    sessionStorage.removeItem("newProjectType");
+                    sessionStorage.removeItem("newProjectLastModified");
+                    sessionStorage.removeItem("newProjectClientName");
+                    sessionStorage.removeItem("newProjectClientEmail");
+                    sessionStorage.removeItem("newProjectClientPhone");
+                    console.log("Cleared all project data from sessionStorage");
+                  } catch (error) {
+                    console.error("Error clearing project sessionStorage:", error);
+                  }
+                  // Navigate to new project page
+                  navigate("/projects/new");
+                }} 
                 className="animated-border shrink-0 absolute right-0"
                 style={{
                   backgroundColor: 'transparent',

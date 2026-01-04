@@ -665,9 +665,9 @@ export function useEstimatesPage() {
       }
     } else {
       filtered = estimates.filter(estimate => {
-        if (currentTab === "pending") return estimate.status === "pending" || estimate.status === "negotiating";
-        if (currentTab === "declined") return estimate.status === "declined";
-        return true;
+      if (currentTab === "pending") return estimate.status === "pending" || estimate.status === "negotiating";
+      if (currentTab === "declined") return estimate.status === "declined";
+      return true;
       });
     }
     
