@@ -3,6 +3,8 @@ import { Invoice, InvoiceItem } from "@/components/invoices/types";
 import { ClientDetailsFormState } from "@/components/invoices/types/formTypes";
 import { toast } from "sonner";
 import { z } from "zod";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 // Define validation schema
 const invoiceSchema = z.object({
@@ -18,6 +20,8 @@ const invoiceSchema = z.object({
 });
 
 export function useInvoiceForm(editingInvoice?: Invoice | null, estimateData?: any) {
+  const { user } = useAuth();
+  
   // Client Details State
   const [clientDetails, setClientDetails] = useState<ClientDetailsFormState>({
     clientName: "",
@@ -81,24 +85,64 @@ export function useInvoiceForm(editingInvoice?: Invoice | null, estimateData?: a
       setClientDetails(prevState => ({
         ...prevState,
         clientName: estimateData.clientName || "",
-        clientEmail: estimateData.clientEmail || ""
+        clientEmail: estimateData.clientEmail || "",
+        clientPhone: estimateData.clientPhNo || estimateData.clientPhone || ""
       }));
       
-      // Create items based on package selection
+      // Helper function to format amount with ₹ symbol
+      const formatAmount = (amt: string | number | undefined): string => {
+        if (!amt && amt !== 0) return "₹0.00";
+        
+        // Convert to string and remove any existing ₹ or commas
+        let numValue: string;
+        if (typeof amt === 'number') {
+          numValue = amt.toString();
+        } else {
+          numValue = amt.replace(/[₹,]/g, "").trim();
+        }
+        
+        // Check if it's a valid number
+        if (numValue && !isNaN(parseFloat(numValue)) && parseFloat(numValue) >= 0) {
+          // Format with ₹ and ensure 2 decimal places
+          const parsed = parseFloat(numValue);
+          return `₹${parsed.toFixed(2)}`;
+        }
+        
+        return "₹0.00";
+      };
+      
+      // Prioritize estimate's total amount over package amount
+      const estimateAmount = estimateData.amount || estimateData.previewEstimate?.amount;
+      const formattedEstimateAmount = formatAmount(estimateAmount);
+      
+      // Create items based on package selection or use estimate amount
       const selectedPackage = estimateData.packages && estimateData.packages[estimateData.selectedPackageIndex || 0];
       
+      const newItems: InvoiceItem[] = [];
+      
       if (selectedPackage) {
-        const newItems: InvoiceItem[] = [];
-        
         // Add selected package as an item
         newItems.push({
           description: `Photography Package: ${selectedPackage.name || 'Option ' + (estimateData.selectedPackageIndex + 1)}`,
-          amount: selectedPackage.amount
+          amount: formattedEstimateAmount // Use estimate's total amount instead of package amount
         });
-        
-        setItems(newItems);
-        setAmount(selectedPackage.amount);
-        setBalanceAmount(selectedPackage.amount);
+      } else if (estimateAmount) {
+        // If no package but we have estimate amount, create a generic item
+        newItems.push({
+          description: "Photography Services",
+          amount: formattedEstimateAmount
+        });
+      } else {
+        // Fallback: empty item
+        newItems.push({ description: "", amount: "" });
+      }
+      
+      setItems(newItems);
+      
+      // Set the amount from estimate (this will auto-populate PaymentTrackingCard and TotalCard)
+      if (formattedEstimateAmount && formattedEstimateAmount !== "₹0.00") {
+        setAmount(formattedEstimateAmount);
+        setBalanceAmount(formattedEstimateAmount);
       }
     } else if (editingInvoice) {
       // Fill form with editing invoice data

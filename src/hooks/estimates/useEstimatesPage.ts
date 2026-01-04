@@ -332,8 +332,14 @@ export function useEstimatesPage() {
       return est;
     });
     
-    setEstimates(updatedEstimates);
-    const updatedEstimate = updatedEstimates.find(est => est.id === estimateId);
+    // Sort updated estimates by date (most recent first)
+    const sortedEstimates = updatedEstimates.sort((a, b) => {
+      const dateA = a.date ? new Date(a.date).getTime() : 0;
+      const dateB = b.date ? new Date(b.date).getTime() : 0;
+      return dateB - dateA; // Descending order (most recent first)
+    });
+    setEstimates(sortedEstimates);
+    const updatedEstimate = sortedEstimates.find(est => est.id === estimateId);
     setSelectedEstimate(updatedEstimate);
     
     // Update estimate_status in database based on newStatus
@@ -457,15 +463,21 @@ export function useEstimatesPage() {
     setEstimates(prevEstimates => {
       // Check if estimate already exists (in case of edit)
       const existingIndex = prevEstimates.findIndex(est => est.id === savedEstimate.id);
+      let updated: any[];
       if (existingIndex >= 0) {
         // Update existing estimate
-        const updated = [...prevEstimates];
+        updated = [...prevEstimates];
         updated[existingIndex] = savedEstimate;
-        return updated;
       } else {
         // Add new estimate at the beginning
-        return [savedEstimate, ...prevEstimates];
+        updated = [savedEstimate, ...prevEstimates];
       }
+      // Sort by date (most recent first) after update
+      return updated.sort((a, b) => {
+        const dateA = a.date ? new Date(a.date).getTime() : 0;
+        const dateB = b.date ? new Date(b.date).getTime() : 0;
+        return dateB - dateA; // Descending order (most recent first)
+      });
     });
     
     // Switch to pending tab for new estimates, or appropriate tab for edited estimates
@@ -621,8 +633,13 @@ export function useEstimatesPage() {
             };
           });
 
-        // Combine both sources
-        const allApprovedEstimates = [...mappedFromInvoices, ...projectsWithoutInvoices];
+        // Combine both sources and sort by date (most recent first)
+        const allApprovedEstimates = [...mappedFromInvoices, ...projectsWithoutInvoices]
+          .sort((a, b) => {
+            const dateA = a.date ? new Date(a.date).getTime() : 0;
+            const dateB = b.date ? new Date(b.date).getTime() : 0;
+            return dateB - dateA; // Descending order (most recent first)
+          });
         setApprovedEstimatesFromDB(allApprovedEstimates);
       } catch (error) {
         console.error("Error fetching approved estimates:", error);
@@ -636,19 +653,29 @@ export function useEstimatesPage() {
   }, [currentTab]);
 
   const getFilteredEstimates = () => {
+    let filtered: any[] = [];
+    
     if (currentTab === "approved") {
       // Prioritize DB data, fallback to localStorage
       if (approvedEstimatesFromDB.length > 0) {
-        return approvedEstimatesFromDB;
+        filtered = approvedEstimatesFromDB;
+      } else {
+        // Fallback to localStorage
+        filtered = estimates.filter(estimate => estimate.status === "approved");
       }
-      // Fallback to localStorage
-      return estimates.filter(estimate => estimate.status === "approved");
+    } else {
+      filtered = estimates.filter(estimate => {
+        if (currentTab === "pending") return estimate.status === "pending" || estimate.status === "negotiating";
+        if (currentTab === "declined") return estimate.status === "declined";
+        return true;
+      });
     }
     
-    return estimates.filter(estimate => {
-      if (currentTab === "pending") return estimate.status === "pending" || estimate.status === "negotiating";
-      if (currentTab === "declined") return estimate.status === "declined";
-      return true;
+    // Sort by date (most recent first) - handle both date string and Date object
+    return filtered.sort((a, b) => {
+      const dateA = a.date ? new Date(a.date).getTime() : 0;
+      const dateB = b.date ? new Date(b.date).getTime() : 0;
+      return dateB - dateA; // Descending order (most recent first)
     });
   };
 

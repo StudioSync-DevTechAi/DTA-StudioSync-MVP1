@@ -51,6 +51,9 @@ interface ClientDetailsCardProps {
   
   // Validation errors
   errors?: Record<string, string>;
+  
+  // Add this prop to indicate if fields should be read-only (from estimate)
+  isFromEstimate?: boolean;
 }
 
 export function ClientDetailsCard({ 
@@ -84,7 +87,8 @@ export function ClientDetailsCard({
   onCompanyGstChange,
   invoiceDate,
   onInvoiceDateChange,
-  errors = {}
+  errors = {},
+  isFromEstimate = false
 }: ClientDetailsCardProps) {
   return (
     <Card 
@@ -228,13 +232,17 @@ export function ClientDetailsCard({
                 placeholder="client@example.com"
                 value={clientEmail}
                 onChange={(e) => onClientEmailChange(e.target.value)}
+                disabled={isFromEstimate}
+                readOnly={isFromEstimate}
                 className="text-white placeholder:text-gray-400"
                 style={{ 
                   backgroundColor: 'rgba(45, 27, 78, 0.95)', 
                   borderColor: errors.clientEmail ? '#ef4444' : '#5a4a7a', 
                   color: '#ffffff', 
                   borderWidth: '1.5px', 
-                  borderStyle: 'solid' 
+                  borderStyle: 'solid',
+                  cursor: isFromEstimate ? 'not-allowed' : 'text',
+                  opacity: isFromEstimate ? 0.7 : 1
                 }}
               />
               {errors.clientEmail && (
@@ -251,8 +259,18 @@ export function ClientDetailsCard({
                 placeholder="+91 98765 43210"
                 value={clientPhone}
                 onChange={(e) => onClientPhoneChange(e.target.value)}
+                disabled={isFromEstimate}
+                readOnly={isFromEstimate}
                 className="text-white placeholder:text-gray-400"
-                style={{ backgroundColor: 'rgba(45, 27, 78, 0.95)', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid' }}
+                style={{ 
+                  backgroundColor: 'rgba(45, 27, 78, 0.95)', 
+                  borderColor: '#5a4a7a', 
+                  color: '#ffffff', 
+                  borderWidth: '1.5px', 
+                  borderStyle: 'solid',
+                  cursor: isFromEstimate ? 'not-allowed' : 'text',
+                  opacity: isFromEstimate ? 0.7 : 1
+                }}
               />
             </div>
             <div className="space-y-2">
