@@ -694,7 +694,7 @@ export function useEstimatesPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Fetch estimate counts from database
+  // Fetch estimate counts from database (kept for reference, but counts now use filteredEstimates)
   useEffect(() => {
     const fetchEstimateCounts = async () => {
       try {
@@ -727,28 +727,22 @@ export function useEstimatesPage() {
   }, [currentTab, estimates]); // Refresh counts when tab changes or estimates update
 
   // Calculate counts for each tab
+  // Use actual filtered estimates length to ensure count matches displayed items
   const getTabCounts = () => {
-    // Use database counts if available, otherwise fallback to local counts
-    const pendingCount = estimateCounts.pending > 0 
-      ? estimateCounts.pending 
-      : estimates.filter(
-          estimate => estimate.status === "pending" || estimate.status === "negotiating"
-        ).length;
-    
-    const approvedCount = estimateCounts.approved > 0 
-      ? estimateCounts.approved 
-      : (approvedEstimatesFromDB.length > 0 
-          ? approvedEstimatesFromDB.length 
-          : estimates.filter(estimate => estimate.status === "approved").length);
-    
-    const declinedCount = estimateCounts.declined > 0 
-      ? estimateCounts.declined 
-      : estimates.filter(estimate => estimate.status === "declined").length;
-    
+    // Use the already calculated filteredEstimates to ensure count matches what's displayed
+    // This fixes the discrepancy where database count (20) didn't match displayed items
     return {
-      pending: pendingCount,
-      approved: approvedCount,
-      declined: declinedCount
+      pending: currentTab === "pending" 
+        ? filteredEstimates.length 
+        : estimates.filter(e => e.status === "pending" || e.status === "negotiating").length,
+      approved: currentTab === "approved"
+        ? filteredEstimates.length
+        : (approvedEstimatesFromDB.length > 0 
+            ? approvedEstimatesFromDB.length 
+            : estimates.filter(e => e.status === "approved").length),
+      declined: currentTab === "declined"
+        ? filteredEstimates.length
+        : estimates.filter(e => e.status === "declined").length
     };
   };
 
