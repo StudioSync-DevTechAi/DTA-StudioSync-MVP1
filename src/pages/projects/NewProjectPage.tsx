@@ -20,6 +20,7 @@ import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { TimePickerClock } from "@/components/ui/time-picker-clock";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CalendarIcon, ArrowRight, Plus, Trash2, Pencil, Eye, Download, Share2, ChevronDown, ChevronUp, Phone, X, Save, Loader2, ArrowLeft, RotateCcw } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -87,6 +88,7 @@ export default function NewProjectPage() {
     ? 2 
     : (pageFromUrl ? parseInt(pageFromUrl, 10) : 1);
   const [currentPage, setCurrentPage] = useState(initialPage >= 1 && initialPage <= 3 ? initialPage : 1);
+  const [activeProjectTab, setActiveProjectTab] = useState("event-details");
   const [formData, setFormData] = useState({
     projectName: "",
     eventType: "",
@@ -3839,92 +3841,134 @@ export default function NewProjectPage() {
                     - sessionStorage.getItem('newProjectName')
                     - sessionStorage.getItem('newProjectType')
                   */}
-                  <div className="mb-6">
-                    <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          {eventsSaved && hasAnyUnsavedChanges() && (
-                            <button
-                              onClick={() => {
-                                // Revert to saved snapshot
-                                setEventPackages(JSON.parse(JSON.stringify(savedEventsSnapshot)));
-                              }}
-                              className="p-2 hover:bg-accent rounded-md transition-colors"
-                              title="Revert changes"
-                              style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}
-                            >
-                              <RotateCcw className="h-5 w-5 text-gray-300 hover:text-white" />
-                            </button>
-                          )}
-                          {projectEstimateUuid && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setCurrentPage(1);
-                                setSearchParams({ projectUuid: projectEstimateUuid, page: '1' });
-                              }}
-                              className="flex items-center gap-2 bg-[#2d1b4e] text-white border-[#5a4a7a] hover:bg-[#1a0f3d]"
-                              style={{ borderWidth: '1.5px', borderStyle: 'solid' }}
-                            >
-                              <ArrowLeft className="h-4 w-4" />
-                              Project Details
-                            </Button>
-                          )}
-                          <div className="flex-1 flex justify-center">
-                            <h2 className="text-2xl font-semibold text-white">Events Details</h2>
+                  <Tabs value={activeProjectTab} onValueChange={setActiveProjectTab} className="w-full">
+                    {/* Header Section - Common for all tabs */}
+                    <div className="mb-6">
+                      <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            {eventsSaved && hasAnyUnsavedChanges() && (
+                              <button
+                                onClick={() => {
+                                  // Revert to saved snapshot
+                                  setEventPackages(JSON.parse(JSON.stringify(savedEventsSnapshot)));
+                                }}
+                                className="p-2 hover:bg-accent rounded-md transition-colors"
+                                title="Revert changes"
+                                style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f' }}
+                              >
+                                <RotateCcw className="h-5 w-5 text-gray-300 hover:text-white" />
+                              </button>
+                            )}
+                            {projectEstimateUuid && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setCurrentPage(1);
+                                  setSearchParams({ projectUuid: projectEstimateUuid, page: '1' });
+                                }}
+                                className="flex items-center gap-2 bg-[#2d1b4e] text-white border-[#5a4a7a] hover:bg-[#1a0f3d]"
+                                style={{ borderWidth: '1.5px', borderStyle: 'solid' }}
+                              >
+                                <ArrowLeft className="h-4 w-4" />
+                                Project Details
+                              </Button>
+                            )}
+                            <div className="flex-1 flex justify-center">
+                              <h2 className="text-2xl font-semibold text-white">Project Management</h2>
+                            </div>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-2 text-sm mt-2">
+                            <span className="font-medium text-white">Project:</span>
+                            <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>{projectDetails?.project_name || formData.projectName || "Not set"}</span>
+                            <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>|</span>
+                            <span className="font-medium text-white">Project Type:</span>
+                            <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>{projectDetails?.project_type || formData.eventType || "Not set"}</span>
+                            <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>|</span>
+                            <span className="font-medium text-white">StartDate:</span>
+                            <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>
+                              {formData.startDate ? format(formData.startDate, "MM/dd/yyyy") : "Not set"}
+                            </span>
+                            <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>|</span>
+                            <span className="font-medium text-white">EndDate:</span>
+                            <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>
+                              {formData.endDate ? format(formData.endDate, "MM/dd/yyyy") : "Not set"}
+                            </span>
                           </div>
                         </div>
-                        <div className="flex flex-wrap items-center gap-2 text-sm mt-2">
-                          <span className="font-medium text-white">Project:</span>
-                          <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>{projectDetails?.project_name || formData.projectName || "Not set"}</span>
-                          <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>|</span>
-                          <span className="font-medium text-white">Project Type:</span>
-                          <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>{projectDetails?.project_type || formData.eventType || "Not set"}</span>
-                          <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>|</span>
-                          <span className="font-medium text-white">StartDate:</span>
-                          <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>
-                            {formData.startDate ? format(formData.startDate, "MM/dd/yyyy") : "Not set"}
-                          </span>
-                          <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>|</span>
-                          <span className="font-medium text-white">EndDate:</span>
-                          <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>
-                            {formData.endDate ? format(formData.endDate, "MM/dd/yyyy") : "Not set"}
-                          </span>
+                        <div className="flex items-center gap-2">
+                          {activeProjectTab === "event-details" && (
+                            <Button 
+                              onClick={() => handleSaveEvent(false)} 
+                              className="bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                              disabled={isSavingEvents || !hasAnyUnsavedChanges()}
+                            >
+                              {isSavingEvents ? (
+                                <>
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                  Saving Events...
+                                </>
+                              ) : (
+                                'Save Events'
+                              )}
+                            </Button>
+                          )}
+                          <Button variant="outline" onClick={handleCancel} className="bg-[#2d1b4e] text-white border-[#3d2a5f] hover:bg-[#1a0f3d]">
+                            Cancel
+                          </Button>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Button 
-                          onClick={() => handleSaveEvent(false)} 
-                          className="bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                          disabled={isSavingEvents || !hasAnyUnsavedChanges()}
-                        >
-                          {isSavingEvents ? (
-                            <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              Saving Events...
-                            </>
-                          ) : (
-                            'Save Events'
-                          )}
-                        </Button>
-                        <Button variant="outline" onClick={handleCancel} className="bg-[#2d1b4e] text-white border-[#3d2a5f] hover:bg-[#1a0f3d]">
-                          Cancel
-                        </Button>
+                      <div className="flex flex-wrap items-center gap-2 text-sm mb-4">
+                        <span className="font-medium text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Client Name:</span>
+                        <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>{formData.clientFullName || "Not set"}</span>
+                        <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>|</span>
+                        <span className="font-medium text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Client PhNo:</span>
+                        <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>{formData.clientPhone || "Not set"}</span>
                       </div>
+                      
+                      {/* Tab List */}
+                      <TabsList 
+                        className="bg-white/10 border-white/20 w-full sm:w-auto flex-wrap sm:flex-nowrap h-auto sm:h-10"
+                        style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', borderColor: 'rgba(255, 255, 255, 0.2)' }}
+                      >
+                        <TabsTrigger 
+                          value="event-details"
+                          className="data-[state=active]:bg-white/20 data-[state=active]:text-white text-gray-300 text-xs xs:text-sm sm:text-base px-3 xs:px-4 sm:px-5 py-2 sm:py-1.5 flex-1 sm:flex-initial"
+                        >
+                          Event Details
+                        </TabsTrigger>
+                        <TabsTrigger 
+                          value="manage-resources"
+                          className="data-[state=active]:bg-white/20 data-[state=active]:text-white text-gray-300 text-xs xs:text-sm sm:text-base px-3 xs:px-4 sm:px-5 py-2 sm:py-1.5 flex-1 sm:flex-initial"
+                        >
+                          Manage Resources
+                        </TabsTrigger>
+                        <TabsTrigger 
+                          value="manage-project"
+                          className="data-[state=active]:bg-white/20 data-[state=active]:text-white text-gray-300 text-xs xs:text-sm sm:text-base px-3 xs:px-4 sm:px-5 py-2 sm:py-1.5 flex-1 sm:flex-initial"
+                        >
+                          Manage Project
+                        </TabsTrigger>
+                        <TabsTrigger 
+                          value="handle-delivery"
+                          className="data-[state=active]:bg-white/20 data-[state=active]:text-white text-gray-300 text-xs xs:text-sm sm:text-base px-3 xs:px-4 sm:px-5 py-2 sm:py-1.5 flex-1 sm:flex-initial"
+                        >
+                          Handle DELIVERY
+                        </TabsTrigger>
+                        <TabsTrigger 
+                          value="project-metrics"
+                          className="data-[state=active]:bg-white/20 data-[state=active]:text-white text-gray-300 text-xs xs:text-sm sm:text-base px-3 xs:px-4 sm:px-5 py-2 sm:py-1.5 flex-1 sm:flex-initial"
+                        >
+                          Project Metrics
+                        </TabsTrigger>
+                      </TabsList>
                     </div>
-                    <div className="flex flex-wrap items-center gap-2 text-sm">
-                      <span className="font-medium text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Client Name:</span>
-                      <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>{formData.clientFullName || "Not set"}</span>
-                      <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>|</span>
-                      <span className="font-medium text-white" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}>Client PhNo:</span>
-                      <span className="text-gray-300" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}>{formData.clientPhone || "Not set"}</span>
-                    </div>
-                  </div>
 
-                  <div className="space-y-2 xs:space-y-3 sm:space-y-4">
-                    {/* Event Packages */}
-                    <div className="flex flex-wrap gap-2 xs:gap-3 sm:gap-4 justify-start items-start">
+                    {/* Tab Content: Event Details */}
+                    <TabsContent value="event-details" className="space-y-2 xs:space-y-3 sm:space-y-4 mt-0">
+                      {/* Event Packages */}
+                      <div className="flex flex-wrap gap-2 xs:gap-3 sm:gap-4 justify-start items-start">
                       {eventPackages.map((pkg, index) => {
                         const isActiveEvent = index === eventPackages.length - 1; // Last event is the active one
                         const isExpanded = expandedEventId === pkg.id;
@@ -4665,11 +4709,10 @@ export default function NewProjectPage() {
                         </div>
                       )}
                     </div>
-                  </div>
 
-                  {/* Price Summary - Bottom left, same width as event cards */}
-                  <div className="w-full mt-4">
-                    <Card className="rounded-lg border-2 bg-card text-card-foreground shadow-sm p-3 sm:p-4 w-full sm:w-[45%] transition-all duration-300 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(59,130,246,0.4)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', borderWidth: '2px', borderStyle: 'solid' }}>
+                    {/* Price Summary - Bottom left, same width as event cards */}
+                    <div className="w-full mt-4">
+                      <Card className="rounded-lg border-2 bg-card text-card-foreground shadow-sm p-3 sm:p-4 w-full sm:w-[45%] transition-all duration-300 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(59,130,246,0.4)] hover:border-blue-400/60 hover:scale-[1.02]" style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', borderWidth: '2px', borderStyle: 'solid' }}>
                       <div className="flex justify-between items-center mb-4">
                         <h3 className="font-semibold text-white">Price</h3>
                         <div className="flex items-center gap-2">
@@ -4893,28 +4936,54 @@ export default function NewProjectPage() {
                           )}
                         </div>
                       )}
-                    </Card>
-                  </div>
+                      </Card>
+                    </div>
 
-                  {/* Navigation Buttons */}
-                  <div className="flex justify-center pt-4">
-                    <Button
-                      onClick={handlePrevious}
-                      variant="outline"
-                      className="mr-4 bg-[#2d1b4e] text-white border-[#5a4a7a] hover:bg-[#1a0f3d]"
-                      style={{ borderWidth: '1.5px', borderStyle: 'solid' }}
-                    >
-                      Previous
-                    </Button>
-                    <Button
-                      onClick={handleNext}
-                      disabled={!eventsSaved || hasAnyUnsavedChanges()}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-8 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Next
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </div>
+                    {/* Navigation Buttons */}
+                      <div className="flex justify-center pt-4">
+                        <Button
+                          onClick={handlePrevious}
+                          variant="outline"
+                          className="mr-4 bg-[#2d1b4e] text-white border-[#5a4a7a] hover:bg-[#1a0f3d]"
+                          style={{ borderWidth: '1.5px', borderStyle: 'solid' }}
+                        >
+                          Previous
+                        </Button>
+                        <Button
+                          onClick={handleNext}
+                          disabled={!eventsSaved || hasAnyUnsavedChanges()}
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-8 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Next
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TabsContent>
+
+                    {/* Tab Content: Manage Resources */}
+                    <TabsContent value="manage-resources" className="space-y-4 mt-0">
+                      <div className="p-6 rounded-lg" style={{ backgroundColor: 'rgba(45, 27, 78, 0.98)', backdropFilter: 'blur(10px)' }}>
+                        <h3 className="text-xl font-semibold text-white mb-4">Manage Resources</h3>
+                        <p className="text-gray-300">Resource management interface will be implemented here.</p>
+                      </div>
+                    </TabsContent>
+
+                    {/* Tab Content: Manage Project */}
+                    <TabsContent value="manage-project" className="space-y-4 mt-0">
+                      <div className="p-6 rounded-lg" style={{ backgroundColor: 'rgba(45, 27, 78, 0.98)', backdropFilter: 'blur(10px)' }}>
+                        <h3 className="text-xl font-semibold text-white mb-4">Manage Project</h3>
+                        <p className="text-gray-300">Project management interface will be implemented here.</p>
+                      </div>
+                    </TabsContent>
+
+                    {/* Tab Content: Handle DELIVERY */}
+                    <TabsContent value="handle-delivery" className="space-y-4 mt-0">
+                      <div className="p-6 rounded-lg" style={{ backgroundColor: 'rgba(45, 27, 78, 0.98)', backdropFilter: 'blur(10px)' }}>
+                        <h3 className="text-xl font-semibold text-white mb-4">Handle DELIVERY</h3>
+                        <p className="text-gray-300">Delivery management interface will be implemented here.</p>
+                      </div>
+                    </TabsContent>
+                  </Tabs>
                 </>
               ) : (
                 <>
