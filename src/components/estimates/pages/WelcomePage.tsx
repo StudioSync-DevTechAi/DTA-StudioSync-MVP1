@@ -227,7 +227,9 @@ export function WelcomePage({
       
       <div className="max-w-md mx-auto space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="clientName" className="text-white">Client Name</Label>
+          <Label htmlFor="clientName" className="text-white">
+            Client Name <span className="text-red-400">*</span>
+          </Label>
           <Input
             id="clientName"
             value={clientName.slice(0, 30)}
@@ -235,6 +237,7 @@ export function WelcomePage({
             placeholder="Enter client name (max 30 characters)"
             readOnly={isReadOnly}
             maxLength={30}
+            required
             className={`text-white placeholder:text-gray-400 ${isReadOnly ? "bg-gray-700" : ""}`}
             style={!isReadOnly ? { backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' } : {}}
           />
