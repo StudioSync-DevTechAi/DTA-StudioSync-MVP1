@@ -346,6 +346,29 @@ export function useEstimateForm(editingEstimate?: any, onSaveCallback?: (estimat
     setFormData(prev => ({ ...prev, [key]: value }));
   };
 
+  const resetFormToNew = () => {
+    setFormData({
+      clientName: "",
+      clientEmail: "",
+      clientPhNo: "",
+      countryCode: "+91",
+      projectName: getStoredProjectName(),
+      selectedServices: [],
+      estimateDetails: {
+        events: [],
+        estimates: [],
+        deliverables: []
+      },
+      terms: [
+        "This estimate is valid for 30 days from the date of issue.",
+        "A 50% advance payment is required to confirm the booking.",
+        "The balance payment is due before the event date."
+      ],
+      portfolioLinks: [],
+      selectedTemplate: "modern"
+    });
+  };
+
   return {
     currentPage,
     formData,
@@ -356,5 +379,6 @@ export function useEstimateForm(editingEstimate?: any, onSaveCallback?: (estimat
     handlePreviousPage,
     handleUpdateFormData,
     handleSaveEstimate,
+    resetFormToNew,
   };
 }
