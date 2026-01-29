@@ -230,10 +230,11 @@ export function WelcomePage({
           <Label htmlFor="clientName" className="text-white">Client Name</Label>
           <Input
             id="clientName"
-            value={clientName}
-            onChange={(e) => onClientNameChange(e.target.value)}
-            placeholder="Enter client name"
+            value={clientName.slice(0, 30)}
+            onChange={(e) => onClientNameChange(e.target.value.slice(0, 30))}
+            placeholder="Enter client name (max 30 characters)"
             readOnly={isReadOnly}
+            maxLength={30}
             className={`text-white placeholder:text-gray-400 ${isReadOnly ? "bg-gray-700" : ""}`}
             style={!isReadOnly ? { backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' } : {}}
           />
