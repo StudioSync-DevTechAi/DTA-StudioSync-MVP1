@@ -26,6 +26,18 @@ export function ServiceCard({ service, onUpdate, onRemove }: ServiceCardProps) {
   // Get today's date in YYYY-MM-DD format for min attribute
   const today = new Date().toISOString().split('T')[0];
   
+  const MAX_COUNT = 100;
+  const clampCount = (raw: string): string => {
+    if (raw === '') return '';
+    if (raw.trim().startsWith('-')) return '0';
+    const digitsOnly = raw.replace(/\D/g, '');
+    if (digitsOnly === '') return '0';
+    const num = parseInt(digitsOnly, 10);
+    if (Number.isNaN(num)) return '0';
+    if (num > MAX_COUNT) return String(MAX_COUNT);
+    return String(num);
+  };
+
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedDate = new Date(e.target.value);
     const currentDate = new Date();
@@ -93,10 +105,11 @@ export function ServiceCard({ service, onUpdate, onRemove }: ServiceCardProps) {
           <Label className="text-white">Number of Photographers</Label>
           <Input
             type="number"
-            min="0"
+            min={0}
+            max={MAX_COUNT}
             value={service.photographers}
-            onChange={(e) => onUpdate("photographers", e.target.value)}
-            placeholder="Enter number of photographers"
+            onChange={(e) => onUpdate("photographers", clampCount(e.target.value))}
+            placeholder="Enter number of photographers (0–100)"
             className="text-white placeholder:text-gray-400 text-center"
             style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid', textAlign: 'center' }}
           />
@@ -106,10 +119,11 @@ export function ServiceCard({ service, onUpdate, onRemove }: ServiceCardProps) {
           <Label className="text-white">Number of Cinematographers</Label>
           <Input
             type="number"
-            min="0"
+            min={0}
+            max={MAX_COUNT}
             value={service.cinematographers}
-            onChange={(e) => onUpdate("cinematographers", e.target.value)}
-            placeholder="Enter number of cinematographers"
+            onChange={(e) => onUpdate("cinematographers", clampCount(e.target.value))}
+            placeholder="Enter number of cinematographers (0–100)"
             className="text-white placeholder:text-gray-400 text-center"
             style={{ backgroundColor: '#2d1b4e', borderColor: '#5a4a7a', color: '#ffffff', borderWidth: '1.5px', borderStyle: 'solid', textAlign: 'center' }}
           />
