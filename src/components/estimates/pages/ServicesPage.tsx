@@ -50,42 +50,10 @@ interface ServicesPageProps {
 }
 
 export function ServicesPage({ selectedServices, onServicesChange, isReadOnly = false }: ServicesPageProps) {
-  const [description, setDescription] = useState(() => {
+  const [description] = useState(() => {
     const saved = localStorage.getItem('servicesPageDescription');
     return saved || '(Optional) Select service packages to include in your estimate. This page will always be displayed in the final estimate.';
   });
-  const [isEditingDescription, setIsEditingDescription] = useState(false);
-  const [tempDescription, setTempDescription] = useState(description);
-
-  useEffect(() => {
-    localStorage.setItem('servicesPageDescription', description);
-  }, [description]);
-
-  const handleDescriptionEdit = () => {
-    if (isReadOnly) return;
-    setIsEditingDescription(true);
-    setTempDescription(description);
-  };
-
-  const handleDescriptionSave = () => {
-    if (tempDescription.trim()) {
-      setDescription(tempDescription.trim());
-    }
-    setIsEditingDescription(false);
-  };
-
-  const handleDescriptionCancel = () => {
-    setTempDescription(description);
-    setIsEditingDescription(false);
-  };
-
-  const handleDescriptionKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleDescriptionSave();
-    } else if (e.key === 'Escape') {
-      handleDescriptionCancel();
-    }
-  };
 
   const handleToggleService = (serviceKey: string) => {
     if (selectedServices.includes(serviceKey)) {
@@ -277,66 +245,38 @@ export function ServicesPage({ selectedServices, onServicesChange, isReadOnly = 
     <div className="space-y-8">
       <div className="text-center">
         <h2 className="text-3xl font-light text-white text-center">SERVICES</h2>
-        {!isReadOnly && (
-          <div className="flex items-center justify-center gap-3 mt-2">
-            {isEditingDescription ? (
-              <Input
-                value={tempDescription}
-                onChange={(e) => setTempDescription(e.target.value)}
-                onBlur={handleDescriptionSave}
-                onKeyDown={handleDescriptionKeyDown}
-                className="text-sm text-gray-300 text-center bg-transparent border-white/30 focus:border-white/50"
-                style={{ backgroundColor: 'rgba(45, 27, 78, 0.5)', maxWidth: '600px' }}
-                autoFocus
-              />
-            ) : (
-              <>
-                <p className="text-sm text-gray-300 mt-2">
-                  {description}
-                </p>
-                <button
-                  onClick={handleDescriptionEdit}
-                  className="p-1 hover:bg-white/10 rounded transition-colors"
-                  title="Edit description"
-                >
-                  <Pencil className="h-4 w-4 text-gray-300/70 hover:text-gray-300" />
-                </button>
-              </>
-            )}
-          </div>
-        )}
+        <p className="text-sm text-gray-300 mt-2">
+          {description}
+        </p>
       </div>
       
       {/* Horizontal Tabs */}
       <div className="w-full">
-        {/* Tab Headers */}
-        <div className="flex flex-wrap gap-2 mb-4 border-b border-white/20 pb-2">
-          {allServices.map(([key, service]) => {
+        {/* Tab Headers: BigFat and Intimate equal width, Optional Addons full width below */}
+        <div className="grid grid-cols-2 gap-2 mb-4 border-b border-white/20 pb-2">
+          {serviceEntries.map(([key, service]) => {
             const isExpanded = expandedTabs.has(key);
-            const isAddons = key === 'addons';
-            const isServiceSelected = !isAddons && selectedServices.includes(key);
+            const isServiceSelected = selectedServices.includes(key);
             
             return (
               <div
                 key={key}
-                className={`flex items-center gap-2 px-4 py-2 rounded-t-lg transition-all ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-t-lg transition-all min-w-0 ${
                   isExpanded 
                     ? 'bg-white/20 text-white border-b-2 border-white' 
                     : 'bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white'
                 }`}
               >
-                {!isReadOnly && !isAddons && (
+                {!isReadOnly && (
                   <Checkbox 
                     checked={isServiceSelected}
                     onCheckedChange={(checked) => {
                       if (checked) {
-                        // If checking, expand the tab and select the service
                         if (!isExpanded) {
                           toggleTab(key);
                         }
                         handleToggleService(key);
                       } else {
-                        // If unchecking, just deselect
                         handleToggleService(key);
                       }
                     }}
@@ -346,18 +286,41 @@ export function ServicesPage({ selectedServices, onServicesChange, isReadOnly = 
                 )}
                 <button
                   onClick={() => toggleTab(key)}
+                  className="flex items-center gap-2 min-w-0 flex-1"
+                >
+                  <span className="font-medium truncate">{service.title}</span>
+                  {isExpanded ? (
+                    <ChevronUp className="h-4 w-4 flex-shrink-0" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                  )}
+                </button>
+              </div>
+            );
+          })}
+          {addonsService && (
+            <div className="col-span-2">
+              <div
+                className={`flex items-center gap-2 px-4 py-2 rounded-t-lg transition-all ${
+                  expandedTabs.has('addons') 
+                    ? 'bg-white/20 text-white border-b-2 border-white' 
+                    : 'bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white'
+                }`}
+              >
+                <button
+                  onClick={() => toggleTab('addons')}
                   className="flex items-center gap-2"
                 >
-                  <span className="font-medium">{service.title}</span>
-                  {isExpanded ? (
+                  <span className="font-medium">{addonsService.title}</span>
+                  {expandedTabs.has('addons') ? (
                     <ChevronUp className="h-4 w-4" />
                   ) : (
                     <ChevronDown className="h-4 w-4" />
                   )}
                 </button>
               </div>
-            );
-          })}
+            </div>
+          )}
         </div>
 
         {/* Tab Content */}

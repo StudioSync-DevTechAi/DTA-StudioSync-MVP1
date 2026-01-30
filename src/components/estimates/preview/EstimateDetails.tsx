@@ -191,6 +191,16 @@ export function EstimateDetails({ estimate }: EstimateDetailsProps) {
         <div className={`flex justify-between items-start border-b pb-4 ${styles.sectionClass}`} style={{ borderColor: '#3d2a5f' }}>
           <div>
             <h2 className={`${styles.headingClass} text-white`}>Client: {estimate.clientName}</h2>
+            {(estimate.clientPhNo || (estimate as any).clientPhone) && (
+              <p className="text-sm text-gray-300">
+                PhNo: {estimate.countryCode ? `${estimate.countryCode} ` : ""}{estimate.clientPhNo || (estimate as any).clientPhone}
+              </p>
+            )}
+            {estimate.clientEmail && (
+              <p className="text-sm text-gray-300">
+                Email: {estimate.clientEmail}
+              </p>
+            )}
             <p className="text-sm text-gray-300">
               Date: {new Date(estimate.date).toLocaleDateString()}
             </p>

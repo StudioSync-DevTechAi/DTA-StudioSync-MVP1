@@ -1,9 +1,9 @@
 
 import { WelcomePage } from "../pages/WelcomePage";
-import { ServicesPage } from "../pages/ServicesPage";
 import { PortfolioPage } from "../pages/PortfolioPage";
 import { TemplateSelectionPage } from "../pages/TemplateSelectionPage";
 import { EstimateDetails } from "./EstimateDetails";
+import { SelectedServicesPreview } from "./SelectedServicesPreview";
 
 interface PreviewContentProps {
   currentPageIndex: number;
@@ -20,24 +20,32 @@ export function PreviewContent({ currentPageIndex, estimate }: PreviewContentPro
   // Ensure selectedTemplate is always a string
   const selectedTemplate = estimate?.selectedTemplate || "modern";
 
+  // Support both clientPhNo and clientPhone (used when loading from DB/list)
+  const clientPhNo = estimate?.clientPhNo || (estimate as any)?.clientPhone || "";
+  const countryCode = estimate?.countryCode || "+91";
+
   const pages = [
     <WelcomePage 
       key="welcome" 
       clientName={estimate.clientName}
       clientEmail={estimate.clientEmail || ""}
-      clientPhNo={estimate.clientPhNo || ""}
-      countryCode={estimate.countryCode || '+91'}
+      clientPhNo={clientPhNo}
+      countryCode={countryCode}
       onClientNameChange={() => {}} // No-op function since this is read-only
       onClientEmailChange={() => {}} // No-op function since this is read-only
       onClientPhNoChange={() => {}} // No-op function since this is read-only
       onCountryCodeChange={() => {}} // No-op function since this is read-only
       isReadOnly={true}
     />,
-    <ServicesPage 
+    <SelectedServicesPreview
       key="services"
       selectedServices={selectedServices}
-      onServicesChange={() => {}} // No-op function since this is read-only
-      isReadOnly={true}
+      description={
+        typeof localStorage !== "undefined"
+          ? localStorage.getItem("servicesPageDescription") ||
+            "(Optional) Select service packages to include in your estimate. This page will always be displayed in the final estimate."
+          : undefined
+      }
     />,
     <EstimateDetails 
       key="details"

@@ -27,6 +27,7 @@ export function EstimateForm({ open, onClose, editingEstimate, onSave }: Estimat
     handlePreviousPage,
     handleUpdateFormData,
     handleSaveEstimate,
+    resetFormToNew,
   } = useEstimateForm(editingEstimate, onSave);
 
   // Clear phone error when phone number changes
@@ -39,17 +40,23 @@ export function EstimateForm({ open, onClose, editingEstimate, onSave }: Estimat
 
   const handleCloseAndReset = () => {
     if (!editingEstimate) {
-      // Reset form data only when creating a new estimate
-      handleUpdateFormData("clientName", "");
-      handleUpdateFormData("clientEmail", "");
-      handleUpdateFormData("selectedServices", []);
-      handleUpdateFormData("estimateDetails", {
-        events: [],
-        estimates: [],
-        deliverables: []
-      });
+      const hasData =
+        (formData.clientName?.trim() ?? "") !== "" ||
+        (formData.clientPhNo?.trim() ?? "") !== "" ||
+        (formData.clientEmail?.trim() ?? "") !== "" ||
+        (formData.selectedServices?.length ?? 0) > 0 ||
+        (formData.estimateDetails?.estimates?.length ?? 0) > 0;
+      if (hasData) {
+        try {
+          sessionStorage.setItem("estimate_form_draft", JSON.stringify(formData));
+          sessionStorage.setItem("estimate_form_draft_lastModified", new Date().toISOString());
+        } catch (e) {
+          console.warn("Failed to save estimate draft:", e);
+        }
+      }
+      resetFormToNew();
     }
-    
+
     setPhoneError(undefined);
     setCurrentPage(editingEstimate ? 2 : 0);
     onClose();
