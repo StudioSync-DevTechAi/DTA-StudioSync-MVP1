@@ -20,13 +20,17 @@ export function PreviewContent({ currentPageIndex, estimate }: PreviewContentPro
   // Ensure selectedTemplate is always a string
   const selectedTemplate = estimate?.selectedTemplate || "modern";
 
+  // Support both clientPhNo and clientPhone (used when loading from DB/list)
+  const clientPhNo = estimate?.clientPhNo || (estimate as any)?.clientPhone || "";
+  const countryCode = estimate?.countryCode || "+91";
+
   const pages = [
     <WelcomePage 
       key="welcome" 
       clientName={estimate.clientName}
       clientEmail={estimate.clientEmail || ""}
-      clientPhNo={estimate.clientPhNo || ""}
-      countryCode={estimate.countryCode || '+91'}
+      clientPhNo={clientPhNo}
+      countryCode={countryCode}
       onClientNameChange={() => {}} // No-op function since this is read-only
       onClientEmailChange={() => {}} // No-op function since this is read-only
       onClientPhNoChange={() => {}} // No-op function since this is read-only

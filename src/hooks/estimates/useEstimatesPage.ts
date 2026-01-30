@@ -537,7 +537,8 @@ export function useEstimatesPage() {
                 isProjectRequested: project.is_project_requested || false,
                 isInvoiceRequested: project.is_invoice_requested || false,
                 ...estimateData,
-                // Map created_at to date AFTER spread to ensure it's not overwritten
+                clientPhNo: estimateData.clientPhNo || project.clientid_phno || "",
+                countryCode: estimateData.countryCode || "+91",
                 date: project.created_at || estimateData.date || new Date().toISOString()
               };
             });
@@ -587,6 +588,8 @@ export function useEstimatesPage() {
               isProjectRequested: linkedProject?.is_project_requested || false,
               isInvoiceRequested: linkedProject?.is_invoice_requested || false,
               ...estimateData,
+              clientPhNo: estimateData.clientPhNo || item.clientid_phno || "",
+              countryCode: estimateData.countryCode || "+91",
               // Map created_at to date AFTER spread to ensure it's not overwritten
               // Prioritize project's created_at, then invoice's created_at, then estimateData.date
               date: linkedProject?.created_at || item.created_at || estimateData.date || new Date().toISOString(),
@@ -616,7 +619,8 @@ export function useEstimatesPage() {
               isProjectRequested: project.is_project_requested || false,
               isInvoiceRequested: project.is_invoice_requested || false,
               ...estimateData,
-              // Map created_at to date AFTER spread to ensure it's not overwritten
+              clientPhNo: estimateData.clientPhNo || project.clientid_phno || "",
+              countryCode: estimateData.countryCode || "+91",
               date: project.created_at || estimateData.date || new Date().toISOString()
             };
           });

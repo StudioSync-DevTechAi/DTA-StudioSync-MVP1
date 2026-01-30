@@ -18,6 +18,8 @@ interface EstimatePreviewProps {
     id: string;
     clientName: string;
     clientEmail?: string;
+    clientPhNo?: string;
+    countryCode?: string;
     date: string;
     amount: string;
     status: string;

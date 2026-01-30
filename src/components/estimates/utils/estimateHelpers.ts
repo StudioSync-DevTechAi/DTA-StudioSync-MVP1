@@ -80,6 +80,8 @@ export function generatePreviewEstimate(formData: any, toast: any) {
     id: Math.floor(Math.random() * 10000).toString(),
     clientName: formData.clientName,
     clientEmail: formData.clientEmail || "",
+    clientPhNo: formData.clientPhNo || "",
+    countryCode: formData.countryCode || "+91",
     projectName: formData.projectName || "",  // Include project name
     date: new Date().toISOString(),
     // Still keep the first estimate's amount as the main amount for compatibility

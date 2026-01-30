@@ -67,6 +67,11 @@ export function WelcomePage({
 
   const displayGreeting = greeting || (clientName ? `Hello ${clientName}!` : "Welcome");
 
+  // Ensure country code is always a valid Select value (+91 or +1) so the dropdown shows the selected option
+  const normalizedCountryCode =
+    countryCode === "+1" || countryCode === "+91" ? countryCode : "+91";
+  const countryCodeLabel = normalizedCountryCode === "+1" ? "🇺🇸 USA (+1)" : "🇮🇳 India (+91)";
+
   return (
     <div className="space-y-8">
       <div className="text-center space-y-4">
@@ -103,28 +108,36 @@ export function WelcomePage({
             Client PhNo <span className="text-red-400">*</span>
           </Label>
           <div className="flex gap-2">
-            <Select
-              value={countryCode}
-              onValueChange={handleCountryCodeChange}
-              disabled={isReadOnly}
-            >
-              <SelectTrigger
+            {isReadOnly ? (
+              <Input
+                readOnly
+                value={countryCodeLabel}
                 className="w-[140px] text-white border-[#3d2a5f]"
-                style={!isReadOnly ? { backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' } : {}}
+                style={{ backgroundColor: '#374151', borderColor: '#3d2a5f', color: '#ffffff', cursor: 'default' }}
+              />
+            ) : (
+              <Select
+                value={normalizedCountryCode}
+                onValueChange={handleCountryCodeChange}
               >
-                <SelectValue placeholder="Select country" />
-              </SelectTrigger>
-              <SelectContent
-                style={{ backgroundColor: 'rgba(26, 15, 61, 0.98)', backdropFilter: 'blur(10px)', borderColor: '#3d2a5f' }}
-              >
-                <SelectItem value="+91" className="text-white focus:bg-[#3d2a5f]">
-                  🇮🇳 India (+91)
-                </SelectItem>
-                <SelectItem value="+1" className="text-white focus:bg-[#3d2a5f]">
-                  🇺🇸 USA (+1)
-                </SelectItem>
-              </SelectContent>
-            </Select>
+                <SelectTrigger
+                  className="w-[140px] text-white border-[#3d2a5f]"
+                  style={{ backgroundColor: '#2d1b4e', borderColor: '#3d2a5f', color: '#ffffff' }}
+                >
+                  <SelectValue placeholder="Select country" />
+                </SelectTrigger>
+                <SelectContent
+                  style={{ backgroundColor: 'rgba(26, 15, 61, 0.98)', backdropFilter: 'blur(10px)', borderColor: '#3d2a5f' }}
+                >
+                  <SelectItem value="+91" className="text-white focus:bg-[#3d2a5f]">
+                    🇮🇳 India (+91)
+                  </SelectItem>
+                  <SelectItem value="+1" className="text-white focus:bg-[#3d2a5f]">
+                    🇺🇸 USA (+1)
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            )}
             <div className="flex-1">
               <Input
                 id="clientPhNo"

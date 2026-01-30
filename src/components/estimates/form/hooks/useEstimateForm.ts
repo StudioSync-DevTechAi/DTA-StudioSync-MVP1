@@ -139,6 +139,10 @@ export function useEstimateForm(editingEstimate?: any, onSaveCallback?: (estimat
       // Add selected template to the preview
       preview.selectedTemplate = formData.selectedTemplate;
       
+      // Add client phone and country code so they show in preview
+      preview.clientPhNo = formData.clientPhNo || "";
+      preview.countryCode = formData.countryCode || "+91";
+      
       setPreviewEstimate(preview);
       setCurrentPage(5);
     }
